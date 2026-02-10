@@ -1,12 +1,12 @@
 module CRT
   class MultiEntry < CRT::CRTObjs
     property info : String = ""
-    property current_col : Int32 = 0
-    property current_row : Int32 = 0
-    property top_row : Int32 = 0
+    getter current_col : Int32 = 0
+    getter current_row : Int32 = 0
+    getter top_row : Int32 = 0
     property disp_type : CRT::DisplayType = CRT::DisplayType::MIXED
-    property field_width : Int32 = 0
-    property rows : Int32 = 0
+    getter field_width : Int32 = 0
+    getter rows : Int32 = 0
 
     @field_win : NCurses::Window? = nil
     @label_win : NCurses::Window? = nil
@@ -116,7 +116,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:MULTI_ENTRY, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : String
@@ -407,7 +407,7 @@ module CRT
       CRT::Screen.wrefresh(fw)
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       if w = @win
         Draw.draw_obj_box(w, self) if box
         wrefresh
@@ -436,8 +436,8 @@ module CRT
       CRT.delete_curses_window(@label_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:MULTI_ENTRY)
-      CRT::Screen.unregister(:MULTI_ENTRY, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def value=(new_value : String)

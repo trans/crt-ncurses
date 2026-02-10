@@ -2,12 +2,12 @@ module CRT
   class Template < CRT::CRTObjs
     property plate : String = ""
     property info : String = ""
-    property plate_pos : Int32 = 0
-    property screen_pos : Int32 = 0
-    property info_pos : Int32 = 0
+    getter plate_pos : Int32 = 0
+    getter screen_pos : Int32 = 0
+    getter info_pos : Int32 = 0
     property min : Int32 = 0
-    property field_width : Int32 = 0
-    property parent : NCurses::Window? = nil
+    getter field_width : Int32 = 0
+    getter parent : NCurses::Window? = nil
 
     @field_win : NCurses::Window? = nil
     @label_win : NCurses::Window? = nil
@@ -121,7 +121,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:TEMPLATE, self)
+      cdkscreen.register(object_type, self)
     end
 
     def self.is_plate_char?(c : Char) : Bool
@@ -363,7 +363,7 @@ module CRT
       unmixed.to_s
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -432,8 +432,8 @@ module CRT
       CRT.delete_curses_window(@label_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:TEMPLATE)
-      CRT::Screen.unregister(:TEMPLATE, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def value=(new_value : String)

@@ -1,11 +1,11 @@
 module CRT
   class Buttonbox < CRT::CRTObjs
     getter current_button : Int32 = 0
-    property button_count : Int32 = 0
-    property rows : Int32 = 0
-    property cols : Int32 = 0
+    getter button_count : Int32 = 0
+    getter rows : Int32 = 0
+    getter cols : Int32 = 0
     property highlight : Int32 = 0
-    property parent : NCurses::Window? = nil
+    getter parent : NCurses::Window? = nil
 
     @button : Array(Array(Int32)) = [] of Array(Int32)
     @button_len : Array(Int32) = [] of Int32
@@ -110,7 +110,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:BUTTONBOX, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -189,7 +189,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -247,8 +247,8 @@ module CRT
       clean_title
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:BUTTONBOX)
-      CRT::Screen.unregister(:BUTTONBOX, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def current_button=(button : Int32)

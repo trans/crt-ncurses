@@ -108,10 +108,10 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(:FILE_SELECT, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:FILE_SELECT, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
 
-      cdkscreen.register(:FILE_SELECT, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : String | Int32
@@ -204,7 +204,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
       @entry_field.draw(@entry_field.box)
       draw_my_scroller
@@ -232,12 +232,12 @@ module CRT
     end
 
     def destroy
-      clean_bindings(:FILE_SELECT)
+      clean_bindings(object_type)
       @scroll_field.destroy
       @entry_field.destroy
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      CRT::Screen.unregister(:FILE_SELECT, self)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

@@ -1,14 +1,14 @@
 module CRT
   class Histogram < CRT::CRTObjs
-    property orient : Int32 = CRT::HORIZONTAL
+    getter orient : Int32 = CRT::HORIZONTAL
     property filler : Int32 = '#'.ord | LibNCurses::Attribute::Reverse.value.to_i32
     property stats_attr : Int32 = 0
     property stats_pos : Int32 = CRT::TOP
     property view_type : CRT::HistViewType = CRT::HistViewType::REAL
-    property value : Int32 = 0
-    property low : Int32 = 0
-    property high : Int32 = 0
-    property parent : NCurses::Window? = nil
+    getter value : Int32 = 0
+    getter low : Int32 = 0
+    getter high : Int32 = 0
+    getter parent : NCurses::Window? = nil
 
     @field_width : Int32 = 0
     @field_height : Int32 = 0
@@ -81,7 +81,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:HISTOGRAM, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -166,7 +166,7 @@ module CRT
       @filler
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       return unless w = @win
 
       fattr = @filler & ~0xFF
@@ -229,8 +229,8 @@ module CRT
       clean_title
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:HISTOGRAM)
-      CRT::Screen.unregister(:HISTOGRAM, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

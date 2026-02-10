@@ -2,9 +2,9 @@ module CRT
   class Button < CRT::CRTObjs
     include Formattable
 
-    property xpos : Int32 = 0
-    property ypos : Int32 = 0
-    property parent : NCurses::Window? = nil
+    getter xpos : Int32 = 0
+    getter ypos : Int32 = 0
+    getter parent : NCurses::Window? = nil
     property callback : Proc(CRT::Button, Nil)? = nil
 
     @info : Array(Int32) = [] of Int32
@@ -72,7 +72,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:BUTTON, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -160,7 +160,7 @@ module CRT
       end
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -178,8 +178,8 @@ module CRT
     def destroy
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:BUTTON)
-      CRT::Screen.unregister(:BUTTON, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

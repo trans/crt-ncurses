@@ -1,9 +1,9 @@
 module CRT
   class Graph < CRT::CRTObjs
-    property values : Array(Int32) = [] of Int32
-    property count : Int32 = 0
+    getter values : Array(Int32) = [] of Int32
+    getter count : Int32 = 0
     property display_type : Symbol = :LINE
-    property parent : NCurses::Window? = nil
+    getter parent : NCurses::Window? = nil
 
     @xtitle : Array(Int32) = [] of Int32
     @xtitle_len : Int32 = 0
@@ -70,7 +70,7 @@ module CRT
       @graph_char = [] of Int32
       @values = [] of Int32
 
-      cdkscreen.register(:GRAPH, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -117,7 +117,7 @@ module CRT
       @display_type
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       return unless w = @win
 
       adj = 2 + (@xtitle.size > 0 ? 1 : 0)
@@ -203,8 +203,8 @@ module CRT
 
     def destroy
       clean_title
-      clean_bindings(:GRAPH)
-      CRT::Screen.unregister(:GRAPH, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
       CRT.delete_curses_window(@win)
     end
 

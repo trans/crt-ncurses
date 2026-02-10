@@ -1,9 +1,9 @@
 module CRT
   class Label < CRT::CRTObjs
-    property xpos : Int32 = 0
-    property ypos : Int32 = 0
-    property rows : Int32 = 0
-    property parent : NCurses::Window? = nil
+    getter xpos : Int32 = 0
+    getter ypos : Int32 = 0
+    getter rows : Int32 = 0
+    getter parent : NCurses::Window? = nil
 
     @info : Array(Array(Int32)) = [] of Array(Int32)
     @info_len : Array(Int32) = [] of Int32
@@ -87,7 +87,7 @@ module CRT
       end
 
       # Register this widget
-      cdkscreen.register(:LABEL, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : String = "")
@@ -144,7 +144,7 @@ module CRT
     end
 
     # Draw the label widget
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       # Draw shadow if present
       Draw.draw_shadow(@shadow_win)
 
@@ -176,8 +176,8 @@ module CRT
     def destroy
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:LABEL)
-      CRT::Screen.unregister(:LABEL, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     # Pause until a user hits a key

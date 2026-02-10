@@ -40,7 +40,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:MARQUEE, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(mesg : String, delay : Int32, repeat : Int32, box : Bool) : Int32
@@ -138,7 +138,7 @@ module CRT
       @active = false
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       @box = box
       Draw.draw_shadow(@shadow_win)
 
@@ -156,8 +156,8 @@ module CRT
     def destroy
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:MARQUEE)
-      CRT::Screen.unregister(:MARQUEE, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

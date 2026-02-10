@@ -3,7 +3,7 @@ module CRT
     MAX_MATRIX_ROWS = 1000
     MAX_MATRIX_COLS = 1000
 
-    property info : Array(Array(String))
+    getter info : Array(Array(String))
     getter row : Int32 = 1
     getter col : Int32 = 1
     getter crow : Int32 = 1
@@ -210,10 +210,10 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(:MATRIX, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(:MATRIX, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
 
-      cdkscreen.register(:MATRIX, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -260,7 +260,7 @@ module CRT
 
       focus_current
 
-      if check_bind(:MATRIX, input)
+      if check_bind(object_type, input)
         @complete = true
       else
         case input
@@ -484,7 +484,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -599,8 +599,8 @@ module CRT
       end
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:MATRIX)
-      CRT::Screen.unregister(:MATRIX, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

@@ -4,11 +4,11 @@ module CRT
 
     MIN_DIALOG_WIDTH = 10
 
-    property message_rows : Int32 = 0
-    property button_count : Int32 = 0
+    getter message_rows : Int32 = 0
+    getter button_count : Int32 = 0
     property highlight : Int32 = 0
     property separator : Bool = false
-    property parent : NCurses::Window? = nil
+    getter parent : NCurses::Window? = nil
 
     @info : Array(Array(Int32)) = [] of Array(Int32)
     @info_len : Array(Int32) = [] of Int32
@@ -104,7 +104,7 @@ module CRT
           y: ytmp[0] + 1, x: xtmp[0] + 1)
       end
 
-      cdkscreen.register(:DIALOG, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -172,7 +172,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -226,8 +226,8 @@ module CRT
     def destroy
       CRT.delete_curses_window(@win)
       CRT.delete_curses_window(@shadow_win)
-      clean_bindings(:DIALOG)
-      CRT::Screen.unregister(:DIALOG, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def highlight=(highlight : Int32)

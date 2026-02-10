@@ -1,16 +1,16 @@
 module CRT
   abstract class Scroller < CRT::CRTObjs
     getter current_item : Int32 = 0
-    property current_top : Int32 = 0
-    property current_high : Int32 = 0
-    property list_size : Int32 = 0
-    property view_size : Int32 = 0
-    property max_top_item : Int32 = 0
-    property last_item : Int32 = 0
-    property left_char : Int32 = 0
-    property max_left_char : Int32 = 0
-    property step : Float64 = 1.0
-    property toggle_size : Int32 = 1
+    getter current_top : Int32 = 0
+    getter current_high : Int32 = 0
+    getter list_size : Int32 = 0
+    getter view_size : Int32 = 0
+    getter max_top_item : Int32 = 0
+    getter last_item : Int32 = 0
+    getter left_char : Int32 = 0
+    getter max_left_char : Int32 = 0
+    getter step : Float64 = 1.0
+    getter toggle_size : Int32 = 1
 
     def initialize
       super

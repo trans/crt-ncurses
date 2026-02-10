@@ -3,7 +3,7 @@ module CRT
     getter day : Int32 = 1
     getter month : Int32 = 1
     getter year : Int32 = 2000
-    property week_base : Int32 = 0
+    getter week_base : Int32 = 0
 
     MONTHS_OF_THE_YEAR = [
       "NULL", "January", "February", "March", "April", "May", "June",
@@ -133,14 +133,14 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(:CALENDAR, 'T'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:CALENDAR, 't'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:CALENDAR, 'n'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:CALENDAR, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(:CALENDAR, 'p'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(:CALENDAR, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, 'T'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, 't'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, 'n'.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, 'p'.ord, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
 
-      cdkscreen.register(:CALENDAR, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -213,7 +213,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -325,8 +325,8 @@ module CRT
       CRT.delete_curses_window(@field_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:CALENDAR)
-      CRT::Screen.unregister(:CALENDAR, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

@@ -87,10 +87,10 @@ module CRT
       @input_window = @entry_field.win
       @accepts_focus = true
 
-      bind(:ALPHA_LIST, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:ALPHA_LIST, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
 
-      cdkscreen.register(:ALPHA_LIST, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : String | Int32
@@ -178,7 +178,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
       @entry_field.draw(@entry_field.box)
       draw_my_scroller
@@ -192,12 +192,12 @@ module CRT
     end
 
     def destroy
-      clean_bindings(:ALPHA_LIST)
+      clean_bindings(object_type)
       @entry_field.destroy
       @scroll_field.destroy
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      CRT::Screen.unregister(:ALPHA_LIST, self)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def contents=(list : Array(String))

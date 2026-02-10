@@ -96,17 +96,17 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(:VIEWER, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:VIEWER, 'b'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(:VIEWER, 'B'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(:VIEWER, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(:VIEWER, ' '.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:VIEWER, 'f'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:VIEWER, 'F'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:VIEWER, '|'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:VIEWER, '$'.ord, :getc, LibNCurses::Key::End.value)
+      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, 'b'.ord, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, 'B'.ord, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, ' '.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, 'f'.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, 'F'.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, '|'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, '$'.ord, :getc, LibNCurses::Key::End.value)
 
-      cdkscreen.register(:VIEWER, self)
+      cdkscreen.register(object_type, self)
     end
 
     def viewer_title=(title : String)
@@ -189,7 +189,7 @@ module CRT
 
       set_exit_type(0)
 
-      if check_bind(:VIEWER, input)
+      if check_bind(object_type, input)
         @complete = true
       else
         case input
@@ -288,7 +288,7 @@ module CRT
       @complete ? 0 : -1
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -393,8 +393,8 @@ module CRT
       clean_title
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:VIEWER)
-      CRT::Screen.unregister(:VIEWER, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

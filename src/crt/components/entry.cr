@@ -1,16 +1,16 @@
 module CRT
   class Entry < CRT::CRTObjs
     property info : String = ""
-    property left_char : Int32 = 0
-    property screen_col : Int32 = 0
-    property field_width : Int32 = 0
+    getter left_char : Int32 = 0
+    getter screen_col : Int32 = 0
+    getter field_width : Int32 = 0
     property min : Int32 = 0
     property max : Int32 = 0
-    property field_attr : Int32 = 0
+    getter field_attr : Int32 = 0
     property filler : Char = ' '
     property hidden : Char = ' '
     property disp_type : CRT::DisplayType = CRT::DisplayType::MIXED
-    property parent : NCurses::Window? = nil
+    getter parent : NCurses::Window? = nil
 
     @field_win : NCurses::Window? = nil
     @label_win : NCurses::Window? = nil
@@ -142,7 +142,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:ENTRY, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : String | Int32
@@ -335,7 +335,7 @@ module CRT
       wrefresh(@field_win)
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -395,8 +395,8 @@ module CRT
       CRT.delete_curses_window(@label_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:ENTRY)
-      CRT::Screen.unregister(:ENTRY, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def value=(new_value : String?)

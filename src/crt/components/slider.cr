@@ -7,14 +7,14 @@ module CRT
       limit_current_value
     end
 
-    property low : T
-    property high : T
+    getter low : T
+    getter high : T
     property inc : T
     property fastinc : T
     property filler : Int32 = 0
-    property field_width : Int32 = 0
+    getter field_width : Int32 = 0
     property digits : Int32 = 0
-    property parent : NCurses::Window? = nil
+    getter parent : NCurses::Window? = nil
 
     @field_win : NCurses::Window? = nil
     @label_win : NCurses::Window? = nil
@@ -123,16 +123,16 @@ module CRT
       end
 
       # Key bindings
-      bind(:SLIDER, 'u'.ord, :getc, LibNCurses::Key::Up.value)
-      bind(:SLIDER, 'U'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SLIDER, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SLIDER, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SLIDER, 'g'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SLIDER, '^'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SLIDER, 'G'.ord, :getc, LibNCurses::Key::End.value)
-      bind(:SLIDER, '$'.ord, :getc, LibNCurses::Key::End.value)
+      bind(object_type, 'u'.ord, :getc, LibNCurses::Key::Up.value)
+      bind(object_type, 'U'.ord, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, 'g'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, '^'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, 'G'.ord, :getc, LibNCurses::Key::End.value)
+      bind(object_type, '$'.ord, :getc, LibNCurses::Key::End.value)
 
-      cdkscreen.register(:SLIDER, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : T
@@ -227,7 +227,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -280,8 +280,8 @@ module CRT
       CRT.delete_curses_window(@label_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:SLIDER)
-      CRT::Screen.unregister(:SLIDER, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def set_range(low : T, high : T)

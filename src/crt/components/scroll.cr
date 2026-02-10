@@ -9,11 +9,11 @@ module CRT
 
     property scrollbar : Bool = false
     property scrollbar_placement : Int32 = CRT::RIGHT
-    property scrollbar_win : NCurses::Window? = nil
-    property list_win : NCurses::Window? = nil
-    property toggle_pos : Int32 = 0
-    property numbers : Bool = false
-    property parent : NCurses::Window? = nil
+    getter scrollbar_win : NCurses::Window? = nil
+    getter list_win : NCurses::Window? = nil
+    getter toggle_pos : Int32 = 0
+    getter numbers : Bool = false
+    getter parent : NCurses::Window? = nil
 
     @shadow : Bool = false
     @complete : Bool = false
@@ -115,15 +115,15 @@ module CRT
       end
 
       # Set up key bindings
-      bind(:SCROLL, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SCROLL, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SCROLL, 'g'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SCROLL, '1'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SCROLL, 'G'.ord, :getc, LibNCurses::Key::End.value)
-      bind(:SCROLL, '<'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SCROLL, '>'.ord, :getc, LibNCurses::Key::End.value)
+      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, 'g'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, '1'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, 'G'.ord, :getc, LibNCurses::Key::End.value)
+      bind(object_type, '<'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, '>'.ord, :getc, LibNCurses::Key::End.value)
 
-      cdkscreen.register(:SCROLL, self)
+      cdkscreen.register(object_type, self)
     end
 
     def object_type : Symbol
@@ -227,7 +227,7 @@ module CRT
       set_position(item)
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -324,8 +324,8 @@ module CRT
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@list_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:SCROLL)
-      CRT::Screen.unregister(:SCROLL, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def alloc_list_item(which : Int32, number : Int32, value : String) : Bool

@@ -116,7 +116,7 @@ module CRT
 
       @input_window = @title_win[@current_title]
 
-      cdkscreen.register(:MENU, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -154,7 +154,7 @@ module CRT
 
       set_exit_type(0)
 
-      if check_bind(:MENU, input)
+      if check_bind(object_type, input)
         @complete = true
       else
         case input
@@ -193,7 +193,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       (0...@menu_items).each do |x|
         draw_menu_title(x)
       end
@@ -263,8 +263,8 @@ module CRT
         CRT.delete_curses_window(@pull_win[x])
       end
 
-      clean_bindings(:MENU)
-      CRT::Screen.unregister(:MENU, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def set_current_item(menu_item : Int32, submenu_item : Int32)

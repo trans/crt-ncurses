@@ -8,10 +8,10 @@ module CRT
 
     property scrollbar : Bool = false
     property scrollbar_placement : Int32 = CRT::RIGHT
-    property scrollbar_win : NCurses::Window? = nil
-    property parent : NCurses::Window? = nil
-    property toggle_pos : Int32 = 0
-    property choice_count : Int32 = 0
+    getter scrollbar_win : NCurses::Window? = nil
+    getter parent : NCurses::Window? = nil
+    getter toggle_pos : Int32 = 0
+    getter choice_count : Int32 = 0
     property mode : Array(Int32) = [] of Int32
 
     @choice : Array(Array(Int32)) = [] of Array(Int32)
@@ -121,15 +121,15 @@ module CRT
       end
 
       # Key bindings
-      bind(:SELECTION, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SELECTION, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SELECTION, 'g'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SELECTION, '1'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SELECTION, 'G'.ord, :getc, LibNCurses::Key::End.value)
-      bind(:SELECTION, '<'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SELECTION, '>'.ord, :getc, LibNCurses::Key::End.value)
+      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, 'g'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, '1'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, 'G'.ord, :getc, LibNCurses::Key::End.value)
+      bind(object_type, '<'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, '>'.ord, :getc, LibNCurses::Key::End.value)
 
-      cdkscreen.register(:SELECTION, self)
+      cdkscreen.register(object_type, self)
     end
 
     def fix_cursor_position
@@ -226,7 +226,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -304,8 +304,8 @@ module CRT
       CRT.delete_curses_window(@scrollbar_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:SELECTION)
-      CRT::Screen.unregister(:SELECTION, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def highlight=(highlight : Int32)

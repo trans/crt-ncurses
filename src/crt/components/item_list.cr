@@ -6,9 +6,9 @@ module CRT
 
     getter current_item : Int32 = 0
     getter default_item : Int32 = 0
-    property list_size : Int32 = 0
-    property field_width : Int32 = 0
-    property parent : NCurses::Window? = nil
+    getter list_size : Int32 = 0
+    getter field_width : Int32 = 0
+    getter parent : NCurses::Window? = nil
 
     @field_win : NCurses::Window? = nil
     @label_win : NCurses::Window? = nil
@@ -96,7 +96,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:ITEM_LIST, self)
+      cdkscreen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -172,7 +172,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -224,8 +224,8 @@ module CRT
       CRT.delete_curses_window(@label_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:ITEM_LIST)
-      CRT::Screen.unregister(:ITEM_LIST, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def current_item=(current_item : Int32)

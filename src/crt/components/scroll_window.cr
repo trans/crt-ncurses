@@ -76,17 +76,17 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(:SCROLL_WINDOW, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SCROLL_WINDOW, 'b'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SCROLL_WINDOW, 'B'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SCROLL_WINDOW, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SCROLL_WINDOW, ' '.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SCROLL_WINDOW, 'f'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SCROLL_WINDOW, 'F'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SCROLL_WINDOW, '|'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SCROLL_WINDOW, '$'.ord, :getc, LibNCurses::Key::End.value)
+      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, 'b'.ord, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, 'B'.ord, :getc, LibNCurses::Key::PageUp.value)
+      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, ' '.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, 'f'.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, 'F'.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(object_type, '|'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(object_type, '$'.ord, :getc, LibNCurses::Key::End.value)
 
-      cdkscreen.register(:SCROLL_WINDOW, self)
+      cdkscreen.register(object_type, self)
     end
 
     def setup_line(list : String, x : Int32)
@@ -223,7 +223,7 @@ module CRT
       set_exit_type(0)
       draw(@box)
 
-      if check_bind(:SCROLL_WINDOW, input)
+      if check_bind(object_type, input)
         @complete = true
       else
         case input
@@ -302,7 +302,7 @@ module CRT
       ret
     end
 
-    def draw(box : Bool)
+    def draw(box : Bool = @box)
       Draw.draw_shadow(@shadow_win)
 
       if w = @win
@@ -353,8 +353,8 @@ module CRT
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@field_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:SCROLL_WINDOW)
-      CRT::Screen.unregister(:SCROLL_WINDOW, self)
+      clean_bindings(object_type)
+      CRT::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)
