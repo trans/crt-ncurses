@@ -4,18 +4,42 @@ module CRT
   L_MARKER = '<'
   R_MARKER = '>'
 
-  LEFT       = 9000
-  RIGHT      = 9001
-  CENTER     = 9002
-  TOP        = 9003
-  BOTTOM     = 9004
-  HORIZONTAL = 9005
-  VERTICAL   = 9006
-  FULL       = 9007
+  # Direction for drawing operations
+  enum Direction
+    Horizontal
+    Vertical
+  end
 
-  NONE = 0
-  ROW  = 1
-  COL  = 2
+  # Position/alignment for widget placement and configuration
+  enum Position
+    Left   = 9000
+    Right  = 9001
+    Center = 9002
+    Top    = 9003
+    Bottom = 9004
+    Full   = 9007
+  end
+
+  # Dominant dimension for matrix navigation
+  enum Dominant
+    None
+    Row
+    Col
+  end
+
+  # Direction convenience constants
+  HORIZONTAL = Direction::Horizontal
+  VERTICAL   = Direction::Vertical
+
+  # TODO: Replace these Int32 convenience constants with `Int32 | Position` union
+  # types on constructor x/y params and other mixed-use sites, so users pass
+  # `Position::Left` directly instead of relying on sentinel values.
+  LEFT   = Position::Left.value
+  RIGHT  = Position::Right.value
+  CENTER = Position::Center.value
+  TOP    = Position::Top.value
+  BOTTOM = Position::Bottom.value
+  FULL   = Position::Full.value
 
   MAX_BINDINGS = 300
   MAX_ITEMS    = 2000

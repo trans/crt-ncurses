@@ -7,7 +7,7 @@ module CRT
     getter selections : Array(Int32) = [] of Int32
 
     property scrollbar : Bool = false
-    property scrollbar_placement : Int32 = CRT::RIGHT
+    property scrollbar_placement : Position = Position::Right
     getter scrollbar_win : NCurses::Window? = nil
     getter parent : NCurses::Window? = nil
     getter toggle_pos : Int32 = 0
@@ -23,7 +23,7 @@ module CRT
 
     def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, list : Array(String),
-                   choices : Array(String), splace : Int32 = CRT::RIGHT,
+                   choices : Array(String), splace : Position = Position::Right,
                    title : String = "",
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
                    box : Bool = true, shadow : Bool = false)
@@ -52,7 +52,7 @@ module CRT
       @maxchoicelen = 0
 
       # Adjust for scrollbar
-      if splace == CRT::LEFT || splace == CRT::RIGHT
+      if splace.left? || splace.right?
         box_width += 1
         @scrollbar = true
       else
@@ -76,10 +76,10 @@ module CRT
       w.keypad(true)
 
       # Create scrollbar window
-      if splace == CRT::RIGHT
+      if splace.right?
         @scrollbar_win = CRT.subwin(w, max_view_size, 1,
           screen_ypos(ypos), xpos + @box_width - @border_size - 1)
-      elsif splace == CRT::LEFT
+      elsif splace.left?
         @scrollbar_win = CRT.subwin(w, max_view_size, 1,
           screen_ypos(ypos), screen_xpos(xpos))
       else
@@ -133,7 +133,7 @@ module CRT
     end
 
     def fix_cursor_position
-      scrollbar_adj = @scrollbar_placement == CRT::LEFT ? 1 : 0
+      scrollbar_adj = @scrollbar_placement.left? ? 1 : 0
       ypos = screen_ypos(@current_item - @current_top)
       xpos = screen_xpos(0) + scrollbar_adj
 
@@ -239,7 +239,7 @@ module CRT
     def draw_list(box : Bool)
       return unless w = @win
 
-      scrollbar_adj = @scrollbar_placement == CRT::LEFT ? 1 : 0
+      scrollbar_adj = @scrollbar_placement.left? ? 1 : 0
       sel_item = @has_focus ? @current_item : -1
 
       (0...@view_size).each do |j|

@@ -18,12 +18,12 @@ module CRT
     @title_attr : Int32 = 0
     @subtitle_attr : Int32 = 0
     @last_selection : Int32 = -1
-    @menu_pos : Int32 = 0
+    @menu_pos : Position = Position::Top
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
     def initialize(cdkscreen : CRT::Screen, *, menu_list : Array(Array(String)),
-                   menu_location : Array(Int32), menu_pos : Int32 = CRT::TOP,
+                   menu_location : Array(Position), menu_pos : Position = Position::Top,
                    title_attr : Int32 = 0, subtitle_attr : Int32 = 0)
       super()
       menu_items = menu_list.size
@@ -61,7 +61,7 @@ module CRT
       right_count_val = menu_items - 1
 
       (0...menu_items).each do |x|
-        x1 = if menu_location[x] == CRT::LEFT
+        x1 = if menu_location[x].left?
                x
              else
                val = right_count_val
@@ -69,8 +69,8 @@ module CRT
                val
              end
 
-        y1 = menu_pos == CRT::BOTTOM ? ymax - 1 : 0
-        y2 = menu_pos == CRT::BOTTOM ? ymax - subsize[x] - 2 : TITLELINES
+        y1 = menu_pos.bottom? ? ymax - 1 : 0
+        y2 = menu_pos.bottom? ? ymax - subsize[x] - 2 : TITLELINES
         high = subsize[x] + TITLELINES
 
         if high + y2 > ymax
@@ -86,7 +86,7 @@ module CRT
           max = {max, sublist_len_arr[0]}.max
         end
 
-        x2 = if menu_location[x] == CRT::LEFT
+        x2 = if menu_location[x].left?
                leftloc
              else
                rightloc -= (max + 2)
@@ -215,7 +215,7 @@ module CRT
 
       # Box the pull-down window
       LibNCurses.box(pw, 0_i8, 0_i8)
-      if @menu_pos == CRT::BOTTOM
+      if @menu_pos.bottom?
         Draw.mvwaddch(pw, @subsize[@current_title] + 1, 0,
           Draw::ACS_VLINE)
       else

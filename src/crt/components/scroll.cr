@@ -8,7 +8,7 @@ module CRT
     getter highlight : Int32 = 0
 
     property scrollbar : Bool = false
-    property scrollbar_placement : Int32 = CRT::RIGHT
+    property scrollbar_placement : Position = Position::Right
     getter scrollbar_win : NCurses::Window? = nil
     getter list_win : NCurses::Window? = nil
     getter toggle_pos : Int32 = 0
@@ -21,7 +21,7 @@ module CRT
 
     def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, list : Array(String),
-                   splace : Int32 = CRT::RIGHT, title : String = "",
+                   splace : Position = Position::Right, title : String = "",
                    numbers : Bool = false,
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
                    box : Bool = true, shadow : Bool = false)
@@ -45,7 +45,7 @@ module CRT
       end
 
       # Adjust box width for scrollbar
-      if splace == CRT::LEFT || splace == CRT::RIGHT
+      if splace.left? || splace.right?
         @scrollbar = true
         box_width += 1
       else
@@ -71,10 +71,10 @@ module CRT
       w.keypad(true)
 
       # Create the scrollbar window
-      if splace == CRT::RIGHT
+      if splace.right?
         @scrollbar_win = CRT.subwin(w, max_view_size, 1,
           screen_ypos(ypos), xpos + box_width - @border_size - 1)
-      elsif splace == CRT::LEFT
+      elsif splace.left?
         @scrollbar_win = CRT.subwin(w, max_view_size, 1,
           screen_ypos(ypos), screen_xpos(xpos))
       else
@@ -82,7 +82,7 @@ module CRT
       end
 
       # Create the list window
-      scrollbar_offset = splace == CRT::LEFT ? 1 : 0
+      scrollbar_offset = splace.left? ? 1 : 0
       @list_win = CRT.subwin(w, max_view_size,
         box_width - (2 * @border_size) - scroll_adjust,
         screen_ypos(ypos),
@@ -131,7 +131,7 @@ module CRT
     end
 
     def fix_cursor_position
-      scrollbar_adj = @scrollbar_placement == CRT::LEFT ? 1 : 0
+      scrollbar_adj = @scrollbar_placement.left? ? 1 : 0
       ypos = screen_ypos(@current_item - @current_top)
       xpos = screen_xpos(0) + scrollbar_adj
 

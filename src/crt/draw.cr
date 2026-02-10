@@ -123,7 +123,7 @@ module CRT
 
     # Write a string of blanks
     def self.write_blanks(window : NCurses::Window, xpos : Int32, ypos : Int32,
-                          align : Int32, start : Int32, endn : Int32)
+                          align : Direction, start : Int32, endn : Int32)
       if start < endn
         want = (endn - start) + 1000
         blanks = " " * (want - 1)
@@ -133,17 +133,17 @@ module CRT
 
     # Write a char string with no attributes
     def self.write_char(window : NCurses::Window, xpos : Int32, ypos : Int32,
-                        string : String, align : Int32, start : Int32, endn : Int32)
+                        string : String, align : Direction, start : Int32, endn : Int32)
       write_char_attrib(window, xpos, ypos, string, 0, align, start, endn)
     end
 
     # Write a char string with attributes
     def self.write_char_attrib(window : NCurses::Window, xpos : Int32, ypos : Int32,
-                               string : String, attr : Int32, align : Int32,
+                               string : String, attr : Int32, align : Direction,
                                start : Int32, endn : Int32)
       display = endn - start
 
-      if align == CRT::HORIZONTAL
+      if align.horizontal?
         display = {display, window.max_x - 1}.min
         (0...display).each do |x|
           idx = x + start
@@ -162,17 +162,17 @@ module CRT
 
     # Write a chtype (Int32) array
     def self.write_chtype(window : NCurses::Window, xpos : Int32, ypos : Int32,
-                          string : Array(Int32), align : Int32, start : Int32, endn : Int32)
+                          string : Array(Int32), align : Direction, start : Int32, endn : Int32)
       write_chtype_attrib(window, xpos, ypos, string, 0, align, start, endn)
     end
 
     # Write a chtype array with given attributes added
     def self.write_chtype_attrib(window : NCurses::Window, xpos : Int32, ypos : Int32,
-                                 string : Array(Int32), attr : Int32, align : Int32,
+                                 string : Array(Int32), attr : Int32, align : Direction,
                                  start : Int32, endn : Int32)
       diff = endn - start
 
-      if align == CRT::HORIZONTAL
+      if align.horizontal?
         display = {diff, window.max_x - xpos}.min
         (0...display).each do |x|
           idx = x + start

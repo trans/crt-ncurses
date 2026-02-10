@@ -21,10 +21,24 @@ describe CRT do
       CRT::BOTTOM.should eq(9004)
     end
 
-    it "defines orientation constants" do
-      CRT::HORIZONTAL.should eq(9005)
-      CRT::VERTICAL.should eq(9006)
-      CRT::FULL.should eq(9007)
+    it "defines direction enum" do
+      CRT::HORIZONTAL.should eq(CRT::Direction::Horizontal)
+      CRT::VERTICAL.should eq(CRT::Direction::Vertical)
+    end
+
+    it "defines position enum" do
+      CRT::Position::Left.value.should eq(9000)
+      CRT::Position::Right.value.should eq(9001)
+      CRT::Position::Center.value.should eq(9002)
+      CRT::Position::Top.value.should eq(9003)
+      CRT::Position::Bottom.value.should eq(9004)
+      CRT::Position::Full.value.should eq(9007)
+    end
+
+    it "defines dominant enum" do
+      CRT::Dominant::None.value.should eq(0)
+      CRT::Dominant::Row.value.should eq(1)
+      CRT::Dominant::Col.value.should eq(2)
     end
 
     it "defines key constants" do

@@ -1,9 +1,9 @@
 module CRT
   class Histogram < CRT::CRTObjs
-    getter orient : Int32 = CRT::HORIZONTAL
+    getter orient : Direction = Direction::Horizontal
     property filler : Int32 = '#'.ord | LibNCurses::Attribute::Reverse.value.to_i32
     property stats_attr : Int32 = 0
-    property stats_pos : Int32 = CRT::TOP
+    property stats_pos : Position = Position::Top
     property view_type : CRT::HistViewType = CRT::HistViewType::REAL
     getter value : Int32 = 0
     getter low : Int32 = 0
@@ -27,7 +27,7 @@ module CRT
     @cury : Int32 = 0
 
     def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
-                   height : Int32, width : Int32, orient : Int32 = CRT::HORIZONTAL,
+                   height : Int32, width : Int32, orient : Direction = Direction::Horizontal,
                    title : String = "", box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
@@ -73,7 +73,7 @@ module CRT
 
       @filler = '#'.ord | LibNCurses::Attribute::Reverse.value.to_i32
       @stats_attr = 0
-      @stats_pos = CRT::TOP
+      @stats_pos = Position::Top
       @view_type = CRT::HistViewType::REAL
 
       if shadow
@@ -89,7 +89,7 @@ module CRT
       0
     end
 
-    def set(view_type : CRT::HistViewType, stats_pos : Int32, stats_attr : Int32,
+    def set(view_type : CRT::HistViewType, stats_pos : Position, stats_attr : Int32,
             low : Int32, high : Int32, value : Int32, filler : Int32, box : Bool)
       self.display_type = view_type
       self.stats_pos = stats_pos
@@ -106,7 +106,7 @@ module CRT
       @percent = @high == 0 ? 0.0 : 1.0 * @value / @high
 
       # Determine bar size
-      if @orient == CRT::VERTICAL
+      if @orient.vertical?
         @bar_size = (@percent * @field_height).to_i32
       else
         @bar_size = (@percent * @field_width).to_i32
@@ -115,7 +115,7 @@ module CRT
       # Set label strings based on view_type and orientation
       return if @view_type == CRT::HistViewType::NONE
 
-      if @orient == CRT::VERTICAL
+      if @orient.vertical?
         set_vertical_labels
       else
         set_horizontal_labels
@@ -140,14 +140,6 @@ module CRT
 
     def display_type : CRT::HistViewType
       @view_type
-    end
-
-    def stats_pos=(stats_pos : Int32)
-      @stats_pos = stats_pos
-    end
-
-    def stats_pos : Int32
-      @stats_pos
     end
 
     def stats_attr=(stats_attr : Int32)
@@ -183,24 +175,24 @@ module CRT
       if @view_type != CRT::HistViewType::NONE
         if @low_string.size > 0
           Draw.write_char_attrib(w, @lowx, @lowy, @low_string,
-            @stats_attr, @orient == CRT::VERTICAL ? CRT::VERTICAL : CRT::HORIZONTAL,
+            @stats_attr, @orient,
             0, @low_string.size)
         end
 
         if @cur_string.size > 0
           Draw.write_char_attrib(w, @curx, @cury, @cur_string,
-            @stats_attr, @orient == CRT::VERTICAL ? CRT::VERTICAL : CRT::HORIZONTAL,
+            @stats_attr, @orient,
             0, @cur_string.size)
         end
 
         if @high_string.size > 0
           Draw.write_char_attrib(w, @highx, @highy, @high_string,
-            @stats_attr, @orient == CRT::VERTICAL ? CRT::VERTICAL : CRT::HORIZONTAL,
+            @stats_attr, @orient,
             0, @high_string.size)
         end
       end
 
-      if @orient == CRT::VERTICAL
+      if @orient.vertical?
         hist_x = @box_height - @bar_size - 1
         hist_y = @field_width
       end
@@ -263,7 +255,7 @@ module CRT
     end
 
     private def set_vertical_labels
-      if @stats_pos == CRT::LEFT || @stats_pos == CRT::BOTTOM
+      if @stats_pos.left? || @stats_pos.bottom?
         @low_string = @low.to_s
         @lowx = 1
         @lowy = @box_height - @low_string.size - 1
@@ -275,7 +267,7 @@ module CRT
         @cur_string = format_value_string
         @curx = 1
         @cury = (@field_height - @cur_string.size) // 2 + @title_lines + 1
-      elsif @stats_pos == CRT::CENTER
+      elsif @stats_pos.center?
         @low_string = @low.to_s
         @lowx = @field_width // 2 + 1
         @lowy = @box_height - @low_string.size - 1
@@ -287,7 +279,7 @@ module CRT
         @cur_string = format_value_string
         @curx = @field_width // 2 + 1
         @cury = (@field_height - @cur_string.size) // 2 + @title_lines + 1
-      elsif @stats_pos == CRT::RIGHT || @stats_pos == CRT::TOP
+      elsif @stats_pos.right? || @stats_pos.top?
         @low_string = @low.to_s
         @lowx = @field_width
         @lowy = @box_height - @low_string.size - 1
@@ -303,7 +295,7 @@ module CRT
     end
 
     private def set_horizontal_labels
-      if @stats_pos == CRT::TOP || @stats_pos == CRT::RIGHT
+      if @stats_pos.top? || @stats_pos.right?
         @low_string = @low.to_s
         @lowx = 1
         @lowy = @title_lines + 1
@@ -315,7 +307,7 @@ module CRT
         @cur_string = format_value_string
         @curx = (@field_width - @cur_string.size) // 2 + 1
         @cury = @title_lines + 1
-      elsif @stats_pos == CRT::CENTER
+      elsif @stats_pos.center?
         @low_string = @low.to_s
         @lowx = 1
         @lowy = @field_height // 2 + @title_lines + 1
@@ -327,7 +319,7 @@ module CRT
         @cur_string = format_value_string
         @curx = (@field_width - @cur_string.size) // 2 + 1
         @cury = @field_height // 2 + @title_lines + 1
-      elsif @stats_pos == CRT::BOTTOM || @stats_pos == CRT::LEFT
+      elsif @stats_pos.bottom? || @stats_pos.left?
         @low_string = @low.to_s
         @lowx = 1
         @lowy = @box_height - 2 * @border_size

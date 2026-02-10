@@ -32,7 +32,7 @@ module CRT
     @oldvcol : Int32 = 1
     @row_space : Int32 = 0
     @col_space : Int32 = 0
-    @dominant : Int32 = 0
+    @dominant : Dominant = Dominant::None
     @box_cell : Bool = false
     @highlight : Int32 = 0
     @shadow : Bool = false
@@ -44,7 +44,7 @@ module CRT
                    rowtitles : Array(String), coltitles : Array(String),
                    colwidths : Array(Int32), colvalues : Array(CRT::DisplayType),
                    title : String = "", rspace : Int32 = 1, cspace : Int32 = 1,
-                   filler : Char = '.', dominant : Int32 = 0, box : Bool = true,
+                   filler : Char = '.', dominant : Dominant = Dominant::None, box : Bool = true,
                    box_cell : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
@@ -630,9 +630,9 @@ module CRT
       infolen = @info[@row][@col].size
       hl = @highlight
 
-      if @dominant == CRT::ROW
+      if @dominant.row?
         hl = (@rowtitle[@crow][0]? || 0) & 0xFFFFFF00_u32.to_i32
-      elsif @dominant == CRT::COL
+      elsif @dominant.col?
         hl = (@coltitle[@ccol][0]? || 0) & 0xFFFFFF00_u32.to_i32
       end
 
@@ -664,9 +664,9 @@ module CRT
       infolen = @info[vrow][vcol].size
       hl = @filler & 0xFFFFFF00_u32.to_i32
 
-      if @dominant == CRT::ROW
+      if @dominant.row?
         hl = (@rowtitle[row][0]? || 0) & 0xFFFFFF00_u32.to_i32
-      elsif @dominant == CRT::COL
+      elsif @dominant.col?
         hl = (@coltitle[col][0]? || 0) & 0xFFFFFF00_u32.to_i32
       end
 
