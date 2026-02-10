@@ -15,7 +15,7 @@ Ported from [Ruby CDK](https://github.com/movitto/cdk).
 | **Label** | Static text display |
 | **Dialog** | Message box with buttons |
 | **Entry** | Single-line text input |
-| **Mentry** | Multi-line text editor |
+| **MultiEntry** | Multi-line text editor |
 | **Button** | Standalone push button |
 | **ButtonBox** | Group of buttons |
 | **Scale(T)** | Numeric input with arrow keys — generic over any number type |
@@ -23,17 +23,17 @@ Ported from [Ruby CDK](https://github.com/movitto/cdk).
 | **Scroll** | Scrolling list |
 | **Radio** | Radio button list |
 | **Selection** | Multi-select checklist |
-| **Itemlist** | Cycle through a list of values |
+| **ItemList** | Cycle through a list of values |
 | **Template** | Formatted input with overlay template |
 | **Histogram** | Horizontal/vertical bar chart |
 | **Graph** | Line/plot graph |
 | **Calendar** | Date picker |
 | **Marquee** | Scrolling marquee text |
-| **Swindow** | Scrolling text output window |
+| **ScrollWindow** | Scrolling text output window |
 | **Viewer** | Text file viewer with buttons |
 | **Menu** | Menu bar with pull-down submenus |
-| **Alphalist** | Filterable alphabetical list |
-| **Fselect** | File/directory selector |
+| **AlphaList** | Filterable alphabetical list |
+| **FileSelect** | File/directory selector |
 | **Matrix** | Spreadsheet-style editable grid |
 
 ## Installation

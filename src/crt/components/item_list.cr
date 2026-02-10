@@ -1,5 +1,5 @@
 module CRT
-  class Itemlist < CRT::CRTObjs
+  class ItemList < CRT::CRTObjs
     getter item : Array(Array(Int32)) = [] of Array(Int32)
     getter item_len : Array(Int32) = [] of Int32
     getter item_pos : Array(Int32) = [] of Int32
@@ -96,7 +96,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:ITEMLIST, self)
+      cdkscreen.register(:ITEM_LIST, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -224,8 +224,8 @@ module CRT
       CRT.delete_curses_window(@label_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:ITEMLIST)
-      CRT::Screen.unregister(:ITEMLIST, self)
+      clean_bindings(:ITEM_LIST)
+      CRT::Screen.unregister(:ITEM_LIST, self)
     end
 
     def set_current_item(current_item : Int32)
@@ -273,7 +273,7 @@ module CRT
     end
 
     def object_type : Symbol
-      :ITEMLIST
+      :ITEM_LIST
     end
 
     def create_list(items : Array(String), count : Int32) : Bool

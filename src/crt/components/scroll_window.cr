@@ -1,5 +1,5 @@
 module CRT
-  class Swindow < CRT::CRTObjs
+  class ScrollWindow < CRT::CRTObjs
     @field_win : NCurses::Window? = nil
     @list : Array(Array(Int32)) = [] of Array(Int32)
     @list_pos : Array(Int32) = [] of Int32
@@ -76,17 +76,17 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(:SWINDOW, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SWINDOW, 'b'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SWINDOW, 'B'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(:SWINDOW, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SWINDOW, ' '.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SWINDOW, 'f'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SWINDOW, 'F'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(:SWINDOW, '|'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(:SWINDOW, '$'.ord, :getc, LibNCurses::Key::End.value)
+      bind(:SCROLL_WINDOW, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(:SCROLL_WINDOW, 'b'.ord, :getc, LibNCurses::Key::PageUp.value)
+      bind(:SCROLL_WINDOW, 'B'.ord, :getc, LibNCurses::Key::PageUp.value)
+      bind(:SCROLL_WINDOW, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(:SCROLL_WINDOW, ' '.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(:SCROLL_WINDOW, 'f'.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(:SCROLL_WINDOW, 'F'.ord, :getc, LibNCurses::Key::PageDown.value)
+      bind(:SCROLL_WINDOW, '|'.ord, :getc, LibNCurses::Key::Home.value)
+      bind(:SCROLL_WINDOW, '$'.ord, :getc, LibNCurses::Key::End.value)
 
-      cdkscreen.register(:SWINDOW, self)
+      cdkscreen.register(:SCROLL_WINDOW, self)
     end
 
     def setup_line(list : String, x : Int32)
@@ -223,7 +223,7 @@ module CRT
       set_exit_type(0)
       draw(@box)
 
-      if check_bind(:SWINDOW, input)
+      if check_bind(:SCROLL_WINDOW, input)
         @complete = true
       else
         case input
@@ -353,8 +353,8 @@ module CRT
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@field_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:SWINDOW)
-      CRT::Screen.unregister(:SWINDOW, self)
+      clean_bindings(:SCROLL_WINDOW)
+      CRT::Screen.unregister(:SCROLL_WINDOW, self)
     end
 
     def set_bk_attr(attrib : Int32)
@@ -375,7 +375,7 @@ module CRT
     end
 
     def object_type : Symbol
-      :SWINDOW
+      :SCROLL_WINDOW
     end
 
     private def create_list(list_size : Int32)

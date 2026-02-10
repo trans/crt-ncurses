@@ -1,5 +1,5 @@
 module CRT
-  class Fselect < CRT::CRTObjs
+  class FileSelect < CRT::CRTObjs
     include ListSupport
 
     getter scroll_field : CRT::Scroll
@@ -108,10 +108,10 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(:FSELECT, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:FSELECT, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(:FILE_SELECT, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(:FILE_SELECT, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
 
-      cdkscreen.register(:FSELECT, self)
+      cdkscreen.register(:FILE_SELECT, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : String | Int32
@@ -232,12 +232,12 @@ module CRT
     end
 
     def destroy
-      clean_bindings(:FSELECT)
+      clean_bindings(:FILE_SELECT)
       @scroll_field.destroy
       @entry_field.destroy
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      CRT::Screen.unregister(:FSELECT, self)
+      CRT::Screen.unregister(:FILE_SELECT, self)
     end
 
     def set_bk_attr(attrib : Int32)
@@ -254,7 +254,7 @@ module CRT
     end
 
     def object_type : Symbol
-      :FSELECT
+      :FILE_SELECT
     end
 
     def content_to_path(content : String) : String

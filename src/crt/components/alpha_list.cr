@@ -1,5 +1,5 @@
 module CRT
-  class Alphalist < CRT::CRTObjs
+  class AlphaList < CRT::CRTObjs
     include ListSupport
 
     getter scroll_field : CRT::Scroll
@@ -87,10 +87,10 @@ module CRT
       @input_window = @entry_field.win
       @accepts_focus = true
 
-      bind(:ALPHALIST, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(:ALPHALIST, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      bind(:ALPHA_LIST, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      bind(:ALPHA_LIST, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
 
-      cdkscreen.register(:ALPHALIST, self)
+      cdkscreen.register(:ALPHA_LIST, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : String | Int32
@@ -192,12 +192,12 @@ module CRT
     end
 
     def destroy
-      clean_bindings(:ALPHALIST)
+      clean_bindings(:ALPHA_LIST)
       @entry_field.destroy
       @scroll_field.destroy
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      CRT::Screen.unregister(:ALPHALIST, self)
+      CRT::Screen.unregister(:ALPHA_LIST, self)
     end
 
     def set_contents(list : Array(String), list_size : Int32)
@@ -244,7 +244,7 @@ module CRT
     end
 
     def object_type : Symbol
-      :ALPHALIST
+      :ALPHA_LIST
     end
 
     private def draw_my_scroller

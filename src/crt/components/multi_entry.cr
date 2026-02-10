@@ -1,5 +1,5 @@
 module CRT
-  class Mentry < CRT::CRTObjs
+  class MultiEntry < CRT::CRTObjs
     property info : String = ""
     property current_col : Int32 = 0
     property current_row : Int32 = 0
@@ -116,7 +116,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(:MENTRY, self)
+      cdkscreen.register(:MULTI_ENTRY, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : String
@@ -436,8 +436,8 @@ module CRT
       CRT.delete_curses_window(@label_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(:MENTRY)
-      CRT::Screen.unregister(:MENTRY, self)
+      clean_bindings(:MULTI_ENTRY)
+      CRT::Screen.unregister(:MULTI_ENTRY, self)
     end
 
     def set_value(new_value : String)
@@ -519,7 +519,7 @@ module CRT
     end
 
     def object_type : Symbol
-      :MENTRY
+      :MULTI_ENTRY
     end
   end
 end
