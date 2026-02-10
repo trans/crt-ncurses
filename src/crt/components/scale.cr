@@ -9,8 +9,8 @@ module CRT
 
     getter low : T
     getter high : T
-    property inc : T
-    property fastinc : T
+    property step : T
+    property page : T
     property field_attr : Int32 = 0
     getter field_width : Int32 = 0
     property digits : Int32 = 0
@@ -25,7 +25,7 @@ module CRT
     @result_data : T
 
     def initialize(cdkscreen : CRT::Screen, *,
-                   low : T, high : T, inc : T, fast_inc : T,
+                   low : T, high : T, step : T, page : T,
                    x : Int32, y : Int32,
                    title : String = "", label : String = "",
                    start : T = low, field_attr : Int32 = 0,
@@ -43,8 +43,8 @@ module CRT
       @current = start
       @low = low
       @high = high
-      @inc = inc
-      @fastinc = fast_inc
+      @step = step
+      @page = page
       @result_data = low
 
       field_width = CRT.set_widget_dimension(parent_width, field_width, 0)
@@ -168,13 +168,13 @@ module CRT
 
       case input
       when LibNCurses::Key::Down.value
-        @current -= @inc
+        @current -= @step
       when LibNCurses::Key::Up.value
-        @current += @inc
+        @current += @step
       when LibNCurses::Key::PageUp.value
-        @current += @fastinc
+        @current += @page
       when LibNCurses::Key::PageDown.value
-        @current -= @fastinc
+        @current -= @page
       when LibNCurses::Key::Home.value
         @current = @low
       when LibNCurses::Key::End.value
@@ -194,11 +194,11 @@ module CRT
       else
         case input
         when 'd'.ord, '-'.ord
-          @current -= @inc
+          @current -= @step
         when '+'.ord
-          @current += @inc
+          @current += @step
         when 'D'.ord
-          @current -= @fastinc
+          @current -= @page
         when '0'.ord
           @current = @low
         else
