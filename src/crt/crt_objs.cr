@@ -37,6 +37,15 @@ module CRT
     @title_pos : Array(Int32) = [] of Int32
     @title_len : Array(Int32) = [] of Int32
 
+    def self.open(*args, **kwargs, &)
+      widget = new(*args, **kwargs)
+      begin
+        yield widget
+      ensure
+        widget.destroy
+      end
+    end
+
     def initialize
       CRT::ALL_OBJECTS << self
 
