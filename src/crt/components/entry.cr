@@ -168,7 +168,7 @@ module CRT
       end
     end
 
-    def set_position_to_end
+    def move_to_end
       if @info.size >= @field_width
         if @info.size < @max
           char_count = @field_width - 1
@@ -211,7 +211,7 @@ module CRT
           draw_field
         end
       when LibNCurses::Key::End.value
-        set_position_to_end
+        move_to_end
         draw_field
       when LibNCurses::Key::Left.value
         if curr_pos <= 0
@@ -292,7 +292,7 @@ module CRT
         end
       when CRT::PASTE
         if !CRT::CRTObjs.paste_buffer.empty?
-          set_value(CRT::CRTObjs.paste_buffer)
+          self.value = CRT::CRTObjs.paste_buffer
           draw_field
         else
           CRT.beep
@@ -399,38 +399,38 @@ module CRT
       CRT::Screen.unregister(:ENTRY, self)
     end
 
-    def set_value(new_value : String?)
+    def value=(new_value : String?)
       if new_value.nil?
         @info = ""
         @left_char = 0
         @screen_col = 0
       else
         @info = new_value.dup
-        set_position_to_end
+        move_to_end
       end
     end
 
-    def get_value : String
+    def value : String
       @info
     end
 
-    def set_max(max : Int32)
+    def max=(max : Int32)
       @max = max
     end
 
-    def set_min(min : Int32)
+    def min=(min : Int32)
       @min = min
     end
 
-    def set_filler_char(filler_char : Char)
+    def filler_char=(filler_char : Char)
       @filler = filler_char
     end
 
-    def set_hidden_char(hidden_character : Char)
+    def hidden_char=(hidden_character : Char)
       @hidden = hidden_character
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end
@@ -442,7 +442,7 @@ module CRT
       end
     end
 
-    def set_callback(callback : Proc(CRT::Entry, Int32, Nil))
+    def callback=(callback : Proc(CRT::Entry, Int32, Nil))
       @callbackfn = callback
     end
 

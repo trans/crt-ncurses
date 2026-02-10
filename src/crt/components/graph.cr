@@ -78,8 +78,8 @@ module CRT
       0
     end
 
-    def set_values(values : Array(Int32), count : Int32, start_at_zero : Bool) : Bool
-      return false if count < 0
+    def set_values(values : Array(Int32), start_at_zero : Bool) : Bool
+      return false if values.size < 0
 
       @values = [] of Int32
       @count = 0
@@ -92,7 +92,7 @@ module CRT
         @values << value
       end
 
-      @count = count
+      @count = values.size
       @minx = min
       @maxx = max
       @minx = 0 if start_at_zero
@@ -101,7 +101,7 @@ module CRT
       true
     end
 
-    def set_characters(characters : String) : Bool
+    def characters=(characters : String) : Bool
       char_count = [] of Int32
       new_tokens = char2chtype(characters, char_count, [] of Int32)
       return false if char_count[0] != @count
@@ -109,11 +109,11 @@ module CRT
       true
     end
 
-    def set_display_type(type : Symbol)
+    def display_type=(type : Symbol)
       @display_type = type
     end
 
-    def get_display_type : Symbol
+    def display_type : Symbol
       @display_type
     end
 
@@ -208,7 +208,7 @@ module CRT
       CRT.delete_curses_window(@win)
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

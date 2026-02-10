@@ -101,7 +101,7 @@ module CRT
       @accepts_focus = true
       @shadow = shadow
 
-      set_current_item(0)
+      self.current_item = 0
 
       if shadow
         @shadow_win = NCurses::Window.new(height: box_height, width: box_width + 1,
@@ -303,36 +303,36 @@ module CRT
       CRT::Screen.unregister(:RADIO, self)
     end
 
-    def set_highlight(highlight : Int32)
+    def highlight=(highlight : Int32)
       @highlight = highlight
     end
 
-    def set_choice_character(character : Char)
+    def choice_character=(character : Char)
       @choice_char = character.ord
     end
 
-    def set_left_brace(character : Char)
+    def left_brace=(character : Char)
       @left_box_char = character.ord
     end
 
-    def set_right_brace(character : Char)
+    def right_brace=(character : Char)
       @right_box_char = character.ord
     end
 
-    def set_current_item(item : Int32)
+    def current_item=(item : Int32)
       set_position(item)
       @selected_item = item
     end
 
-    def get_selected_item : Int32
+    def selected_item : Int32
       @selected_item
     end
 
-    def set_selected_item(item : Int32)
+    def selected_item=(item : Int32)
       @selected_item = item
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

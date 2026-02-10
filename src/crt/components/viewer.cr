@@ -109,14 +109,14 @@ module CRT
       cdkscreen.register(:VIEWER, self)
     end
 
-    def set_viewer_title(title : String)
+    def viewer_title=(title : String)
       set_title(title, -(@box_width + 1))
       @title_adj = @title_lines
       @view_size = @box_height - (@title_lines + 1) - 2
     end
 
-    def set_info(list : Array(String), list_size : Int32, interpret : Bool) : Int32
-      viewer_size = list_size < 0 ? list.size : list_size
+    def set_info(list : Array(String), interpret : Bool = false) : Int32
+      viewer_size = list.size
       @in_progress = true
       @list = [] of Array(Int32)
       @list_pos = [] of Int32
@@ -126,7 +126,7 @@ module CRT
 
       current_line = 0
       x = 0
-      while x < list_size && current_line < viewer_size
+      while x < list.size && current_line < viewer_size
         if list[x].empty?
           @list << [] of Int32
           @list_len << 0
@@ -156,11 +156,11 @@ module CRT
       @list_size
     end
 
-    def set_highlight(button_highlight : Int32)
+    def highlight=(button_highlight : Int32)
       @button_highlight = button_highlight
     end
 
-    def set_info_line(show : Bool)
+    def info_line=(show : Bool)
       @show_line_info = show
     end
 
@@ -397,7 +397,7 @@ module CRT
       CRT::Screen.unregister(:VIEWER, self)
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

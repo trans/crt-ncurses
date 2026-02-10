@@ -96,12 +96,14 @@ module CRT
 
     # Set multiple attributes
     def set(mesg : Array(String), lines : Int32, box : Bool)
-      set_message(mesg, lines)
+      self.message = mesg
       set_box(box)
     end
 
     # Set the information within the label
-    def set_message(info : Array(String), info_size : Int32)
+    def message=(info : Array(String))
+      info_size = info.size
+
       # Clean out the old message
       @rows.times do |x|
         @info[x] = [] of Int32
@@ -126,7 +128,7 @@ module CRT
       draw(@box)
     end
 
-    def get_message : Array(Array(Int32))
+    def message : Array(Array(Int32))
       @info
     end
 
@@ -135,7 +137,7 @@ module CRT
     end
 
     # Set the background attribute of the widget
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

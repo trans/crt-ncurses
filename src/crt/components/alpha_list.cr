@@ -127,7 +127,7 @@ module CRT
           # Update entry from scroll selection
           current_idx = @scroll_field.current_item
           if current_idx >= 0 && current_idx < @list.size
-            @entry_field.set_value(@list[current_idx])
+            @entry_field.value = @list[current_idx]
             @entry_field.draw(@entry_field.box)
           end
         else
@@ -142,7 +142,7 @@ module CRT
           if index < 0
             CRT.beep
           else
-            @entry_field.set_value(@list[index])
+            @entry_field.value = @list[index]
             @entry_field.draw(@entry_field.box)
             @scroll_field.set_position(index)
             draw_my_scroller
@@ -200,39 +200,39 @@ module CRT
       CRT::Screen.unregister(:ALPHA_LIST, self)
     end
 
-    def set_contents(list : Array(String), list_size : Int32)
-      @list = list[0...list_size].sort
-      @scroll_field.set_items(@list, @list.size, false)
+    def contents=(list : Array(String))
+      @list = list.sort.dup
+      @scroll_field.set_items(@list)
       @entry_field.clean
       erase
       draw(@box)
     end
 
-    def set_current_item(item : Int32)
+    def current_item=(item : Int32)
       if @list.size > 0
-        @scroll_field.set_current_item(item)
+        @scroll_field.current_item = item
         if @scroll_field.current_item < @list.size
-          @entry_field.set_value(@list[@scroll_field.current_item])
+          @entry_field.value = @list[@scroll_field.current_item]
         end
       end
     end
 
-    def get_current_item : Int32
-      @scroll_field.get_current_item
+    def current_item : Int32
+      @scroll_field.current_item
     end
 
-    def set_filler_char(filler : Char)
+    def filler_char=(filler : Char)
       @filler_char = filler
-      @entry_field.set_filler_char(filler)
+      @entry_field.filler_char = filler
     end
 
-    def set_highlight(highlight : Int32)
+    def highlight=(highlight : Int32)
       @highlight = highlight
     end
 
-    def set_bk_attr(attrib : Int32)
-      @entry_field.set_bk_attr(attrib)
-      @scroll_field.set_bk_attr(attrib)
+    def background=(attrib : Int32)
+      @entry_field.background = attrib
+      @scroll_field.background = attrib
     end
 
     def focus

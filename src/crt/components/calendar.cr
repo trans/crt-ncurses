@@ -329,7 +329,7 @@ module CRT
       CRT::Screen.unregister(:CALENDAR, self)
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

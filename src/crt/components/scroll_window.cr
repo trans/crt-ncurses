@@ -98,15 +98,15 @@ module CRT
       @widest_line = {@widest_line, @list_len[x]}.max
     end
 
-    def set_contents(list : Array(String), list_size : Int32)
+    def contents=(list : Array(String))
       clean
-      create_list(list_size)
+      create_list(list.size)
 
-      (0...list_size).each do |x|
+      (0...list.size).each do |x|
         setup_line(list[x], x)
       end
 
-      @list_size = list_size
+      @list_size = list.size
       @max_top_line = {@list_size - @view_size, 0}.max
       @max_left_char = @widest_line - (@box_width - 2)
       @current_top = 0
@@ -357,7 +357,7 @@ module CRT
       CRT::Screen.unregister(:SCROLL_WINDOW, self)
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

@@ -139,7 +139,7 @@ module CRT
       ""
     end
 
-    def get_cursor_pos : Int32
+    def cursor_pos : Int32
       (@current_row + @top_row) * @field_width + @current_col
     end
 
@@ -182,7 +182,7 @@ module CRT
     end
 
     def inject(input : Int32) : String
-      cursor_pos = get_cursor_pos
+      cur_pos = self.cursor_pos
       @complete = false
 
       set_exit_type(0)
@@ -212,7 +212,7 @@ module CRT
         redraw = rtmp[0]
       when LibNCurses::Key::Right.value
         if @current_col < @field_width - 1
-          if get_cursor_pos + 1 <= @info.size
+          if cur_pos + 1 <= @info.size
             moved = set_cur_pos(@current_row, @current_col + 1)
           end
         elsif @current_row == @rows - 1
@@ -226,7 +226,7 @@ module CRT
         CRT.beep if !moved && !redraw
       when LibNCurses::Key::Down.value
         if @current_row != @rows - 1
-          if get_cursor_pos + @field_width + 1 <= @info.size
+          if cur_pos + @field_width + 1 <= @info.size
             moved = set_cur_pos(@current_row + 1, @current_col)
           end
         elsif @top_row < @logical_rows - @rows
@@ -249,7 +249,7 @@ module CRT
           CRT.beep
         elsif input == CRT::DELETE
           # Delete char at cursor
-          cp = get_cursor_pos
+          cp = cursor_pos
           if cp < @info.size
             @info = @info[0...cp] + @info[cp + 1..]
             draw_field
@@ -264,7 +264,7 @@ module CRT
           moved = mtmp[0]
           redraw = rtmp[0]
           if hkl
-            cp = get_cursor_pos
+            cp = cursor_pos
             if cp < @info.size
               @info = @info[0...cp] + @info[cp + 1..]
               draw_field
@@ -274,7 +274,7 @@ module CRT
           end
         end
       when CRT::TRANSPOSE
-        cp = get_cursor_pos
+        cp = cursor_pos
         if cp >= @info.size - 1
           CRT.beep
         else
@@ -306,7 +306,7 @@ module CRT
         if CRT::CRTObjs.paste_buffer.size == 0
           CRT.beep
         else
-          set_value(CRT::CRTObjs.paste_buffer)
+          self.value = CRT::CRTObjs.paste_buffer
           draw(@box)
         end
       when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
@@ -334,7 +334,7 @@ module CRT
           if newchar == -1
             CRT.beep
           else
-            cp = get_cursor_pos
+            cp = cursor_pos
             @info = @info[0...cp] + newchar.chr.to_s + @info[cp..]
             @current_col += 1
 
@@ -440,7 +440,7 @@ module CRT
       CRT::Screen.unregister(:MULTI_ENTRY, self)
     end
 
-    def set_value(new_value : String)
+    def value=(new_value : String)
       field_characters = @rows * @field_width
       @info = new_value
 
@@ -458,31 +458,31 @@ module CRT
       draw_field
     end
 
-    def get_value : String
+    def value : String
       @info
     end
 
-    def set_filler_char(filler : Char)
+    def filler_char=(filler : Char)
       @filler = filler.ord
     end
 
-    def get_filler_char : Int32
+    def filler_char : Int32
       @filler
     end
 
-    def set_hidden_char(character : Char)
+    def hidden_char=(character : Char)
       @hidden = character.ord
     end
 
-    def get_hidden_char : Int32
+    def hidden_char : Int32
       @hidden
     end
 
-    def set_min(min : Int32)
+    def min=(min : Int32)
       @min = min
     end
 
-    def get_min : Int32
+    def min : Int32
       @min
     end
 
@@ -493,7 +493,7 @@ module CRT
       @top_row = 0
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

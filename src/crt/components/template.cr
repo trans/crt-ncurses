@@ -436,22 +436,22 @@ module CRT
       CRT::Screen.unregister(:TEMPLATE, self)
     end
 
-    def set_value(new_value : String)
+    def value=(new_value : String)
       clean
       new_value.each_char do |ch|
         handle_input(ch.ord)
       end
     end
 
-    def get_value : String
+    def value : String
       @info
     end
 
-    def set_min(min : Int32)
+    def min=(min : Int32)
       @min = min if min >= 0
     end
 
-    def get_min : Int32
+    def min : Int32
       @min
     end
 
@@ -462,7 +462,7 @@ module CRT
       @plate_pos = 0
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

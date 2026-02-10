@@ -230,15 +230,15 @@ module CRT
       CRT::Screen.unregister(:DIALOG, self)
     end
 
-    def set_highlight(highlight : Int32)
+    def highlight=(highlight : Int32)
       @highlight = highlight
     end
 
-    def set_separator(separator : Bool)
+    def separator=(separator : Bool)
       @separator = separator
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

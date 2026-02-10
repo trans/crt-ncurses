@@ -90,7 +90,7 @@ module CRT
 
       @entry_field.ll_char = Draw::ACS_LTEE
       @entry_field.lr_char = Draw::ACS_RTEE
-      @entry_field.set_value(@pwd)
+      @entry_field.value = @pwd
 
       # Create the scrolling list
       temp_height = entry_win.max_y - @border_size
@@ -148,7 +148,7 @@ module CRT
           current_idx = @scroll_field.current_item
           if current_idx >= 0 && current_idx < @dir_contents.size
             temp = content_to_path(@dir_contents[current_idx])
-            @entry_field.set_value(temp)
+            @entry_field.value = temp
             @entry_field.draw(@entry_field.box)
           end
         else
@@ -162,13 +162,13 @@ module CRT
         else
           # Check if it's a directory
           if Dir.exists?(filename)
-            set_directory(filename)
+            self.directory = filename
           else
             # Look for matching files
             file_list = (0...@file_counter).map { |x| content_to_path(@dir_contents[x]) }
             index = search_list(file_list, file_list.size, filename)
             if index >= 0
-              @entry_field.set_value(file_list[index])
+              @entry_field.value = file_list[index]
               @entry_field.draw(@entry_field.box)
               @scroll_field.set_position(index)
               draw_my_scroller
@@ -192,7 +192,7 @@ module CRT
           ret = @pathname
           @complete = true
         elsif !filename_str.empty? && Dir.exists?(filename_str)
-          set_directory(filename_str)
+          self.directory = filename_str
           draw_my_scroller
         end
       end
@@ -210,16 +210,16 @@ module CRT
       draw_my_scroller
     end
 
-    def set_directory(directory : String)
+    def directory=(directory : String)
       return if directory.empty?
 
       expanded = File.expand_path(directory)
       if Dir.exists?(expanded)
         @pwd = expanded
-        @entry_field.set_value(@pwd)
+        @entry_field.value = @pwd
         @entry_field.draw(@entry_field.box)
         set_dir_contents
-        @scroll_field.set_items(@dir_contents, @file_counter, false)
+        @scroll_field.set_items(@dir_contents)
       else
         CRT.beep
       end
@@ -240,9 +240,9 @@ module CRT
       CRT::Screen.unregister(:FILE_SELECT, self)
     end
 
-    def set_bk_attr(attrib : Int32)
-      @entry_field.set_bk_attr(attrib)
-      @scroll_field.set_bk_attr(attrib)
+    def background=(attrib : Int32)
+      @entry_field.background = attrib
+      @scroll_field.background = attrib
     end
 
     def focus

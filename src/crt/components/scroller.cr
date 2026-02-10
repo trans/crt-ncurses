@@ -1,6 +1,6 @@
 module CRT
   abstract class Scroller < CRT::CRTObjs
-    property current_item : Int32 = 0
+    getter current_item : Int32 = 0
     property current_top : Int32 = 0
     property current_high : Int32 = 0
     property list_size : Int32 = 0
@@ -183,11 +183,7 @@ module CRT
       end
     end
 
-    def get_current_item : Int32
-      @current_item
-    end
-
-    def set_current_item(item : Int32)
+    def current_item=(item : Int32)
       set_position(item)
     end
   end

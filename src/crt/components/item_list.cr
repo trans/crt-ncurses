@@ -4,8 +4,8 @@ module CRT
     getter item_len : Array(Int32) = [] of Int32
     getter item_pos : Array(Int32) = [] of Int32
 
-    property current_item : Int32 = 0
-    property default_item : Int32 = 0
+    getter current_item : Int32 = 0
+    getter default_item : Int32 = 0
     property list_size : Int32 = 0
     property field_width : Int32 = 0
     property parent : NCurses::Window? = nil
@@ -228,17 +228,13 @@ module CRT
       CRT::Screen.unregister(:ITEM_LIST, self)
     end
 
-    def set_current_item(current_item : Int32)
+    def current_item=(current_item : Int32)
       if current_item >= 0 && current_item < @list_size
         @current_item = current_item
       end
     end
 
-    def get_current_item : Int32
-      @current_item
-    end
-
-    def set_default_item(default_item : Int32)
+    def default_item=(default_item : Int32)
       if default_item < 0
         @default_item = 0
       elsif default_item >= @list_size
@@ -248,11 +244,7 @@ module CRT
       end
     end
 
-    def get_default_item : Int32
-      @default_item
-    end
-
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

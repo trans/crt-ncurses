@@ -251,29 +251,29 @@ module CRT
       CRT::Screen.unregister(:BUTTONBOX, self)
     end
 
-    def set_current_button(button : Int32)
+    def current_button=(button : Int32)
       if button >= 0 && button < @button_count
         @current_button = button
       end
     end
 
-    def get_current_button : Int32
+    def current_button : Int32
       @current_button
     end
 
-    def get_button_count : Int32
+    def button_count : Int32
       @button_count
     end
 
-    def set_highlight(highlight : Int32)
+    def highlight=(highlight : Int32)
       @highlight = highlight
     end
 
-    def get_highlight : Int32
+    def highlight : Int32
       @highlight
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

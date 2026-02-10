@@ -130,7 +130,7 @@ module CRT
       ret
     end
 
-    def set_message(info : String)
+    def message=(info : String)
       info_len = [] of Int32
       info_pos = [] of Int32
       @info = char2chtype(info, info_len, info_pos)
@@ -182,7 +182,7 @@ module CRT
       CRT::Screen.unregister(:BUTTON, self)
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

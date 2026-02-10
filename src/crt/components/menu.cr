@@ -272,15 +272,15 @@ module CRT
       @current_subtitle = self.class.wrapped(submenu_item, @subsize[@current_title])
     end
 
-    def set_title_highlight(highlight : Int32)
+    def title_highlight=(highlight : Int32)
       @title_attr = highlight
     end
 
-    def set_subtitle_highlight(highlight : Int32)
+    def subtitle_highlight=(highlight : Int32)
       @subtitle_attr = highlight
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       (0...@menu_items).each do |x|
         if tw = @title_win[x]
           LibNCurses.wbkgd(tw, attrib.to_u32)

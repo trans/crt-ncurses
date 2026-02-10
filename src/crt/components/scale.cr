@@ -1,6 +1,12 @@
 module CRT
   class Scale(T) < CRT::CRTObjs
-    property current : T
+    getter current : T
+
+    def current=(value : T)
+      @current = value
+      limit_current_value
+    end
+
     property low : T
     property high : T
     property inc : T
@@ -258,16 +264,7 @@ module CRT
       CRT::Screen.unregister(:SCALE, self)
     end
 
-    def set_value(value : T)
-      @current = value
-      limit_current_value
-    end
-
-    def get_value : T
-      @current
-    end
-
-    def set_low_high(low : T, high : T)
+    def set_range(low : T, high : T)
       if low <= high
         @low = low
         @high = high
@@ -278,15 +275,7 @@ module CRT
       limit_current_value
     end
 
-    def set_digits(digits : Int32)
-      @digits = {0, digits}.max
-    end
-
-    def get_digits : Int32
-      @digits
-    end
-
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

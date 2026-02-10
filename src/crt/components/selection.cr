@@ -97,7 +97,7 @@ module CRT
       @input_window = @win
       @shadow = shadow
 
-      set_current_item(0)
+      self.current_item = 0
 
       # Convert each choice to chtype array
       choices.size.times do |j|
@@ -308,15 +308,15 @@ module CRT
       CRT::Screen.unregister(:SELECTION, self)
     end
 
-    def set_highlight(highlight : Int32)
+    def highlight=(highlight : Int32)
       @highlight = highlight
     end
 
-    def get_highlight : Int32
+    def highlight : Int32
       @highlight
     end
 
-    def set_choices(choices : Array(Int32))
+    def choices=(choices : Array(Int32))
       @list_size.times do |j|
         if choices[j] < 0
           @selections[j] = 0
@@ -328,7 +328,7 @@ module CRT
       end
     end
 
-    def get_choices : Array(Int32)
+    def choices : Array(Int32)
       @selections
     end
 
@@ -342,13 +342,13 @@ module CRT
       @selections[index.clamp(0, @list_size - 1)]
     end
 
-    def set_modes(modes : Array(Int32))
+    def modes=(modes : Array(Int32))
       @list_size.times do |j|
         @mode[j] = modes[j]
       end
     end
 
-    def get_modes : Array(Int32)
+    def modes : Array(Int32)
       @mode
     end
 
@@ -360,7 +360,7 @@ module CRT
       @mode[index.clamp(0, @list_size - 1)]
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

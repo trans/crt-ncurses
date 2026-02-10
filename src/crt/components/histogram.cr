@@ -91,11 +91,11 @@ module CRT
 
     def set(view_type : CRT::HistViewType, stats_pos : Int32, stats_attr : Int32,
             low : Int32, high : Int32, value : Int32, filler : Int32, box : Bool)
-      set_display_type(view_type)
-      set_stats_pos(stats_pos)
+      self.display_type = view_type
+      self.stats_pos = stats_pos
       set_value(low, high, value)
-      set_filler_char(filler)
-      set_stats_attr(stats_attr)
+      self.filler_char = filler
+      self.stats_attr = stats_attr
       set_box(box)
     end
 
@@ -122,47 +122,47 @@ module CRT
       end
     end
 
-    def get_value : Int32
+    def value : Int32
       @value
     end
 
-    def get_low_value : Int32
+    def low_value : Int32
       @low
     end
 
-    def get_high_value : Int32
+    def high_value : Int32
       @high
     end
 
-    def set_display_type(view_type : CRT::HistViewType)
+    def display_type=(view_type : CRT::HistViewType)
       @view_type = view_type
     end
 
-    def get_view_type : CRT::HistViewType
+    def display_type : CRT::HistViewType
       @view_type
     end
 
-    def set_stats_pos(stats_pos : Int32)
+    def stats_pos=(stats_pos : Int32)
       @stats_pos = stats_pos
     end
 
-    def get_stats_pos : Int32
+    def stats_pos : Int32
       @stats_pos
     end
 
-    def set_stats_attr(stats_attr : Int32)
+    def stats_attr=(stats_attr : Int32)
       @stats_attr = stats_attr
     end
 
-    def get_stats_attr : Int32
+    def stats_attr : Int32
       @stats_attr
     end
 
-    def set_filler_char(character : Int32)
+    def filler_char=(character : Int32)
       @filler = character
     end
 
-    def get_filler_char : Int32
+    def filler_char : Int32
       @filler
     end
 
@@ -233,7 +233,7 @@ module CRT
       CRT::Screen.unregister(:HISTOGRAM, self)
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end

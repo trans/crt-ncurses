@@ -216,11 +216,11 @@ module CRT
       ret
     end
 
-    def get_current_top : Int32
+    def current_top : Int32
       @current_top
     end
 
-    def set_current_top(item : Int32)
+    def current_top=(item : Int32)
       item = 0 if item < 0
       item = @max_top_item if item > @max_top_item
       @current_top = item
@@ -301,7 +301,7 @@ module CRT
       wrefresh
     end
 
-    def set_bk_attr(attrib : Int32)
+    def background=(attrib : Int32)
       if w = @win
         LibNCurses.wbkgd(w, attrib.to_u32)
       end
@@ -359,21 +359,21 @@ module CRT
       1
     end
 
-    def set_items(list : Array(String), list_size : Int32, numbers : Bool)
-      return if create_item_list(numbers, list, list_size) <= 0
+    def set_items(list : Array(String), numbers : Bool = false)
+      return if create_item_list(numbers, list, list.size) <= 0
 
-      set_view_size(list_size)
+      set_view_size(list.size)
       set_position(0)
       @left_char = 0
     end
 
-    def get_items : Array(String)
+    def items : Array(String)
       (0...@list_size).map do |x|
         chtype2char(@item[x])
       end
     end
 
-    def set_highlight(highlight : Int32)
+    def highlight=(highlight : Int32)
       @highlight = highlight
     end
 
