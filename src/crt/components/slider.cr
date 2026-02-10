@@ -18,10 +18,13 @@ module CRT
     @complete : Bool = false
     @return_data : T
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   title : String, label : String, filler : Int32,
-                   field_width : Int32, start : T, low : T, high : T,
-                   inc : T, fast_inc : T, digits : Int32 = 0,
+    def initialize(cdkscreen : CRT::Screen, *,
+                   low : T, high : T, inc : T, fast_inc : T,
+                   x : Int32, y : Int32,
+                   title : String = "", label : String = "",
+                   start : T = low,
+                   filler : Int32 = '#'.ord | LibNCurses::Attribute::Reverse.value.to_i32,
+                   field_width : Int32 = 0, digits : Int32 = 0,
                    box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
@@ -68,8 +71,8 @@ module CRT
       field_width = {field_width, box_width - @label_len - high_value_len - 1}.min
 
       # Align positions
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]
