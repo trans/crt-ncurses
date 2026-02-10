@@ -1,12 +1,13 @@
 module CRT
-  class Slider < CRT::CRTObjs
-    property current : Int32 = 0
-    property low : Int32 = 0
-    property high : Int32 = 0
-    property inc : Int32 = 1
-    property fastinc : Int32 = 5
+  class Slider(T) < CRT::CRTObjs
+    property current : T
+    property low : T
+    property high : T
+    property inc : T
+    property fastinc : T
     property filler : Int32 = 0
     property field_width : Int32 = 0
+    property digits : Int32 = 0
     property parent : NCurses::Window? = nil
 
     @field_win : NCurses::Window? = nil
@@ -15,13 +16,13 @@ module CRT
     @label_len : Int32 = 0
     @shadow : Bool = false
     @complete : Bool = false
-    @return_data : Int32 = -1
-    @field_edit : Int32 = 0
+    @return_data : T
 
     def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
                    title : String, label : String, filler : Int32,
-                   field_width : Int32, start : Int32, low : Int32, high : Int32,
-                   inc : Int32, fast_inc : Int32, box : Bool, shadow : Bool)
+                   field_width : Int32, start : T, low : T, high : T,
+                   inc : T, fast_inc : T, digits : Int32 = 0,
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -30,10 +31,18 @@ module CRT
       set_box(box)
       box_height = @border_size * 2 + 1
 
+      @digits = digits
       @label = [] of Int32
       @label_len = 0
       @label_win = nil
-      high_value_len = formatted_size(high)
+      @current = start
+      @low = low
+      @high = high
+      @inc = inc
+      @fastinc = fast_inc
+      @return_data = low
+
+      high_value_len = format_value(high).size
 
       field_width = CRT.set_widget_dimension(parent_width, field_width, 0)
 
@@ -92,15 +101,9 @@ module CRT
       @box_height = box_height
       @field_width = field_width - 1
       @filler = filler
-      @low = low
-      @high = high
-      @current = start
-      @inc = inc
-      @fastinc = fast_inc
       @accepts_focus = true
       @input_window = @win
       @shadow = shadow
-      @field_edit = 0
 
       # Clamp start value
       @current = low if start < low
@@ -123,7 +126,7 @@ module CRT
       cdkscreen.register(:SLIDER, self)
     end
 
-    def activate(actions : Array(Int32)? = nil) : Int32
+    def activate(actions : Array(Int32)? = nil) : T
       draw(@box)
 
       if actions.nil? || actions.empty?
@@ -140,7 +143,7 @@ module CRT
       end
 
       set_exit_type(0)
-      -1
+      @low
     end
 
     def limit_current_value
@@ -153,18 +156,8 @@ module CRT
       end
     end
 
-    def self.decrement(value : Int32, by : Int32) : Int32
-      result = value - by
-      result < value ? result : value
-    end
-
-    def self.increment(value : Int32, by : Int32) : Int32
-      result = value + by
-      result > value ? result : value
-    end
-
-    def inject(input : Int32) : Int32
-      ret = -1
+    def inject(input : Int32) : T
+      ret = @low
       @complete = false
 
       set_exit_type(0)
@@ -172,17 +165,17 @@ module CRT
 
       case input
       when LibNCurses::Key::Down.value
-        @current = Slider.decrement(@current, @inc)
+        @current -= @inc
       when LibNCurses::Key::Up.value
-        @current = Slider.increment(@current, @inc)
+        @current += @inc
       when LibNCurses::Key::Right.value
-        @current = Slider.increment(@current, @inc)
+        @current += @inc
       when LibNCurses::Key::Left.value
-        @current = Slider.decrement(@current, @inc)
+        @current -= @inc
       when LibNCurses::Key::PageUp.value
-        @current = Slider.increment(@current, @fastinc)
+        @current += @fastinc
       when LibNCurses::Key::PageDown.value
-        @current = Slider.decrement(@current, @fastinc)
+        @current -= @fastinc
       when LibNCurses::Key::Home.value
         @current = @low
       when LibNCurses::Key::End.value
@@ -202,11 +195,11 @@ module CRT
       else
         case input
         when 'd'.ord, '-'.ord
-          @current = Slider.decrement(@current, @inc)
+          @current -= @inc
         when '+'.ord
-          @current = Slider.increment(@current, @inc)
+          @current += @inc
         when 'D'.ord
-          @current = Slider.decrement(@current, @fastinc)
+          @current -= @fastinc
         when '0'.ord
           @current = @low
         else
@@ -246,14 +239,9 @@ module CRT
     def draw_field
       return unless fw = @field_win
 
-      range = @high - @low
-      step = if range > 0
-               1.0 * @field_width / range
-             else
-               0.0
-             end
-
-      filler_characters = ((@current - @low) * step).to_i32
+      range = (@high - @low).to_f64
+      step = range > 0 ? @field_width.to_f64 / range : 0.0
+      filler_characters = ((@current - @low).to_f64 * step).to_i32
 
       fw.erase
 
@@ -263,7 +251,7 @@ module CRT
       end
 
       # Draw the value text
-      temp = @current.to_s
+      temp = format_value(@current)
       Draw.write_char_attrib(fw, @field_width, 0, temp,
         0, CRT::HORIZONTAL, 0, temp.size)
 
@@ -287,16 +275,16 @@ module CRT
       CRT::Screen.unregister(:SLIDER, self)
     end
 
-    def set_value(value : Int32)
+    def set_value(value : T)
       @current = value
       limit_current_value
     end
 
-    def get_value : Int32
+    def get_value : T
       @current
     end
 
-    def set_low_high(low : Int32, high : Int32)
+    def set_low_high(low : T, high : T)
       if low <= high
         @low = low
         @high = high
@@ -305,6 +293,14 @@ module CRT
         @high = low
       end
       limit_current_value
+    end
+
+    def set_digits(digits : Int32)
+      @digits = {0, digits}.max
+    end
+
+    def get_digits : Int32
+      @digits
     end
 
     def set_bk_attr(attrib : Int32)
@@ -327,12 +323,16 @@ module CRT
       draw(@box)
     end
 
-    def formatted_size(value : Int32) : Int32
-      value.to_s.size
-    end
-
     def object_type : Symbol
       :SLIDER
+    end
+
+    private def format_value(value : T) : String
+      if @digits > 0
+        "%.#{@digits}f" % value.to_f64
+      else
+        value.to_s
+      end
     end
   end
 end

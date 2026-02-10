@@ -1,12 +1,13 @@
 module CRT
-  class Scale < CRT::CRTObjs
-    property current : Int32 = 0
-    property low : Int32 = 0
-    property high : Int32 = 0
-    property inc : Int32 = 1
-    property fastinc : Int32 = 5
+  class Scale(T) < CRT::CRTObjs
+    property current : T
+    property low : T
+    property high : T
+    property inc : T
+    property fastinc : T
     property field_attr : Int32 = 0
     property field_width : Int32 = 0
+    property digits : Int32 = 0
     property parent : NCurses::Window? = nil
 
     @field_win : NCurses::Window? = nil
@@ -15,13 +16,13 @@ module CRT
     @label_len : Int32 = 0
     @shadow : Bool = false
     @complete : Bool = false
-    @result_data : Int32 = -1
-    @field_edit : Int32 = 0
+    @result_data : T
 
     def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
                    title : String, label : String, field_attr : Int32,
-                   field_width : Int32, start : Int32, low : Int32, high : Int32,
-                   inc : Int32, fast_inc : Int32, box : Bool, shadow : Bool)
+                   field_width : Int32, start : T, low : T, high : T,
+                   inc : T, fast_inc : T, digits : Int32 = 0,
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -29,6 +30,14 @@ module CRT
 
       set_box(box)
       box_height = @border_size * 2 + 1
+
+      @digits = digits
+      @current = start
+      @low = low
+      @high = high
+      @inc = inc
+      @fastinc = fast_inc
+      @result_data = low
 
       field_width = CRT.set_widget_dimension(parent_width, field_width, 0)
       box_width = field_width + 2 * @border_size
@@ -90,15 +99,9 @@ module CRT
       @box_height = box_height
       @field_width = field_width
       @field_attr = field_attr
-      @current = start
-      @low = low
-      @high = high
-      @inc = inc
-      @fastinc = fast_inc
       @accepts_focus = true
       @input_window = @win
       @shadow = shadow
-      @field_edit = 0
 
       if shadow
         @shadow_win = NCurses::Window.new(height: box_height, width: box_width,
@@ -118,8 +121,7 @@ module CRT
       cdkscreen.register(:SCALE, self)
     end
 
-    def activate(actions : Array(Int32)? = nil) : Int32
-      ret = -1
+    def activate(actions : Array(Int32)? = nil) : T
       draw(@box)
 
       if actions.nil? || actions.empty?
@@ -136,7 +138,7 @@ module CRT
       end
 
       set_exit_type(0)
-      ret
+      @low
     end
 
     def limit_current_value
@@ -149,8 +151,8 @@ module CRT
       end
     end
 
-    def inject(input : Int32) : Int32
-      ret = -1
+    def inject(input : Int32) : T
+      ret = @low
       @complete = false
 
       set_exit_type(0)
@@ -182,7 +184,6 @@ module CRT
           scr.refresh
         end
       else
-        # Command shortcuts when not in edit mode
         case input
         when 'd'.ord, '-'.ord
           @current -= @inc
@@ -230,8 +231,7 @@ module CRT
       return unless fw = @field_win
       fw.erase
 
-      # Draw the value right-aligned in the field
-      temp = @current.to_s
+      temp = format_value(@current)
       Draw.write_char_attrib(fw,
         @field_width - temp.size - 1, 0, temp, @field_attr,
         CRT::HORIZONTAL, 0, temp.size)
@@ -256,16 +256,16 @@ module CRT
       CRT::Screen.unregister(:SCALE, self)
     end
 
-    def set_value(value : Int32)
+    def set_value(value : T)
       @current = value
       limit_current_value
     end
 
-    def get_value : Int32
+    def get_value : T
       @current
     end
 
-    def set_low_high(low : Int32, high : Int32)
+    def set_low_high(low : T, high : T)
       if low <= high
         @low = low
         @high = high
@@ -274,6 +274,14 @@ module CRT
         @high = low
       end
       limit_current_value
+    end
+
+    def set_digits(digits : Int32)
+      @digits = {0, digits}.max
+    end
+
+    def get_digits : Int32
+      @digits
     end
 
     def set_bk_attr(attrib : Int32)
@@ -298,6 +306,14 @@ module CRT
 
     def object_type : Symbol
       :SCALE
+    end
+
+    private def format_value(value : T) : String
+      if @digits > 0
+        "%.#{@digits}f" % value.to_f64
+      else
+        value.to_s
+      end
     end
   end
 end
