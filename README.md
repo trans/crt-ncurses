@@ -2,7 +2,7 @@
 
 A Crystal library of curses widgets for building terminal user interfaces.
 
-CRT provides 28 ready-to-use widgets — from simple labels and buttons to
+CRT provides 23 ready-to-use widgets — from simple labels and buttons to
 scrolling lists, text editors, menus, file selectors, and spreadsheet-style
 grids — all rendered with ncurses.
 
@@ -18,13 +18,8 @@ Ported from [Ruby CDK](https://github.com/movitto/cdk).
 | **Mentry** | Multi-line text editor |
 | **Button** | Standalone push button |
 | **ButtonBox** | Group of buttons |
-| **Scale** | Numeric input with arrow keys (Int32) |
-| **FScale** | Float64 scale |
-| **DScale** | Float64 scale (alternate) |
-| **UScale** | UInt64 scale |
-| **Slider** | Slider bar (Int32) |
-| **FSlider** | Float64 slider |
-| **USlider** | UInt64 slider |
+| **Scale(T)** | Numeric input with arrow keys — generic over any number type |
+| **Slider(T)** | Slider bar — generic over any number type |
 | **Scroll** | Scrolling list |
 | **Radio** | Radio button list |
 | **Selection** | Multi-select checklist |
