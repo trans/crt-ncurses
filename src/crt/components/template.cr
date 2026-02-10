@@ -21,9 +21,9 @@ module CRT
     @complete : Bool = false
     @return_data : String = ""
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   title : String, label : String, plate : String,
-                   overlay : String, box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   plate : String, overlay : String, title : String = "",
+                   label : String = "", box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -73,8 +73,8 @@ module CRT
       field_width = {field_width, box_width - @label_len - 2 * @border_size}.min
 
       # Align
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]

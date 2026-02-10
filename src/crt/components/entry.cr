@@ -21,11 +21,12 @@ module CRT
     @result_data : String | Int32 = 0
     @callbackfn : Proc(CRT::Entry, Int32, Nil)? = nil
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   title : String, label : String, field_attr : Int32,
-                   filler : Char, disp_type : CRT::DisplayType,
-                   f_width : Int32, min : Int32, max : Int32,
-                   box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   field_width : Int32, title : String = "", label : String = "",
+                   field_attr : Int32 = 0, filler : Char = ' ',
+                   disp_type : CRT::DisplayType = CRT::DisplayType::MIXED,
+                   min : Int32 = 0, max : Int32 = 512,
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -35,7 +36,7 @@ module CRT
       set_box(box)
       box_height = @border_size * 2 + 1
 
-      field_width = CRT.set_widget_dimension(parent_width, f_width, 0)
+      field_width = CRT.set_widget_dimension(parent_width, field_width, 0)
       box_width = field_width + 2 * @border_size
 
       # Translate the label
@@ -62,8 +63,8 @@ module CRT
       field_width = {field_width, box_width - @label_len - 2 * @border_size}.min
 
       # Align positions
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]

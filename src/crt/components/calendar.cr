@@ -57,10 +57,13 @@ module CRT
       Time.local(year, month, 1).day_of_week.value % 7
     end
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   title : String, day : Int32, month : Int32, year : Int32,
-                   day_attrib : Int32, month_attrib : Int32, year_attrib : Int32,
-                   highlight : Int32, box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   day : Int32 = Time.local.day, month : Int32 = Time.local.month,
+                   year : Int32 = Time.local.year, title : String = "",
+                   day_attrib : Int32 = 0, month_attrib : Int32 = 0,
+                   year_attrib : Int32 = 0,
+                   highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -76,8 +79,8 @@ module CRT
       box_width = {box_width, parent_width}.min
       box_height = {box_height, parent_height}.min
 
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]

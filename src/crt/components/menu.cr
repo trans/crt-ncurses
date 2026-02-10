@@ -22,11 +22,12 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(cdkscreen : CRT::Screen, menu_list : Array(Array(String)),
-                   menu_items : Int32, subsize : Array(Int32),
-                   menu_location : Array(Int32), menu_pos : Int32,
-                   title_attr : Int32, subtitle_attr : Int32)
+    def initialize(cdkscreen : CRT::Screen, *, menu_list : Array(Array(String)),
+                   menu_location : Array(Int32), menu_pos : Int32 = CRT::TOP,
+                   title_attr : Int32 = 0, subtitle_attr : Int32 = 0)
       super()
+      menu_items = menu_list.size
+      subsize = menu_list.map { |m| m.size - 1 }
 
       right_count = menu_items - 1
       parent_window = cdkscreen.window.not_nil!

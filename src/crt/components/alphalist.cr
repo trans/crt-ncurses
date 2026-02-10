@@ -13,17 +13,18 @@ module CRT
     @complete : Bool = false
     @save_focus : Bool = false
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   height : Int32, width : Int32, title : String, label : String,
-                   list : Array(String), list_size : Int32,
-                   filler_char : Char, highlight : Int32, box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   height : Int32, width : Int32, list : Array(String),
+                   title : String = "", label : String = "",
+                   filler_char : Char = '.', highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
       label_len = 0
 
-      @list = list[0...list_size].sort
+      @list = list.sort.dup
 
       set_box(box)
 
@@ -36,8 +37,8 @@ module CRT
         label_len = label_len_arr[0]
       end
 
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]
@@ -61,9 +62,10 @@ module CRT
 
       # Create the entry field
       temp_width = is_full_width?(width) ? CRT::FULL : box_width - 2 - label_len
-      @entry_field = CRT::Entry.new(cdkscreen, LibNCurses.getbegx(w), LibNCurses.getbegy(w),
-        title, label, LibNCurses::Attribute::Normal.value.to_i32, filler_char,
-        CRT::DisplayType::MIXED, temp_width, 0, 512, box, false)
+      @entry_field = CRT::Entry.new(cdkscreen,
+        x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(w),
+        title: title, label: label, field_width: temp_width,
+        filler: filler_char, box: box, shadow: false)
 
       entry_win = @entry_field.win
       return unless entry_win
@@ -75,10 +77,9 @@ module CRT
       temp_height = entry_win.max_y - @border_size
       temp_width_scroll = is_full_width?(width) ? CRT::FULL : box_width - 1
       @scroll_field = CRT::Scroll.new(cdkscreen,
-        LibNCurses.getbegx(w), LibNCurses.getbegy(entry_win) + temp_height,
-        CRT::RIGHT, box_height - temp_height, temp_width_scroll,
-        "", @list, @list.size, false,
-        LibNCurses::Attribute::Reverse.value.to_i32, box, false)
+        x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(entry_win) + temp_height,
+        height: box_height - temp_height, width: temp_width_scroll,
+        list: @list, box: box, shadow: false)
 
       @scroll_field.ul_char = Draw::ACS_LTEE
       @scroll_field.ur_char = Draw::ACS_RTEE

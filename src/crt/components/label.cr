@@ -9,8 +9,8 @@ module CRT
     @info_len : Array(Int32) = [] of Int32
     @info_pos : Array(Int32) = [] of Int32
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   mesg : Array(String), rows : Int32, box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   mesg : Array(String), box : Bool = true, shadow : Bool = false)
       super()
 
       parent_window = cdkscreen.window.not_nil!
@@ -19,17 +19,17 @@ module CRT
       box_width = 0
       box_height = 0
 
-      return if rows <= 0
+      return if mesg.empty?
 
       set_box(box)
-      box_height = rows + 2 * @border_size
+      box_height = mesg.size + 2 * @border_size
 
       @info = [] of Array(Int32)
       @info_len = [] of Int32
       @info_pos = [] of Int32
 
       # Determine the box width by finding the widest message line
-      rows.times do |x|
+      mesg.size.times do |x|
         info_len = [] of Int32
         info_pos = [] of Int32
         @info << char2chtype(mesg[x], info_len, info_pos)
@@ -40,7 +40,7 @@ module CRT
       box_width += 2 * @border_size
 
       # Create the string alignments
-      rows.times do |x|
+      mesg.size.times do |x|
         @info_pos[x] = justify_string(box_width - 2 * @border_size,
           @info_len[x], @info_pos[x])
       end
@@ -50,8 +50,8 @@ module CRT
       box_height = {box_height, parent_height}.min
 
       # Rejustify the x and y positions if needed
-      xpos_arr = [xplace]
-      ypos_arr = [yplace]
+      xpos_arr = [x]
+      ypos_arr = [y]
       alignxy(parent_window, xpos_arr, ypos_arr, box_width, box_height)
 
       @screen = cdkscreen
@@ -65,7 +65,7 @@ module CRT
       @shadow_win = nil
       @xpos = xpos_arr[0]
       @ypos = ypos_arr[0]
-      @rows = rows
+      @rows = mesg.size
       @box_width = box_width
       @box_height = box_height
       @input_window = @win

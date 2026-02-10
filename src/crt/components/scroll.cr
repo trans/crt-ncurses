@@ -19,10 +19,12 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   splace : Int32, height : Int32, width : Int32, title : String,
-                   list : Array(String), list_size : Int32, numbers : Bool,
-                   highlight : Int32, box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   height : Int32, width : Int32, list : Array(String),
+                   splace : Int32 = CRT::RIGHT, title : String = "",
+                   numbers : Bool = false,
+                   highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -39,7 +41,7 @@ module CRT
 
       # Set the box height
       if @title_lines > box_height
-        box_height = @title_lines + {list_size, 8}.min + 2 * @border_size
+        box_height = @title_lines + {list.size, 8}.min + 2 * @border_size
       end
 
       # Adjust box width for scrollbar
@@ -54,11 +56,11 @@ module CRT
       @box_width = {box_width, parent_width}.min
       @box_height = {box_height, parent_height}.min
 
-      set_view_size(list_size)
+      set_view_size(list.size)
 
       # Align positions
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, @box_width, @box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]
@@ -101,7 +103,7 @@ module CRT
       set_position(0)
 
       # Create the scrolling list items
-      if create_item_list(numbers, list, list_size) <= 0
+      if create_item_list(numbers, list, list.size) <= 0
         return
       end
 

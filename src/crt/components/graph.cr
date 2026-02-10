@@ -17,9 +17,9 @@ module CRT
     @xscale : Int32 = 1
     @yscale : Int32 = 1
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   height : Int32, width : Int32, title : String,
-                   xtitle : String, ytitle : String)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   height : Int32, width : Int32, title : String = "",
+                   xtitle : String = "", ytitle : String = "")
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -34,8 +34,8 @@ module CRT
       box_width = {parent_width, box_width}.min
       box_height = {parent_height, box_height}.min
 
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]

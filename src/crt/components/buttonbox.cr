@@ -18,11 +18,11 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   height : Int32, width : Int32, title : String,
-                   rows : Int32, cols : Int32,
-                   buttons : Array(String), button_count : Int32,
-                   highlight : Int32, box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   buttons : Array(String), rows : Int32 = 1, cols : Int32 = 0,
+                   height : Int32 = 0, width : Int32 = 0, title : String = "",
+                   highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -35,7 +35,7 @@ module CRT
       @button_pos = [] of Int32
       @column_widths = [] of Int32
 
-      return if button_count <= 0
+      return if buttons.size <= 0
 
       set_box(box)
 
@@ -47,7 +47,7 @@ module CRT
       box_width = set_title(title, box_width)
 
       # Translate buttons to chtype arrays
-      button_count.times do |x|
+      buttons.size.times do |x|
         button_len = [] of Int32
         @button << char2chtype(buttons[x], button_len, [] of Int32)
         @button_len << button_len[0]
@@ -57,7 +57,7 @@ module CRT
       cols.times do |x|
         max_col_width = 0
         rows.times do |y|
-          if current_button < button_count
+          if current_button < buttons.size
             max_col_width = {max_col_width, @button_len[current_button]}.max
             current_button += 1
           end
@@ -70,8 +70,8 @@ module CRT
       box_width = {box_width, parent_width}.min
       box_height = {box_height, parent_height}.min
 
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]
@@ -83,10 +83,10 @@ module CRT
       w.keypad(true)
 
       @shadow_win = nil
-      @button_count = button_count
+      @button_count = buttons.size
       @current_button = 0
       @rows = rows
-      @cols = {button_count, cols}.min
+      @cols = {buttons.size, cols}.min
       @box_height = box_height
       @box_width = box_width
       @highlight = highlight

@@ -30,10 +30,11 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32,
-                   buttons : Array(String), button_count : Int32,
-                   button_highlight : Int32, box : Bool, shadow : Bool)
+                   buttons : Array(String) = ["OK"],
+                   button_highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -45,8 +46,8 @@ module CRT
       box_height = CRT.set_widget_dimension(parent_height, height, 0)
       box_width = CRT.set_widget_dimension(parent_width, width, 0)
 
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]
@@ -55,17 +56,17 @@ module CRT
       return unless w = @win
       w.keypad(true)
 
-      @button_count = button_count
-      if button_count > 0
-        (0...button_count).each do |x|
+      @button_count = buttons.size
+      if buttons.size > 0
+        (0...buttons.size).each do |x|
           button_len_arr = [] of Int32
           @button << char2chtype(buttons[x], button_len_arr, [] of Int32)
           @button_len << button_len_arr[0]
           button_width += @button_len[x] + 1
         end
-        button_adj = (box_width - button_width) // (button_count + 1)
+        button_adj = (box_width - button_width) // (buttons.size + 1)
         button_pos = 1 + button_adj
-        (0...button_count).each do |x|
+        (0...buttons.size).each do |x|
           @button_pos << button_pos
           button_pos += button_adj + @button_len[x]
         end

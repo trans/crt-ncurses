@@ -21,12 +21,14 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   height : Int32, width : Int32, title : String, label : String,
-                   field_attribute : Int32, filler_char : Char, highlight : Int32,
-                   d_attribute : String, f_attribute : String,
-                   l_attribute : String, s_attribute : String,
-                   box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   height : Int32, width : Int32,
+                   title : String = "", label : String = "",
+                   field_attribute : Int32 = 0, filler_char : Char = '.',
+                   highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
+                   dir_attribute : String = "", file_attribute : String = "",
+                   link_attribute : String = "", sock_attribute : String = "",
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -37,8 +39,8 @@ module CRT
       box_height = CRT.set_widget_dimension(parent_height, height, 0)
       box_width = CRT.set_widget_dimension(parent_width, width, 0)
 
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]
@@ -52,10 +54,10 @@ module CRT
 
       @screen = cdkscreen
       @parent = parent_window
-      @dir_attribute = d_attribute
-      @file_attribute = f_attribute
-      @link_attribute = l_attribute
-      @sock_attribute = s_attribute
+      @dir_attribute = dir_attribute
+      @file_attribute = file_attribute
+      @link_attribute = link_attribute
+      @sock_attribute = sock_attribute
       @highlight = highlight
       @filler_character = filler_char
       @field_attribute = field_attribute
@@ -78,9 +80,10 @@ module CRT
       label_len = label_len_arr[0]? || 0
 
       temp_width = is_full_width?(width) ? CRT::FULL : box_width - 2 - label_len
-      @entry_field = CRT::Entry.new(cdkscreen, LibNCurses.getbegx(w), LibNCurses.getbegy(w),
-        title, label, field_attribute, filler_char,
-        CRT::DisplayType::MIXED, temp_width, 0, 512, box, false)
+      @entry_field = CRT::Entry.new(cdkscreen,
+        x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(w),
+        title: title, label: label, field_width: temp_width,
+        field_attr: field_attribute, filler: filler_char, box: box, shadow: false)
 
       entry_win = @entry_field.win
       return unless entry_win
@@ -93,9 +96,9 @@ module CRT
       temp_height = entry_win.max_y - @border_size
       temp_width_scroll = is_full_width?(width) ? CRT::FULL : box_width - 1
       @scroll_field = CRT::Scroll.new(cdkscreen,
-        LibNCurses.getbegx(w), LibNCurses.getbegy(entry_win) + temp_height,
-        CRT::RIGHT, box_height - temp_height, temp_width_scroll,
-        "", @dir_contents, @file_counter, false, @highlight, box, false)
+        x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(entry_win) + temp_height,
+        height: box_height - temp_height, width: temp_width_scroll,
+        list: @dir_contents, highlight: @highlight, box: box, shadow: false)
 
       @scroll_field.ul_char = Draw::ACS_LTEE
       @scroll_field.ur_char = Draw::ACS_RTEE

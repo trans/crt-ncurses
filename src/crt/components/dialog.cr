@@ -20,23 +20,23 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   mesg : Array(String), rows : Int32,
-                   button_labels : Array(String), button_count : Int32,
-                   highlight : Int32, separator : Bool, box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   mesg : Array(String), buttons : Array(String),
+                   highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
+                   separator : Bool = true, box : Bool = true, shadow : Bool = false)
       super()
       box_width = MIN_DIALOG_WIDTH
       max_message_width = -1
       button_width = 0
 
-      return if rows <= 0 || button_count <= 0
+      return if mesg.empty? || buttons.empty?
 
       set_box(box)
       box_height = separator ? 1 : 0
-      box_height += rows + 2 * @border_size + 1
+      box_height += mesg.size + 2 * @border_size + 1
 
       # Translate message strings to chtype arrays
-      rows.times do |x|
+      mesg.size.times do |x|
         info_len = [] of Int32
         info_pos = [] of Int32
         @info << char2chtype(mesg[x], info_len, info_pos)
@@ -46,9 +46,9 @@ module CRT
       end
 
       # Translate button labels to chtype arrays
-      button_count.times do |x|
+      buttons.size.times do |x|
         btn_len = [] of Int32
-        @button_label << char2chtype(button_labels[x], btn_len, [] of Int32)
+        @button_label << char2chtype(buttons[x], btn_len, [] of Int32)
         @button_len << btn_len[0]
         button_width += btn_len[0] + 1
       end
@@ -61,8 +61,8 @@ module CRT
       parent_window = cdkscreen.window.not_nil!
 
       # Adjust positions
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
 
       @screen = cdkscreen
@@ -70,9 +70,9 @@ module CRT
       @win = NCurses::Window.new(height: box_height, width: box_width,
         y: ytmp[0], x: xtmp[0])
       @shadow_win = nil
-      @button_count = button_count
+      @button_count = buttons.size
       @current_button = 0
-      @message_rows = rows
+      @message_rows = mesg.size
       @box_height = box_height
       @box_width = box_width
       @highlight = highlight
@@ -87,13 +87,13 @@ module CRT
 
       # Find button positions (centered)
       buttonadj = (box_width - button_width) // 2
-      button_count.times do |x|
+      buttons.size.times do |x|
         @button_pos << buttonadj
         buttonadj = buttonadj + @button_len[x] + @border_size
       end
 
       # Create string alignments
-      rows.times do |x|
+      mesg.size.times do |x|
         @info_pos[x] = justify_string(box_width - 2 * @border_size,
           @info_len[x], @info_pos[x])
       end

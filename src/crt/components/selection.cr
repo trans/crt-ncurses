@@ -21,18 +21,19 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   splace : Int32, height : Int32, width : Int32, title : String,
-                   list : Array(String), list_size : Int32,
-                   choices : Array(String), choice_count : Int32,
-                   highlight : Int32, box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   height : Int32, width : Int32, list : Array(String),
+                   choices : Array(String), splace : Int32 = CRT::RIGHT,
+                   title : String = "",
+                   highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
+                   box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
       box_width = width
 
-      return if choice_count <= 0
+      return if choices.empty?
 
       @choice = [] of Array(Int32)
       @choicelen = [] of Int32
@@ -45,7 +46,7 @@ module CRT
 
       # Set the box height
       if @title_lines > box_height
-        box_height = @title_lines + {list_size, 8}.min + 2 * @border_size
+        box_height = @title_lines + {list.size, 8}.min + 2 * @border_size
       end
 
       @maxchoicelen = 0
@@ -61,11 +62,11 @@ module CRT
       @box_width = {box_width, parent_width}.min
       @box_height = {box_height, parent_height}.min
 
-      set_view_size(list_size)
+      set_view_size(list.size)
 
       # Align positions
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, @box_width, @box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]
@@ -91,7 +92,7 @@ module CRT
       @max_left_char = 0
       @left_char = 0
       @highlight = highlight
-      @choice_count = choice_count
+      @choice_count = choices.size
       @accepts_focus = true
       @input_window = @win
       @shadow = shadow
@@ -99,7 +100,7 @@ module CRT
       set_current_item(0)
 
       # Convert each choice to chtype array
-      choice_count.times do |j|
+      choices.size.times do |j|
         choicelen = [] of Int32
         @choice << char2chtype(choices[j], choicelen, [] of Int32)
         @choicelen << choicelen[0]
@@ -107,10 +108,10 @@ module CRT
       end
 
       # Create list items
-      widest = create_list(list, list_size)
+      widest = create_list(list, list.size)
       if widest > 0
         update_view_width(widest)
-      elsif list_size > 0
+      elsif list.size > 0
         return
       end
 

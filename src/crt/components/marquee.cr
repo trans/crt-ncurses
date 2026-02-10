@@ -5,8 +5,8 @@ module CRT
     @shadow : Bool = false
     @parent : NCurses::Window? = nil
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
-                   width : Int32, box : Bool, shadow : Bool)
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+                   width : Int32 = 0, box : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -22,8 +22,8 @@ module CRT
       box_width = CRT.set_widget_dimension(parent_width, width, 0)
       box_height = @border_size * 2 + 1
 
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]

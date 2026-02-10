@@ -39,12 +39,13 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(cdkscreen : CRT::Screen, xplace : Int32, yplace : Int32,
+    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
                    rows : Int32, cols : Int32, vrows : Int32, vcols : Int32,
-                   title : String, rowtitles : Array(String), coltitles : Array(String),
+                   rowtitles : Array(String), coltitles : Array(String),
                    colwidths : Array(Int32), colvalues : Array(CRT::DisplayType),
-                   rspace : Int32, cspace : Int32, filler : Char,
-                   dominant : Int32, box : Bool, box_cell : Bool, shadow : Bool)
+                   title : String = "", rspace : Int32 = 1, cspace : Int32 = 1,
+                   filler : Char = '.', dominant : Int32 = 0, box : Bool = true,
+                   box_cell : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -117,8 +118,8 @@ module CRT
       box_width = {box_width, parent_width}.min
       box_height = {box_height, parent_height}.min
 
-      xtmp = [xplace]
-      ytmp = [yplace]
+      xtmp = [x]
+      ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
       xpos = xtmp[0]
       ypos = ytmp[0]
