@@ -1,4 +1,9 @@
 module CRT
+  # TODO: Investigate terminal color query (OSC 11) response leaking into the
+  # shell after NCurses.end. Some terminals send async replies to color queries
+  # that arrive after endwin(). NCurses.flush_input or draining stdin post-exit
+  # may mitigate. See: https://invisible-island.net/ncurses/ncurses.faq.html
+
   class Screen
     property object_focus : Int32 = 0
     property object_count : Int32 = 0
