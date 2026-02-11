@@ -154,10 +154,11 @@ module CRT
 
       set_exit_type(0)
 
-      if check_bind(object_type, input)
+      resolved = resolve_key(input)
+      if resolved.nil?
         @complete = true
       else
-        case input
+        case resolved
         when LibNCurses::Key::Left.value
           across_submenus(-1)
         when LibNCurses::Key::Right.value, CRT::KEY_TAB
@@ -168,13 +169,13 @@ module CRT
           within_submenu(1)
         when LibNCurses::Key::Enter.value, CRT::KEY_RETURN
           clean_up_menu
-          set_exit_type(input)
+          set_exit_type(resolved)
           @last_selection = @current_title * 100 + @current_subtitle
           ret = @last_selection
           @complete = true
         when CRT::KEY_ESC
           clean_up_menu
-          set_exit_type(input)
+          set_exit_type(resolved)
           @last_selection = -1
           ret = @last_selection
           @complete = true
@@ -263,7 +264,7 @@ module CRT
         CRT.delete_curses_window(@pull_win[x])
       end
 
-      clean_bindings(object_type)
+      clear_key_bindings
       CRT::Screen.unregister(object_type, self)
     end
 

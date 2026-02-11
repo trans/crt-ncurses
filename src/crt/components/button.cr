@@ -178,7 +178,7 @@ module CRT
     def destroy
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(object_type)
+      clear_key_bindings
       CRT::Screen.unregister(object_type, self)
     end
 

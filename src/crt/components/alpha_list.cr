@@ -87,8 +87,8 @@ module CRT
       @input_window = @entry_field.win
       @accepts_focus = true
 
-      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
 
       cdkscreen.register(object_type, self)
     end
@@ -119,55 +119,60 @@ module CRT
 
       draw(@box)
 
-      case input
-      when LibNCurses::Key::Up.value, LibNCurses::Key::Down.value,
-           LibNCurses::Key::PageUp.value, LibNCurses::Key::PageDown.value
-        if @scroll_field.list_size > 0
-          inject_my_scroller(input)
-          # Update entry from scroll selection
-          current_idx = @scroll_field.current_item
-          if current_idx >= 0 && current_idx < @list.size
-            @entry_field.value = @list[current_idx]
-            @entry_field.draw(@entry_field.box)
+      resolved = resolve_key(input)
+      if resolved.nil?
+        @complete = true
+      else
+        case resolved
+        when LibNCurses::Key::Up.value, LibNCurses::Key::Down.value,
+             LibNCurses::Key::PageUp.value, LibNCurses::Key::PageDown.value
+          if @scroll_field.list_size > 0
+            inject_my_scroller(resolved)
+            # Update entry from scroll selection
+            current_idx = @scroll_field.current_item
+            if current_idx >= 0 && current_idx < @list.size
+              @entry_field.value = @list[current_idx]
+              @entry_field.draw(@entry_field.box)
+            end
+          else
+            CRT.beep
           end
-        else
-          CRT.beep
-        end
-      when CRT::KEY_TAB
-        # Attempt word completion
-        if @entry_field.info.empty?
-          CRT.beep
-        else
-          index = search_list(@list, @list.size, @entry_field.info)
-          if index < 0
+        when CRT::KEY_TAB
+          # Attempt word completion
+          if @entry_field.info.empty?
             CRT.beep
           else
-            @entry_field.value = @list[index]
-            @entry_field.draw(@entry_field.box)
-            @scroll_field.set_position(index)
-            draw_my_scroller
-          end
-        end
-      else
-        # Delegate to entry field
-        ret = @entry_field.inject(input)
-        @exit_type = @entry_field.exit_type
-
-        if @exit_type == CRT::ExitType::EARLY_EXIT
-          # Filter the scroll list based on current entry
-          if !@entry_field.info.empty?
             index = search_list(@list, @list.size, @entry_field.info)
-            if index >= 0
+            if index < 0
+              CRT.beep
+            else
+              @entry_field.value = @list[index]
+              @entry_field.draw(@entry_field.box)
               @scroll_field.set_position(index)
               draw_my_scroller
             end
-          else
-            @scroll_field.set_position(0)
-            draw_my_scroller
           end
         else
-          @complete = true
-          return ret
+          # Delegate to entry field
+          ret = @entry_field.inject(resolved)
+          @exit_type = @entry_field.exit_type
+
+          if @exit_type == CRT::ExitType::EARLY_EXIT
+            # Filter the scroll list based on current entry
+            if !@entry_field.info.empty?
+              index = search_list(@list, @list.size, @entry_field.info)
+              if index >= 0
+                @scroll_field.set_position(index)
+                draw_my_scroller
+              end
+            else
+              @scroll_field.set_position(0)
+              draw_my_scroller
+            end
+          else
+            @complete = true
+            return ret
+          end
         end
       end
 
@@ -192,7 +197,7 @@ module CRT
     end
 
     def destroy
-      clean_bindings(object_type)
+      clear_key_bindings
       @entry_field.destroy
       @scroll_field.destroy
       CRT.delete_curses_window(@shadow_win)

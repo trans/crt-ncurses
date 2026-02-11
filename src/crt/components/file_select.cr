@@ -108,8 +108,8 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
 
       cdkscreen.register(object_type, self)
     end
@@ -139,61 +139,66 @@ module CRT
       ret : String | Int32 = -1
       @complete = false
 
-      case input
-      when LibNCurses::Key::Up.value, LibNCurses::Key::Down.value,
-           LibNCurses::Key::PageUp.value, LibNCurses::Key::PageDown.value
-        if @scroll_field.list_size > 0
-          inject_my_scroller(input)
-          # Get the currently highlighted filename
-          current_idx = @scroll_field.current_item
-          if current_idx >= 0 && current_idx < @dir_contents.size
-            temp = content_to_path(@dir_contents[current_idx])
-            @entry_field.value = temp
-            @entry_field.draw(@entry_field.box)
-          end
-        else
-          CRT.beep
-        end
-      when CRT::KEY_TAB
-        # Tab completion
-        filename = @entry_field.info
-        if filename.empty?
-          CRT.beep
-        else
-          # Check if it's a directory
-          if Dir.exists?(filename)
-            self.directory = filename
-          else
-            # Look for matching files
-            file_list = (0...@file_counter).map { |x| content_to_path(@dir_contents[x]) }
-            index = search_list(file_list, file_list.size, filename)
-            if index >= 0
-              @entry_field.value = file_list[index]
+      resolved = resolve_key(input)
+      if resolved.nil?
+        @complete = true
+      else
+        case resolved
+        when LibNCurses::Key::Up.value, LibNCurses::Key::Down.value,
+             LibNCurses::Key::PageUp.value, LibNCurses::Key::PageDown.value
+          if @scroll_field.list_size > 0
+            inject_my_scroller(resolved)
+            # Get the currently highlighted filename
+            current_idx = @scroll_field.current_item
+            if current_idx >= 0 && current_idx < @dir_contents.size
+              temp = content_to_path(@dir_contents[current_idx])
+              @entry_field.value = temp
               @entry_field.draw(@entry_field.box)
-              @scroll_field.set_position(index)
-              draw_my_scroller
+            end
+          else
+            CRT.beep
+          end
+        when CRT::KEY_TAB
+          # Tab completion
+          filename = @entry_field.info
+          if filename.empty?
+            CRT.beep
+          else
+            # Check if it's a directory
+            if Dir.exists?(filename)
+              self.directory = filename
             else
-              CRT.beep
+              # Look for matching files
+              file_list = (0...@file_counter).map { |x| content_to_path(@dir_contents[x]) }
+              index = search_list(file_list, file_list.size, filename)
+              if index >= 0
+                @entry_field.value = file_list[index]
+                @entry_field.draw(@entry_field.box)
+                @scroll_field.set_position(index)
+                draw_my_scroller
+              else
+                CRT.beep
+              end
             end
           end
-        end
-      else
-        # Delegate to entry field
-        filename = @entry_field.inject(input)
-        @exit_type = @entry_field.exit_type
+        else
+          # Delegate to entry field
+          filename = @entry_field.inject(resolved)
+          @exit_type = @entry_field.exit_type
 
-        if @exit_type == CRT::ExitType::EARLY_EXIT
-          return 0
-        end
+          if @exit_type == CRT::ExitType::EARLY_EXIT
+            return 0
+          end
 
-        filename_str = filename.is_a?(String) ? filename : ""
-        if !filename_str.empty? && !Dir.exists?(filename_str)
-          @pathname = filename_str
-          ret = @pathname
-          @complete = true
-        elsif !filename_str.empty? && Dir.exists?(filename_str)
-          self.directory = filename_str
-          draw_my_scroller
+          filename_str = filename.is_a?(String) ? filename : ""
+          if !filename_str.empty? && !Dir.exists?(filename_str)
+            @pathname = filename_str
+            ret = @pathname
+            @complete = true
+          elsif !filename_str.empty? && Dir.exists?(filename_str)
+            self.directory = filename_str
+            draw_my_scroller
+          end
         end
       end
 
@@ -232,7 +237,7 @@ module CRT
     end
 
     def destroy
-      clean_bindings(object_type)
+      clear_key_bindings
       @scroll_field.destroy
       @entry_field.destroy
       CRT.delete_curses_window(@shadow_win)

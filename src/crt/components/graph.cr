@@ -203,7 +203,7 @@ module CRT
 
     def destroy
       clean_title
-      clean_bindings(object_type)
+      clear_key_bindings
       CRT::Screen.unregister(object_type, self)
       CRT.delete_curses_window(@win)
     end

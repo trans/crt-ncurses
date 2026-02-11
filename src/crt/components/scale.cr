@@ -117,14 +117,14 @@ module CRT
       end
 
       # Key bindings
-      bind(object_type, 'u'.ord, :getc, LibNCurses::Key::Up.value)
-      bind(object_type, 'U'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(object_type, 'g'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(object_type, '^'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(object_type, 'G'.ord, :getc, LibNCurses::Key::End.value)
-      bind(object_type, '$'.ord, :getc, LibNCurses::Key::End.value)
+      remap_key('u'.ord, LibNCurses::Key::Up.value)
+      remap_key('U'.ord, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key('g'.ord, LibNCurses::Key::Home.value)
+      remap_key('^'.ord, LibNCurses::Key::Home.value)
+      remap_key('G'.ord, LibNCurses::Key::End.value)
+      remap_key('$'.ord, LibNCurses::Key::End.value)
 
       cdkscreen.register(object_type, self)
     end
@@ -166,43 +166,48 @@ module CRT
       set_exit_type(0)
       draw_field
 
-      case input
-      when LibNCurses::Key::Down.value
-        @current -= @step
-      when LibNCurses::Key::Up.value
-        @current += @step
-      when LibNCurses::Key::PageUp.value
-        @current += @page
-      when LibNCurses::Key::PageDown.value
-        @current -= @page
-      when LibNCurses::Key::Home.value
-        @current = @low
-      when LibNCurses::Key::End.value
-        @current = @high
-      when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
-        set_exit_type(input)
-        ret = @current
+      resolved = resolve_key(input)
+      if resolved.nil?
         @complete = true
-      when CRT::KEY_ESC
-        set_exit_type(input)
-        @complete = true
-      when CRT::REFRESH
-        if scr = @screen
-          scr.erase
-          scr.refresh
-        end
       else
-        case input
-        when 'd'.ord, '-'.ord
+        case resolved
+        when LibNCurses::Key::Down.value
           @current -= @step
-        when '+'.ord
+        when LibNCurses::Key::Up.value
           @current += @step
-        when 'D'.ord
+        when LibNCurses::Key::PageUp.value
+          @current += @page
+        when LibNCurses::Key::PageDown.value
           @current -= @page
-        when '0'.ord
+        when LibNCurses::Key::Home.value
           @current = @low
+        when LibNCurses::Key::End.value
+          @current = @high
+        when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+          set_exit_type(resolved)
+          ret = @current
+          @complete = true
+        when CRT::KEY_ESC
+          set_exit_type(resolved)
+          @complete = true
+        when CRT::REFRESH
+          if scr = @screen
+            scr.erase
+            scr.refresh
+          end
         else
-          CRT.beep
+          case resolved
+          when 'd'.ord, '-'.ord
+            @current -= @step
+          when '+'.ord
+            @current += @step
+          when 'D'.ord
+            @current -= @page
+          when '0'.ord
+            @current = @low
+          else
+            CRT.beep
+          end
         end
       end
 
@@ -260,7 +265,7 @@ module CRT
       CRT.delete_curses_window(@label_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(object_type)
+      clear_key_bindings
       CRT::Screen.unregister(object_type, self)
     end
 

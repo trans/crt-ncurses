@@ -210,8 +210,8 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
 
       cdkscreen.register(object_type, self)
     end
@@ -260,10 +260,11 @@ module CRT
 
       focus_current
 
-      if check_bind(object_type, input)
+      resolved = resolve_key(input)
+      if resolved.nil?
         @complete = true
       else
-        case input
+        case resolved
         when LibNCurses::Key::Backspace.value, LibNCurses::Key::Delete.value
           if @colvalues[@col].viewonly? || @info[@row][@col].size <= 0
             CRT.beep
@@ -402,7 +403,7 @@ module CRT
           else
             draw_old_cell
           end
-          set_exit_type(input)
+          set_exit_type(resolved)
           ret = 1
           @complete = true
         when CRT::KEY_ESC
@@ -412,7 +413,7 @@ module CRT
           else
             draw_old_cell
           end
-          set_exit_type(input)
+          set_exit_type(resolved)
           @complete = true
         when CRT::REFRESH
           if scr = @screen
@@ -599,7 +600,7 @@ module CRT
       end
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(object_type)
+      clear_key_bindings
       CRT::Screen.unregister(object_type, self)
     end
 

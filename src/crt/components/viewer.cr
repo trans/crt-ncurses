@@ -96,15 +96,15 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(object_type, 'b'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(object_type, 'B'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(object_type, ' '.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(object_type, 'f'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(object_type, 'F'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(object_type, '|'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(object_type, '$'.ord, :getc, LibNCurses::Key::End.value)
+      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key('b'.ord, LibNCurses::Key::PageUp.value)
+      remap_key('B'.ord, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(' '.ord, LibNCurses::Key::PageDown.value)
+      remap_key('f'.ord, LibNCurses::Key::PageDown.value)
+      remap_key('F'.ord, LibNCurses::Key::PageDown.value)
+      remap_key('|'.ord, LibNCurses::Key::Home.value)
+      remap_key('$'.ord, LibNCurses::Key::End.value)
 
       cdkscreen.register(object_type, self)
     end
@@ -189,10 +189,11 @@ module CRT
 
       set_exit_type(0)
 
-      if check_bind(object_type, input)
+      resolved = resolve_key(input)
+      if resolved.nil?
         @complete = true
       else
-        case input
+        case resolved
         when CRT::KEY_TAB
           if @button_count > 1
             @current_button = (@current_button + 1) % @button_count
@@ -267,11 +268,11 @@ module CRT
           @current_top = @max_top_line
           refresh = true
         when CRT::KEY_ESC
-          set_exit_type(input)
+          set_exit_type(resolved)
           @complete = true
           return -1
         when CRT::KEY_RETURN, LibNCurses::Key::Enter.value
-          set_exit_type(input)
+          set_exit_type(resolved)
           @complete = true
           return @current_button
         when CRT::REFRESH
@@ -393,7 +394,7 @@ module CRT
       clean_title
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(object_type)
+      clear_key_bindings
       CRT::Screen.unregister(object_type, self)
     end
 

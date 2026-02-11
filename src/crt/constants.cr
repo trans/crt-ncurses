@@ -41,7 +41,6 @@ module CRT
   BOTTOM = Position::Bottom.value
   FULL   = Position::Full.value
 
-  MAX_BINDINGS = 300
   MAX_ITEMS    = 2000
   MAX_BUTTONS  = 200
 

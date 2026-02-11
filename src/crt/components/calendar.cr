@@ -133,12 +133,12 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      bind(object_type, 'T'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(object_type, 't'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(object_type, 'n'.ord, :getc, LibNCurses::Key::PageDown.value)
-      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(object_type, 'p'.ord, :getc, LibNCurses::Key::PageUp.value)
-      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
+      remap_key('T'.ord, LibNCurses::Key::Home.value)
+      remap_key('t'.ord, LibNCurses::Key::Home.value)
+      remap_key('n'.ord, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key('p'.ord, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
 
       cdkscreen.register(object_type, self)
     end
@@ -169,40 +169,45 @@ module CRT
       set_exit_type(0)
       draw_field
 
-      case input
-      when LibNCurses::Key::Up.value
-        decrement_calendar_day(7)
-      when LibNCurses::Key::Down.value
-        increment_calendar_day(7)
-      when LibNCurses::Key::Left.value
-        decrement_calendar_day(1)
-      when LibNCurses::Key::Right.value
-        increment_calendar_day(1)
-      when LibNCurses::Key::PageDown.value
-        increment_calendar_month(1)
-      when LibNCurses::Key::PageUp.value
-        decrement_calendar_month(1)
-      when 'N'.ord
-        increment_calendar_month(6)
-      when 'P'.ord
-        decrement_calendar_month(6)
-      when '-'.ord
-        decrement_calendar_year(1)
-      when '+'.ord
-        increment_calendar_year(1)
-      when LibNCurses::Key::Home.value
-        set_date(-1, -1, -1)
-      when CRT::KEY_ESC
-        set_exit_type(input)
+      resolved = resolve_key(input)
+      if resolved.nil?
         @complete = true
-      when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
-        set_exit_type(input)
-        ret = @day
-        @complete = true
-      when CRT::REFRESH
-        if scr = @screen
-          scr.erase
-          scr.refresh
+      else
+        case resolved
+        when LibNCurses::Key::Up.value
+          decrement_calendar_day(7)
+        when LibNCurses::Key::Down.value
+          increment_calendar_day(7)
+        when LibNCurses::Key::Left.value
+          decrement_calendar_day(1)
+        when LibNCurses::Key::Right.value
+          increment_calendar_day(1)
+        when LibNCurses::Key::PageDown.value
+          increment_calendar_month(1)
+        when LibNCurses::Key::PageUp.value
+          decrement_calendar_month(1)
+        when 'N'.ord
+          increment_calendar_month(6)
+        when 'P'.ord
+          decrement_calendar_month(6)
+        when '-'.ord
+          decrement_calendar_year(1)
+        when '+'.ord
+          increment_calendar_year(1)
+        when LibNCurses::Key::Home.value
+          set_date(-1, -1, -1)
+        when CRT::KEY_ESC
+          set_exit_type(resolved)
+          @complete = true
+        when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+          set_exit_type(resolved)
+          ret = @day
+          @complete = true
+        when CRT::REFRESH
+          if scr = @screen
+            scr.erase
+            scr.refresh
+          end
         end
       end
 
@@ -325,7 +330,7 @@ module CRT
       CRT.delete_curses_window(@field_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(object_type)
+      clear_key_bindings
       CRT::Screen.unregister(object_type, self)
     end
 

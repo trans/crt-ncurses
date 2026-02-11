@@ -121,13 +121,13 @@ module CRT
       end
 
       # Key bindings
-      bind(object_type, CRT::BACKCHAR, :getc, LibNCurses::Key::PageUp.value)
-      bind(object_type, CRT::FORCHAR, :getc, LibNCurses::Key::PageDown.value)
-      bind(object_type, 'g'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(object_type, '1'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(object_type, 'G'.ord, :getc, LibNCurses::Key::End.value)
-      bind(object_type, '<'.ord, :getc, LibNCurses::Key::Home.value)
-      bind(object_type, '>'.ord, :getc, LibNCurses::Key::End.value)
+      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key('g'.ord, LibNCurses::Key::Home.value)
+      remap_key('1'.ord, LibNCurses::Key::Home.value)
+      remap_key('G'.ord, LibNCurses::Key::End.value)
+      remap_key('<'.ord, LibNCurses::Key::Home.value)
+      remap_key('>'.ord, LibNCurses::Key::End.value)
 
       cdkscreen.register(object_type, self)
     end
@@ -171,48 +171,53 @@ module CRT
       set_exit_type(0)
       draw_list(@box)
 
-      case input
-      when LibNCurses::Key::Up.value
-        key_up
-      when LibNCurses::Key::Down.value
-        key_down
-      when LibNCurses::Key::Right.value
-        key_right
-      when LibNCurses::Key::Left.value
-        key_left
-      when LibNCurses::Key::PageUp.value
-        key_ppage
-      when LibNCurses::Key::PageDown.value
-        key_npage
-      when LibNCurses::Key::Home.value
-        key_home
-      when LibNCurses::Key::End.value
-        key_end
-      when '$'.ord
-        @left_char = @max_left_char
-      when '|'.ord
-        @left_char = 0
-      when ' '.ord
-        if @mode[@current_item] == 0
-          if @selections[@current_item] == @choice_count - 1
-            @selections[@current_item] = 0
+      resolved = resolve_key(input)
+      if resolved.nil?
+        @complete = true
+      else
+        case resolved
+        when LibNCurses::Key::Up.value
+          key_up
+        when LibNCurses::Key::Down.value
+          key_down
+        when LibNCurses::Key::Right.value
+          key_right
+        when LibNCurses::Key::Left.value
+          key_left
+        when LibNCurses::Key::PageUp.value
+          key_ppage
+        when LibNCurses::Key::PageDown.value
+          key_npage
+        when LibNCurses::Key::Home.value
+          key_home
+        when LibNCurses::Key::End.value
+          key_end
+        when '$'.ord
+          @left_char = @max_left_char
+        when '|'.ord
+          @left_char = 0
+        when ' '.ord
+          if @mode[@current_item] == 0
+            if @selections[@current_item] == @choice_count - 1
+              @selections[@current_item] = 0
+            else
+              @selections[@current_item] += 1
+            end
           else
-            @selections[@current_item] += 1
+            CRT.beep
           end
-        else
-          CRT.beep
-        end
-      when CRT::KEY_ESC
-        set_exit_type(input)
-        @complete = true
-      when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
-        set_exit_type(input)
-        ret = 1
-        @complete = true
-      when CRT::REFRESH
-        if scr = @screen
-          scr.erase
-          scr.refresh
+        when CRT::KEY_ESC
+          set_exit_type(resolved)
+          @complete = true
+        when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+          set_exit_type(resolved)
+          ret = 1
+          @complete = true
+        when CRT::REFRESH
+          if scr = @screen
+            scr.erase
+            scr.refresh
+          end
         end
       end
 
@@ -304,7 +309,7 @@ module CRT
       CRT.delete_curses_window(@scrollbar_win)
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
-      clean_bindings(object_type)
+      clear_key_bindings
       CRT::Screen.unregister(object_type, self)
     end
 

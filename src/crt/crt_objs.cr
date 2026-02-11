@@ -37,6 +37,11 @@ module CRT
     @title_pos : Array(Int32) = [] of Int32
     @title_len : Array(Int32) = [] of Int32
 
+    # TODO: Consider having `activate` return `self` instead of mixed types
+    # (String, Int32, String | Int32, T). Widget state (value, exit_type, etc.)
+    # is already accessible via getters after activation, making return values
+    # redundant. Also consider renaming to `activate!` to signal that it blocks.
+
     def self.open(*args, **kwargs, &)
       widget = new(*args, **kwargs)
       begin
@@ -52,7 +57,6 @@ module CRT
       init_title
       init_borders
       init_focus
-      init_bindings
       init_exit_conditions
       init_screen
     end
