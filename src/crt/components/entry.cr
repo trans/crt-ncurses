@@ -1,8 +1,8 @@
 module CRT
   class Entry < CRT::CRTObjs
     property info : String = ""
-    getter left_char : Int32 = 0
-    getter screen_col : Int32 = 0
+    property left_char : Int32 = 0
+    property screen_col : Int32 = 0
     getter field_width : Int32 = 0
     property min : Int32 = 0
     property max : Int32 = 0
