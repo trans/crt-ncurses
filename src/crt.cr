@@ -48,7 +48,7 @@ require "./crt/components/file_select"
 require "./crt/components/matrix"
 
 module CRT
-  VERSION = "0.1.0"
+  VERSION = "0.2.0"
 
   ALL_SCREENS = [] of CRT::Screen
   ALL_OBJECTS = [] of CRT::CRTObjs
