@@ -1,23 +1,10 @@
 module CRT
+  # TODO: Consider adding before/after input hooks (e.g., `before_input { }`,
+  # `after_input { }`) for running callbacks around each keypress cycle.
+  # Could complement `on_key` for cross-cutting concerns like logging or
+  # input transformation.
+
   module WindowInput
-    property pre_process_func : Proc(Nil)? = nil
-    property pre_process_data : Nil = nil
-    property post_process_func : Proc(Nil)? = nil
-    property post_process_data : Nil = nil
-
-    def inject(a)
-    end
-
-    def set_pre_process(fn : Proc(Nil), data = nil)
-      @pre_process_func = fn
-      @pre_process_data = data
-    end
-
-    def set_post_process(fn : Proc(Nil), data = nil)
-      @post_process_func = fn
-      @post_process_data = data
-    end
-
     def getc : Int32
       return -1 unless input_win = @input_window
       result = input_win.get_char
