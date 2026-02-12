@@ -131,11 +131,11 @@ module CRT
 
     def activate(actions : Array(Int32)? = nil) : String
       draw(@box)
-      LibNCurses.curs_set(1)
 
       begin
         if actions.nil? || actions.empty?
           loop do
+            LibNCurses.curs_set(2)
             input = getch([] of Bool)
             ret = inject(input)
             return ret if @exit_type != CRT::ExitType::EARLY_EXIT

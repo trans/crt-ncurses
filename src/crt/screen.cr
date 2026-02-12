@@ -132,6 +132,7 @@ module CRT
     end
 
     def self.wrefresh(w : NCurses::Window)
+      LibNCurses.curs_set(0)
       if refresh_output?
         w.refresh
       else

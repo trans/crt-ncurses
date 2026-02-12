@@ -26,7 +26,7 @@ module CRT
     def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    field_width : Int32, field_rows : Int32, logical_rows : Int32,
                    title : String = "", label : String = "", field_attr : Int32 = 0,
-                   filler : Char = '.', disp_type : CRT::DisplayType = CRT::DisplayType::MIXED,
+                   filler : Char = ' ', disp_type : CRT::DisplayType = CRT::DisplayType::MIXED,
                    min : Int32 = 0, box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
@@ -122,11 +122,11 @@ module CRT
 
     def activate(actions : Array(Int32)? = nil) : String
       draw(@box)
-      LibNCurses.curs_set(1)
 
       begin
         if actions.nil? || actions.empty?
           loop do
+            LibNCurses.curs_set(2)
             input = getch([] of Bool)
             ret = inject(input)
             return ret if @exit_type != CRT::ExitType::EARLY_EXIT
