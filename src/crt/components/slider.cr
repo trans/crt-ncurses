@@ -31,7 +31,7 @@ module CRT
                    start : T = low,
                    filler : Int32 = '#'.ord | LibNCurses::Attribute::Reverse.value.to_i32,
                    field_width : Int32 = 0, digits : Int32 = 0,
-                   box : Bool = true, shadow : Bool = false)
+                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -133,6 +133,7 @@ module CRT
       remap_key('$'.ord, LibNCurses::Key::End.value)
 
       cdkscreen.register(object_type, self)
+      register_framing
     end
 
     def activate(actions : Array(Int32)? = nil) : T
@@ -280,6 +281,7 @@ module CRT
     end
 
     def destroy
+      unregister_framing
       clean_title
       CRT.delete_curses_window(@field_win)
       CRT.delete_curses_window(@label_win)

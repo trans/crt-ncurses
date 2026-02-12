@@ -19,7 +19,7 @@ module CRT
 
     def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, save_lines : Int32,
-                   title : String = "", box : Bool = true, shadow : Bool = false)
+                   title : String = "", box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -87,6 +87,7 @@ module CRT
       remap_key('$'.ord, LibNCurses::Key::End.value)
 
       cdkscreen.register(object_type, self)
+      register_framing
     end
 
     def setup_line(list : String, x : Int32)
@@ -347,6 +348,7 @@ module CRT
     end
 
     def destroy
+      unregister_framing
       @list = [] of Array(Int32)
       @list_pos = [] of Int32
       @list_len = [] of Int32

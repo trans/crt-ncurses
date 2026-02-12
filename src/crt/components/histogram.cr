@@ -28,7 +28,7 @@ module CRT
 
     def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, orient : Direction = Direction::Horizontal,
-                   title : String = "", box : Bool = true, shadow : Bool = false)
+                   title : String = "", box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -82,6 +82,7 @@ module CRT
       end
 
       cdkscreen.register(object_type, self)
+      register_framing
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -218,6 +219,7 @@ module CRT
     end
 
     def destroy
+      unregister_framing
       clean_title
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)

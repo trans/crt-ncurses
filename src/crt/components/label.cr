@@ -10,7 +10,7 @@ module CRT
     @info_pos : Array(Int32) = [] of Int32
 
     def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
-                   mesg : Array(String), box : Bool = true, shadow : Bool = false)
+                   mesg : Array(String), box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
 
       parent_window = cdkscreen.window.not_nil!
@@ -88,6 +88,7 @@ module CRT
 
       # Register this widget
       cdkscreen.register(object_type, self)
+      register_framing
     end
 
     def activate(actions : String = "")
@@ -174,6 +175,7 @@ module CRT
 
     # Destroy the label widget
     def destroy
+      unregister_framing
       CRT.delete_curses_window(@shadow_win)
       CRT.delete_curses_window(@win)
       clear_key_bindings

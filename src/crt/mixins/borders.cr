@@ -10,6 +10,7 @@ module CRT
     property bx_attr : Int32 = 0
 
     getter border_size : Int32 = 0
+    getter framing : CRT::Framing? = nil
 
     def init_borders
       @ul_char = 'l'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
@@ -21,9 +22,38 @@ module CRT
       @bx_attr = 0
     end
 
-    def set_box(box : Bool)
-      @box = box
-      @border_size = box ? 1 : 0
+    def set_box(box : Bool | CRT::Framing | Nil)
+      case box
+      when CRT::Framing
+        @framing = box
+        @box = false
+        @border_size = 1
+      when true
+        @framing = nil
+        @box = true
+        @border_size = 1
+      else
+        @framing = nil
+        @box = false
+        @border_size = 0
+      end
+    end
+
+    def register_framing
+      if (framing = @framing) && (w = @win)
+        x = LibNCurses.getbegx(w).to_i32
+        y = LibNCurses.getbegy(w).to_i32
+        framing.add(x: x, y: y, h: @box_width, v: @box_height)
+      end
+    end
+
+    def unregister_framing
+      if (framing = @framing) && (w = @win)
+        x = LibNCurses.getbegx(w).to_i32
+        y = LibNCurses.getbegy(w).to_i32
+        framing.remove(x: x, y: y, h: @box_width, v: @box_height)
+        @framing = nil
+      end
     end
   end
 end

@@ -11,6 +11,7 @@ begin
 
   CRT::Dialog.open(screen,
     x: CRT::CENTER, y: CRT::CENTER,
+    box: true,
     mesg: [
       "",
       "  </B>Do you like terminal UIs?  ",

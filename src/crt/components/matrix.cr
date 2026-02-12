@@ -44,7 +44,7 @@ module CRT
                    rowtitles : Array(String), coltitles : Array(String),
                    colwidths : Array(Int32), colvalues : Array(CRT::DisplayType),
                    title : String = "", rspace : Int32 = 1, cspace : Int32 = 1,
-                   filler : Char = '.', dominant : Dominant = Dominant::None, box : Bool = true,
+                   filler : Char = '.', dominant : Dominant = Dominant::None, box : Bool | CRT::Framing | Nil = nil,
                    box_cell : Bool = true, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
@@ -214,6 +214,7 @@ module CRT
       remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
 
       cdkscreen.register(object_type, self)
+      register_framing
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -591,6 +592,7 @@ module CRT
     end
 
     def destroy
+      unregister_framing
       clean_title
       CRT.delete_curses_window(@cell[0][0]) if @maxrt > 0
       (1..@vrows).each { |x| CRT.delete_curses_window(@cell[x][0]) }

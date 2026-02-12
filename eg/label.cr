@@ -9,6 +9,7 @@ begin
 
   CRT::Label.open(screen,
     x: CRT::CENTER, y: CRT::CENTER,
+    box: true,
     mesg: [
       "",
       " </B>CRT Label Example<!B> ",

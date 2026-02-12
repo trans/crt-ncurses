@@ -63,7 +63,7 @@ module CRT
                    day_attrib : Int32 = 0, month_attrib : Int32 = 0,
                    year_attrib : Int32 = 0,
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
-                   box : Bool = true, shadow : Bool = false)
+                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -141,6 +141,7 @@ module CRT
       remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
 
       cdkscreen.register(object_type, self)
+      register_framing
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -325,6 +326,7 @@ module CRT
     end
 
     def destroy
+      unregister_framing
       clean_title
       CRT.delete_curses_window(@label_win)
       CRT.delete_curses_window(@field_win)

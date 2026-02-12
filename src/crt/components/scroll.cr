@@ -24,7 +24,7 @@ module CRT
                    splace : Position = Position::Right, title : String = "",
                    numbers : Bool = false,
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
-                   box : Bool = true, shadow : Bool = false)
+                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -124,6 +124,7 @@ module CRT
       remap_key('>'.ord, LibNCurses::Key::End.value)
 
       cdkscreen.register(object_type, self)
+      register_framing
     end
 
     def object_type : Symbol
@@ -324,6 +325,7 @@ module CRT
     end
 
     def destroy
+      unregister_framing
       clean_title
       CRT.delete_curses_window(@scrollbar_win)
       CRT.delete_curses_window(@shadow_win)

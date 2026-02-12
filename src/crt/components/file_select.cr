@@ -28,7 +28,7 @@ module CRT
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
                    dir_attribute : String = "", file_attribute : String = "",
                    link_attribute : String = "", sock_attribute : String = "",
-                   box : Bool = true, shadow : Bool = false)
+                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = cdkscreen.window.not_nil!
       parent_width = parent_window.max_x
@@ -112,6 +112,7 @@ module CRT
       remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
 
       cdkscreen.register(object_type, self)
+      register_framing
     end
 
     def activate(actions : Array(Int32)? = nil) : String | Int32
@@ -237,6 +238,7 @@ module CRT
     end
 
     def destroy
+      unregister_framing
       clear_key_bindings
       @scroll_field.destroy
       @entry_field.destroy

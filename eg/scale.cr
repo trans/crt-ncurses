@@ -10,6 +10,7 @@ begin
 
   CRT::Scale(Int32).open(screen,
     x: CRT::CENTER, y: CRT::CENTER,
+    box: true,
     low: 0, high: 100, step: 1, page: 10,
     title: "</B>Volume",
     label: "Level: ",

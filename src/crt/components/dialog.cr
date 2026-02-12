@@ -23,7 +23,7 @@ module CRT
     def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
                    mesg : Array(String), buttons : Array(String),
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
-                   separator : Bool = true, box : Bool = true, shadow : Bool = false)
+                   separator : Bool = true, box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
       box_width = MIN_DIALOG_WIDTH
       max_message_width = -1
@@ -105,6 +105,7 @@ module CRT
       end
 
       cdkscreen.register(object_type, self)
+      register_framing
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32
@@ -224,6 +225,7 @@ module CRT
     end
 
     def destroy
+      unregister_framing
       CRT.delete_curses_window(@win)
       CRT.delete_curses_window(@shadow_win)
       clear_key_bindings

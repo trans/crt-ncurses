@@ -28,6 +28,7 @@ begin
 
   CRT::Scroll.open(screen,
     x: CRT::CENTER, y: CRT::CENTER,
+    box: true,
     height: 12, width: 30,
     title: "</B>Pick a Language",
     list: languages,
