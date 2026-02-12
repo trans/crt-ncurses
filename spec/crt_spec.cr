@@ -14,7 +14,7 @@ end
 
 describe CRT do
   it "has a version" do
-    CRT::VERSION.should eq("0.4.1")
+    CRT::VERSION.should eq("0.4.2")
   end
 
   describe "constants" do

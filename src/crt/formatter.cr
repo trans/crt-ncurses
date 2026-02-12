@@ -34,6 +34,32 @@ module CRT
     end
   end
 
+  # Build a chtype suitable for background= (space char + color pair + attributes).
+  #
+  #   CRT.color(7, 4)          # white on blue
+  #   CRT.color("#07/04")      # same, hex notation
+  #   CRT.color("bold #07/04") # bold white on blue
+  #
+  def self.color(fg : Int32, bg : Int32, fill : Char = ' ') : Int32
+    fill.ord | color_pair(fg, bg)
+  end
+
+  def self.color(spec : String, fill : Char = ' ') : Int32
+    attrs = 0
+    fg = -1
+    bg = -1
+    spec.split.each do |token|
+      if attr = Formatter::ATTRIBUTES[token]?
+        attrs |= attr.value.to_i32
+      elsif token.starts_with?('#')
+        tfg, tbg = Formatter.parse_color_token(token)
+        fg = tfg if tfg != -1
+        bg = tbg if tbg != -1
+      end
+    end
+    fill.ord | attrs | color_pair(fg, bg)
+  end
+
   # Style registry — named styles that expand in format strings.
   # Register: CRT.style("error", "bold #FF ##00")
   # Use:      CRT.fmt("[error]Oops![/]")
