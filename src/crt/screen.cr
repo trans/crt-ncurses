@@ -22,6 +22,7 @@ module CRT
       if CRT::ALL_SCREENS.empty?
         NCurses.no_echo
         NCurses.cbreak
+        LibNCurses.curs_set(0)
       end
 
       CRT::ALL_SCREENS << self

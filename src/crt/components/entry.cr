@@ -148,24 +148,29 @@ module CRT
 
     def activate(actions : Array(Int32)? = nil) : String | Int32
       draw(@box)
+      LibNCurses.curs_set(1)
 
-      if actions.nil? || actions.empty?
-        loop do
-          input = getch([] of Bool)
-          ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+      begin
+        if actions.nil? || actions.empty?
+          loop do
+            input = getch([] of Bool)
+            ret = inject(input)
+            return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          end
+        else
+          actions.each do |action|
+            ret = inject(action)
+            return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          end
         end
-      else
-        actions.each do |action|
-          ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
-        end
-      end
 
-      if @exit_type == CRT::ExitType::NORMAL
-        @info
-      else
-        0
+        if @exit_type == CRT::ExitType::NORMAL
+          @info
+        else
+          0
+        end
+      ensure
+        LibNCurses.curs_set(0)
       end
     end
 

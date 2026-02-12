@@ -122,22 +122,27 @@ module CRT
 
     def activate(actions : Array(Int32)? = nil) : String
       draw(@box)
+      LibNCurses.curs_set(1)
 
-      if actions.nil? || actions.empty?
-        loop do
-          input = getch([] of Bool)
-          ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+      begin
+        if actions.nil? || actions.empty?
+          loop do
+            input = getch([] of Bool)
+            ret = inject(input)
+            return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          end
+        else
+          actions.each do |action|
+            ret = inject(action)
+            return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          end
         end
-      else
-        actions.each do |action|
-          ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
-        end
+
+        set_exit_type(0)
+        ""
+      ensure
+        LibNCurses.curs_set(0)
       end
-
-      set_exit_type(0)
-      ""
     end
 
     def cursor_pos : Int32
