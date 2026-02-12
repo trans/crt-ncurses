@@ -1,9 +1,6 @@
 module CRT
   CRT_PATHMAX = 256
 
-  L_MARKER = '<'
-  R_MARKER = '>'
-
   # Direction for drawing operations
   enum Direction
     Horizontal

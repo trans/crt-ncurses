@@ -184,26 +184,26 @@ describe CRT do
         result.should be_empty
       end
 
-      it "detects center alignment marker" do
+      it "detects [C] center alignment" do
         len = [] of Int32
         align = [] of Int32
-        host.char2chtype("<C>centered", len, align)
+        host.char2chtype("[C]centered", len, align)
         align[0].should eq(CRT::CENTER)
         len[0].should eq(8)
       end
 
-      it "detects right alignment marker" do
+      it "detects [R] right alignment" do
         len = [] of Int32
         align = [] of Int32
-        host.char2chtype("<R>right", len, align)
+        host.char2chtype("[R]right", len, align)
         align[0].should eq(CRT::RIGHT)
         len[0].should eq(5)
       end
 
-      it "detects left alignment marker" do
+      it "detects [L] left alignment" do
         len = [] of Int32
         align = [] of Int32
-        host.char2chtype("<L>left", len, align)
+        host.char2chtype("[L]left", len, align)
         align[0].should eq(CRT::LEFT)
         len[0].should eq(4)
       end
@@ -211,17 +211,17 @@ describe CRT do
       it "applies bold attribute" do
         len = [] of Int32
         align = [] of Int32
-        result = host.char2chtype("</B>bold", len, align)
+        result = host.char2chtype("[b]bold", len, align)
         bold = LibNCurses::Attribute::Bold.value.to_i32
         len[0].should eq(4)
         result[0].should eq('b'.ord | bold)
         result[3].should eq('d'.ord | bold)
       end
 
-      it "turns off attribute with !" do
+      it "pops attribute with [/]" do
         len = [] of Int32
         align = [] of Int32
-        result = host.char2chtype("</B>on<!B>off", len, align)
+        result = host.char2chtype("[b]on[/]off", len, align)
         bold = LibNCurses::Attribute::Bold.value.to_i32
         len[0].should eq(5)
         # "on" has bold
@@ -232,13 +232,13 @@ describe CRT do
         result[4].should eq('f'.ord)
       end
 
-      it "handles escaped left marker" do
+      it "handles escaped bracket" do
         len = [] of Int32
         align = [] of Int32
-        result = host.char2chtype("a\\<b", len, align)
+        result = host.char2chtype("a\\[b", len, align)
         len[0].should eq(3)
         result[0].should eq('a'.ord)
-        result[1].should eq('<'.ord)
+        result[1].should eq('['.ord)
         result[2].should eq('b'.ord)
       end
 
@@ -253,7 +253,7 @@ describe CRT do
       it "stacks multiple attributes" do
         len = [] of Int32
         align = [] of Int32
-        result = host.char2chtype("</B></U>x", len, align)
+        result = host.char2chtype("[b][u]x", len, align)
         bold = LibNCurses::Attribute::Bold.value.to_i32
         underline = LibNCurses::Attribute::Underline.value.to_i32
         len[0].should eq(1)

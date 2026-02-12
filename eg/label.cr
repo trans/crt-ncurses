@@ -12,7 +12,7 @@ begin
     box: true,
     mesg: [
       "",
-      " </B>CRT Label Example<!B> ",
+      " [b]CRT Label Example[/] ",
       "",
       " A simple boxed label widget. ",
       " Press any key to exit.       ",
