@@ -11,7 +11,7 @@ begin
   CRT::Entry.open(screen,
     x: CRT::CENTER, y: CRT::CENTER,
     box: true,
-    title: "</B>Enter Your Name",
+    title: "[b]Enter Your Name",
     label: "Name: ",
     field_width: 30,
     min: 1, max: 256,

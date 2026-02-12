@@ -90,21 +90,28 @@ module CRT
       register_framing
     end
 
-    def setup_line(list : String, x : Int32)
-      list_len_arr = [] of Int32
-      list_pos_arr = [] of Int32
-      @list[x] = char2chtype(list, list_len_arr, list_pos_arr)
-      @list_len[x] = list_len_arr[0]
-      @list_pos[x] = justify_string(@box_width, list_len_arr[0], list_pos_arr[0])
+    def setup_line(list : String, x : Int32, fmt : Bool = false)
+      if fmt
+        list_len_arr = [] of Int32
+        list_pos_arr = [] of Int32
+        @list[x] = char2chtype(list, list_len_arr, list_pos_arr)
+        @list_len[x] = list_len_arr[0]
+        @list_pos[x] = justify_string(@box_width, list_len_arr[0], list_pos_arr[0])
+      else
+        plain = list.chars.map { |c| c.ord }
+        @list[x] = plain
+        @list_len[x] = plain.size
+        @list_pos[x] = 0
+      end
       @widest_line = {@widest_line, @list_len[x]}.max
     end
 
-    def contents=(list : Array(String))
+    def set_contents(list : Array(String), fmt : Bool = false)
       clean
       create_list(list.size)
 
       (0...list.size).each do |x|
-        setup_line(list[x], x)
+        setup_line(list[x], x, fmt)
       end
 
       @list_size = list.size
@@ -114,7 +121,11 @@ module CRT
       @left_char = 0
     end
 
-    def add(list : String, insert_pos : Int32)
+    def contents=(list : Array(String))
+      set_contents(list, fmt: false)
+    end
+
+    def add(list : String, insert_pos : Int32, fmt : Bool = false)
       if @list_size == @save_lines && @list_size > 0
         @list = @list[1..]
         @list_pos = @list_pos[1..]
@@ -126,7 +137,7 @@ module CRT
         @list = [[] of Int32] + @list
         @list_pos = [0] + @list_pos
         @list_len = [0] + @list_len
-        setup_line(list, 0)
+        setup_line(list, 0, fmt)
 
         @current_top = 0
         @list_size += 1 if @list_size < @save_lines
@@ -136,7 +147,7 @@ module CRT
         @list << [] of Int32
         @list_pos << 0
         @list_len << 0
-        setup_line(list, @list_size)
+        setup_line(list, @list_size, fmt)
 
         @max_left_char = @widest_line - (@box_width - 2)
         @list_size += 1 if @list_size < @save_lines

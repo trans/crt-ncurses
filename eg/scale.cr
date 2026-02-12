@@ -12,7 +12,7 @@ begin
     x: CRT::CENTER, y: CRT::CENTER,
     box: true,
     low: 0, high: 100, step: 1, page: 10,
-    title: "</B>Volume",
+    title: "[b]Volume",
     label: "Level: ",
     start: 50,
     field_width: 5,

@@ -24,7 +24,7 @@ module CRT
     @characters : Int32 = 0
     @show_line_info : Bool = true
     @in_progress : Bool = false
-    @interpret : Bool = true
+    @fmt : Bool = true
     @title_adj : Int32 = 0
     @shadow : Bool = false
     @parent : NCurses::Window? = nil
@@ -116,14 +116,14 @@ module CRT
       @view_size = @box_height - (@title_lines + 1) - 2
     end
 
-    def set_info(list : Array(String), interpret : Bool = false) : Int32
+    def set_info(list : Array(String), fmt : Bool = false) : Int32
       viewer_size = list.size
       @in_progress = true
       @list = [] of Array(Int32)
       @list_pos = [] of Int32
       @list_len = [] of Int32
       @widest_line = 0
-      @interpret = interpret
+      @fmt = fmt
 
       current_line = 0
       x = 0
@@ -134,7 +134,7 @@ module CRT
           @list_pos << 0
           current_line += 1
         else
-          setup_line(interpret, list[x], current_line)
+          setup_line(fmt, list[x], current_line)
           @characters += @list_len[current_line]
           current_line += 1
         end
@@ -418,8 +418,8 @@ module CRT
       :VIEWER
     end
 
-    private def setup_line(interpret : Bool, list : String, x : Int32)
-      if interpret
+    private def setup_line(fmt : Bool, list : String, x : Int32)
+      if fmt
         list_len_arr = [] of Int32
         list_pos_arr = [] of Int32
         chtype_arr = char2chtype(list, list_len_arr, list_pos_arr)

@@ -23,7 +23,7 @@ begin
   CRT::Label.open(screen,
     x: 7, y: 3,
     mesg: [
-      "</B>Top Left",
+      "[b]Top Left",
       "",
       "This panel shares",
       "edges with others.",
@@ -32,7 +32,7 @@ begin
     CRT::Label.open(screen,
       x: 32, y: 3,
       mesg: [
-        "</B>Top Right",
+        "[b]Top Right",
         "",
         "Intersections are",
         "resolved smartly.",
@@ -41,7 +41,7 @@ begin
       CRT::Label.open(screen,
         x: 7, y: 9,
         mesg: [
-          "</B>Bottom Left",
+          "[b]Bottom Left",
           "",
           "Tees and crosses",
           "appear correctly.",
@@ -54,7 +54,7 @@ begin
           x: 32, y: 9,
           box: framing,
           mesg: [
-            "</B>Bottom Right",
+            "[b]Bottom Right",
             "",
             "Press any key",
             "to exit.",

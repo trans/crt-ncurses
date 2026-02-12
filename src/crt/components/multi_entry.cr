@@ -344,9 +344,7 @@ module CRT
             @info = @info[0...cp] + newchar.chr.to_s + @info[cp..]
             @current_col += 1
 
-            draw_field
-
-            # Check if we've gone past the field width
+            # Wrap to next row if past field width
             if @current_col >= @field_width
               @current_col = 0
               @current_row += 1
@@ -354,13 +352,10 @@ module CRT
               if @current_row == @rows
                 @current_row -= 1
                 @top_row += 1
-                draw_field
-              end
-              if fw = @field_win
-                fw.move(@current_row, @current_col)
-                CRT::Screen.wrefresh(fw)
               end
             end
+
+            draw_field
           end
         end
       end

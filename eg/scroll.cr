@@ -30,7 +30,7 @@ begin
     x: CRT::CENTER, y: CRT::CENTER,
     box: true,
     height: 12, width: 30,
-    title: "</B>Pick a Language",
+    title: "[b]Pick a Language",
     list: languages,
   ) do |scroll|
     scroll.activate

@@ -11,7 +11,7 @@ begin
   CRT::MultiEntry.open(screen,
     x: CRT::CENTER, y: CRT::CENTER,
     box: true,
-    title: "</B>Enter Notes",
+    title: "[b]Enter Notes",
     label: "Notes: ",
     field_width: 40,
     field_rows: 8,
