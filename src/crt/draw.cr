@@ -12,26 +12,8 @@ module CRT
     ACS_BTEE     = 'v'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
     ACS_TTEE     = 'w'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
 
-    # Set up basic color pairs
-    def self.init_color
-      if NCurses.has_colors?
-        NCurses.start_color
-        color = [
-          LibNCurses::Color::White, LibNCurses::Color::Red,
-          LibNCurses::Color::Green, LibNCurses::Color::Yellow,
-          LibNCurses::Color::Blue, LibNCurses::Color::Magenta,
-          LibNCurses::Color::Cyan, LibNCurses::Color::Black,
-        ]
-        limit = {LibNCurses.colors, 8}.min
-        pair = 1_i16
-        (0...limit).each do |fg|
-          (0...limit).each do |bg|
-            LibNCurses.init_pair(pair, color[fg].to_i16, color[bg].to_i16)
-            pair += 1
-          end
-        end
-      end
-    end
+    # Color pairs are now allocated on demand via CRT.color_pair(fg, bg).
+    # See src/crt/formatter.cr for the allocation logic.
 
     # Print a box around a window with attributes
     def self.box_window(window : NCurses::Window, attr : Int32)

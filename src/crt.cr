@@ -23,6 +23,7 @@ require "./crt/mixins/window_input"
 require "./crt/crt_objs"
 require "./crt/screen"
 require "./crt/framing"
+require "./crt/formatter"
 require "./crt/components/label"
 require "./crt/components/dialog"
 require "./crt/components/entry"
@@ -49,7 +50,7 @@ require "./crt/components/file_select"
 require "./crt/components/matrix"
 
 module CRT
-  VERSION = "0.3.0"
+  VERSION = "0.4.0"
 
   ALL_SCREENS = [] of CRT::Screen
   ALL_OBJECTS = [] of CRT::CRTObjs

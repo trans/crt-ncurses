@@ -80,6 +80,80 @@ screen.destroy
 NCurses.end_win
 ```
 
+## Format Strings
+
+CRT provides a BBCode-style format string system for styled text. Use
+`CRT.fmt` to convert a format string into a chtype array for display.
+
+```crystal
+# Bold text
+CRT.fmt("[b]Hello![/]")
+
+# Combined attributes and colors
+CRT.fmt("[bold #0F]Status:[/] OK")
+
+# Alignment (at string start)
+CRT.fmt("[C][b]Centered Title[/]")
+```
+
+### Attributes
+
+| Short | Long | Effect |
+|-------|------|--------|
+| `[b]` | `[bold]` | Bold |
+| `[u]` | `[underline]` | Underline |
+| `[dim]` | `[dim]` | Dim |
+| `[rev]` | `[reverse]` | Reverse video |
+| `[so]` | `[standout]` | Standout |
+| `[bk]` | `[blink]` | Blink |
+
+Multiple attributes can be combined in one tag: `[b u]`
+
+### Colors
+
+Colors use hex palette indices (00-FF, 256-color terminal palette):
+
+| Notation | Meaning |
+|----------|---------|
+| `#XX` | Foreground color |
+| `##XX` | Background color |
+| `#XX/YY` | Foreground / background |
+| `##YY/XX` | Background / foreground |
+
+```crystal
+CRT.fmt("[#0F]green text[/]")
+CRT.fmt("[#FF/00]white on black[/]")
+CRT.fmt("[b #0F/00]bold green on black[/]")
+```
+
+### Alignment
+
+Place at the start of the string:
+
+| Short | Long |
+|-------|------|
+| `[C]` | `[center]` |
+| `[R]` | `[right]` |
+| `[L]` | `[left]` |
+
+### Style Stack
+
+- `[/]` — pop the last style (restores previous attributes/colors)
+- `[//]` — reset all styles
+- `\[` — literal open bracket
+
+### Named Styles
+
+Register reusable styles with `CRT.style`:
+
+```crystal
+CRT.style("error", "bold #FF ##00")
+CRT.style("header", "bold underline #0F")
+
+CRT.fmt("[error]Oops![/] Something broke")
+CRT.fmt("[header]Welcome[/]")
+```
+
 ## Development
 
 ```sh
