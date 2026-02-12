@@ -18,11 +18,11 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    items : Array(String), title : String = "", label : String = "",
                    default_item : Int32 = 0, box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
 
@@ -76,7 +76,7 @@ module CRT
         ypos + @border_size + @title_lines,
         xpos + @label_len + @border_size)
 
-      @screen = cdkscreen
+      @screen = screen
       @parent = parent_window
       @shadow_win = nil
       @accepts_focus = true
@@ -96,7 +96,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 

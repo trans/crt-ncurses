@@ -37,7 +37,7 @@ module CRT
       # Touch/refresh the screen
       if scr = @screen
         if scr_win = scr.window
-          CRT::Screen.refresh_cdk_window(scr_win)
+          CRT::Screen.refresh_window(scr_win)
         end
       end
 

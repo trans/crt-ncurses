@@ -9,11 +9,11 @@ module CRT
     @info_len : Array(Int32) = [] of Int32
     @info_pos : Array(Int32) = [] of Int32
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    mesg : Array(String), box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
 
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
       box_width = 0
@@ -54,7 +54,7 @@ module CRT
       ypos_arr = [y]
       alignxy(parent_window, xpos_arr, ypos_arr, box_width, box_height)
 
-      @screen = cdkscreen
+      @screen = screen
       @parent = parent_window
       @win = NCurses::Window.new(
         height: box_height,
@@ -87,7 +87,7 @@ module CRT
       end
 
       # Register this widget
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 

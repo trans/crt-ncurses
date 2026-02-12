@@ -20,7 +20,7 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    mesg : Array(String), buttons : Array(String),
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
                    separator : Bool = true, box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
@@ -58,14 +58,14 @@ module CRT
       box_width = {box_width, max_message_width, button_width}.max
       box_width = box_width + 2 + 2 * @border_size
 
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
 
       # Adjust positions
       xtmp = [x]
       ytmp = [y]
       alignxy(parent_window, xtmp, ytmp, box_width, box_height)
 
-      @screen = cdkscreen
+      @screen = screen
       @parent = parent_window
       @win = NCurses::Window.new(height: box_height, width: box_width,
         y: ytmp[0], x: xtmp[0])
@@ -104,7 +104,7 @@ module CRT
           y: ytmp[0] + 1, x: xtmp[0] + 1)
       end
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 

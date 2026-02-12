@@ -75,7 +75,7 @@ module CRT
       true
     end
 
-    def valid_cdk_object? : Bool
+    def valid_object? : Bool
       CRT::ALL_OBJECTS.includes?(self) && valid_obj_type?(object_type)
     end
 

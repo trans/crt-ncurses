@@ -13,7 +13,7 @@ module CRT
     ACS_TTEE     = 'w'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
 
     # Set up basic color pairs
-    def self.init_cdk_color
+    def self.init_color
       if NCurses.has_colors?
         NCurses.start_color
         color = [

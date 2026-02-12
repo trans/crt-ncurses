@@ -13,13 +13,13 @@ module CRT
     @complete : Bool = false
     @save_focus : Bool = false
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, list : Array(String),
                    title : String = "", label : String = "",
                    filler_char : Char = '.', highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
                    box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
       label_len = 0
@@ -47,7 +47,7 @@ module CRT
       return unless w = @win
       w.keypad(true)
 
-      @screen = cdkscreen
+      @screen = screen
       @parent = parent_window
       @highlight = highlight
       @filler_char = filler_char
@@ -62,7 +62,7 @@ module CRT
 
       # Create the entry field
       temp_width = is_full_width?(width) ? CRT::FULL : box_width - 2 - label_len
-      @entry_field = CRT::Entry.new(cdkscreen,
+      @entry_field = CRT::Entry.new(screen,
         x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(w),
         title: title, label: label, field_width: temp_width,
         filler: filler_char, box: box, shadow: false)
@@ -76,7 +76,7 @@ module CRT
       # Create the scrolling list below the entry
       temp_height = entry_win.max_y - @border_size
       temp_width_scroll = is_full_width?(width) ? CRT::FULL : box_width - 1
-      @scroll_field = CRT::Scroll.new(cdkscreen,
+      @scroll_field = CRT::Scroll.new(screen,
         x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(entry_win) + temp_height,
         height: box_height - temp_height, width: temp_width_scroll,
         list: @list, box: box, shadow: false)
@@ -90,7 +90,7 @@ module CRT
       remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
       remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 

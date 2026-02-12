@@ -23,13 +23,13 @@ module CRT
     @result_data : String = ""
     @parent : NCurses::Window? = nil
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    field_width : Int32, field_rows : Int32, logical_rows : Int32,
                    title : String = "", label : String = "", field_attr : Int32 = 0,
                    filler : Char = '.', disp_type : CRT::DisplayType = CRT::DisplayType::MIXED,
                    min : Int32 = 0, box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
 
@@ -92,7 +92,7 @@ module CRT
       @total_width = field_width * logical_rows + 1
       @info = ""
 
-      @screen = cdkscreen
+      @screen = screen
       @shadow_win = nil
       @field_attr = field_attr
       @field_width = field_width
@@ -116,7 +116,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 

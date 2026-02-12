@@ -57,7 +57,7 @@ module CRT
       Time.local(year, month, 1).day_of_week.value % 7
     end
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    day : Int32 = Time.local.day, month : Int32 = Time.local.month,
                    year : Int32 = Time.local.year, title : String = "",
                    day_attrib : Int32 = 0, month_attrib : Int32 = 0,
@@ -65,7 +65,7 @@ module CRT
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
                    box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
       box_width = 24
@@ -92,7 +92,7 @@ module CRT
       @x_offset = (box_width - 20) // 2
       @field_width = box_width - 2 * (1 + @border_size)
 
-      @screen = cdkscreen
+      @screen = screen
       @parent = parent_window
       @shadow_win = nil
       @box_width = box_width
@@ -140,7 +140,7 @@ module CRT
       remap_key('p'.ord, LibNCurses::Key::PageUp.value)
       remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 

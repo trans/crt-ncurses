@@ -22,7 +22,7 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(cdkscreen : CRT::Screen, *, menu_list : Array(Array(String)),
+    def initialize(screen : CRT::Screen, *, menu_list : Array(Array(String)),
                    menu_location : Array(Position), menu_pos : Position = Position::Top,
                    title_attr : Int32 = 0, subtitle_attr : Int32 = 0)
       super()
@@ -30,14 +30,14 @@ module CRT
       subsize = menu_list.map { |m| m.size - 1 }
 
       right_count = menu_items - 1
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       rightloc = parent_window.max_x
       leftloc = 0
       xpos = LibNCurses.getbegx(parent_window)
       ypos = LibNCurses.getbegy(parent_window)
       ymax = parent_window.max_y
 
-      @screen = cdkscreen
+      @screen = screen
       @box = false
       @accepts_focus = false
       @parent = parent_window
@@ -116,7 +116,7 @@ module CRT
 
       @input_window = @title_win[@current_title]
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
     end
 
     def activate(actions : Array(Int32)? = nil) : Int32

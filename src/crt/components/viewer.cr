@@ -30,13 +30,13 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32,
                    buttons : Array(String) = ["OK"],
                    button_highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
                    box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
       button_width = 0
@@ -72,7 +72,7 @@ module CRT
         end
       end
 
-      @screen = cdkscreen
+      @screen = screen
       @parent = parent_window
       @button_highlight = button_highlight
       @box_height = box_height
@@ -106,7 +106,7 @@ module CRT
       remap_key('|'.ord, LibNCurses::Key::Home.value)
       remap_key('$'.ord, LibNCurses::Key::End.value)
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 

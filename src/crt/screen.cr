@@ -33,7 +33,7 @@ module CRT
     end
 
     # Register a CRT object with a screen
-    def register(cdktype : Symbol, obj : CRT::CRTObjs)
+    def register(obj_type : Symbol, obj : CRT::CRTObjs)
       if @object_count + 1 >= @object_limit
         @object_limit += 2
         @object_limit *= 2
@@ -42,15 +42,15 @@ module CRT
         end
       end
 
-      if obj.valid_obj_type?(cdktype)
+      if obj.valid_obj_type?(obj_type)
         set_screen_index(@object_count, obj)
         @object_count += 1
       end
     end
 
     # Remove an object from the CRT screen
-    def self.unregister(cdktype : Symbol, obj : CRT::CRTObjs)
-      return unless obj.valid_obj_type?(cdktype) && obj.screen_index >= 0
+    def self.unregister(obj_type : Symbol, obj : CRT::CRTObjs)
+      return unless obj.valid_obj_type?(obj_type) && obj.screen_index >= 0
       screen = obj.screen
       return if screen.nil?
 
@@ -91,7 +91,7 @@ module CRT
       n >= 0 && n < @object_count
     end
 
-    def swap_cdk_indices(n1 : Int32, n2 : Int32)
+    def swap_indices(n1 : Int32, n2 : Int32)
       if n1 != n2 && valid_index?(n1) && valid_index?(n2)
         o1 = @object[n1]
         o2 = @object[n2]
@@ -106,18 +106,18 @@ module CRT
       end
     end
 
-    def self.raise_cdk_object(cdktype : Symbol, obj : CRT::CRTObjs)
-      if obj.valid_obj_type?(cdktype)
+    def self.raise_object(obj_type : Symbol, obj : CRT::CRTObjs)
+      if obj.valid_obj_type?(obj_type)
         if screen = obj.screen
-          screen.swap_cdk_indices(obj.screen_index, screen.object_count - 1)
+          screen.swap_indices(obj.screen_index, screen.object_count - 1)
         end
       end
     end
 
-    def self.lower_cdk_object(cdktype : Symbol, obj : CRT::CRTObjs)
-      if obj.valid_obj_type?(cdktype)
+    def self.lower_object(obj_type : Symbol, obj : CRT::CRTObjs)
+      if obj.valid_obj_type?(obj_type)
         if screen = obj.screen
-          screen.swap_cdk_indices(obj.screen_index, 0)
+          screen.swap_indices(obj.screen_index, 0)
         end
       end
     end
@@ -138,7 +138,7 @@ module CRT
       end
     end
 
-    def self.refresh_cdk_window(win : NCurses::Window)
+    def self.refresh_window(win : NCurses::Window)
       LibNCurses.touchwin(win)
       wrefresh(win)
     end
@@ -151,7 +151,7 @@ module CRT
     # Refresh all objects in the screen
     def refresh
       if w = @window
-        Screen.refresh_cdk_window(w)
+        Screen.refresh_window(w)
       end
 
       focused = -1
@@ -200,7 +200,7 @@ module CRT
     end
 
     # Destroy all objects on a screen
-    def destroy_cdk_screen_objects
+    def destroy_screen_objects
       (0...@object_count).each do |x|
         if obj = @object[x]
           if obj.valid_obj_type?(obj.object_type)
@@ -217,7 +217,7 @@ module CRT
     end
 
     # End CRT / ncurses mode
-    def self.end_cdk
+    def self.end_crt
       NCurses.echo
       NCurses.nocbreak
       NCurses.end

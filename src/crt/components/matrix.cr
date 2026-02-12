@@ -39,7 +39,7 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    rows : Int32, cols : Int32, vrows : Int32, vcols : Int32,
                    rowtitles : Array(String), coltitles : Array(String),
                    colwidths : Array(Int32), colvalues : Array(CRT::DisplayType),
@@ -47,7 +47,7 @@ module CRT
                    filler : Char = '.', dominant : Dominant = Dominant::None, box : Bool | CRT::Framing | Nil = nil,
                    box_cell : Bool = true, shadow : Bool = false)
       super()
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
       max_row_title_width = 0
@@ -183,7 +183,7 @@ module CRT
         begy += row_space + 2
       end
 
-      @screen = cdkscreen
+      @screen = screen
       @accepts_focus = true
       @input_window = @win
       @parent = parent_window
@@ -213,7 +213,7 @@ module CRT
       remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
       remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 

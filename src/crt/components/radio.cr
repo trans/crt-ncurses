@@ -20,14 +20,14 @@ module CRT
     @complete : Bool = false
     @return_data : Int32 = -1
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, list : Array(String),
                    splace : Position = Position::Right, title : String = "",
                    choice_char : Char = 'X', def_item : Int32 = 0,
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
                    box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
       parent_height = parent_window.max_y
       box_width = width
@@ -87,7 +87,7 @@ module CRT
         @scrollbar_win = nil
       end
 
-      @screen = cdkscreen
+      @screen = screen
       @parent = parent_window
       @scrollbar_placement = splace
       @widest_item = widest
@@ -117,7 +117,7 @@ module CRT
       remap_key('<'.ord, LibNCurses::Key::Home.value)
       remap_key('>'.ord, LibNCurses::Key::End.value)
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 

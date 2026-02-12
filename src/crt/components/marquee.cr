@@ -5,13 +5,13 @@ module CRT
     @shadow : Bool = false
     @parent : NCurses::Window? = nil
 
-    def initialize(cdkscreen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
                    width : Int32 = 0, box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
       super()
-      parent_window = cdkscreen.window.not_nil!
+      parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
 
-      @screen = cdkscreen
+      @screen = screen
       @parent = parent_window
       @width = width
       @shadow = shadow
@@ -40,7 +40,7 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      cdkscreen.register(object_type, self)
+      screen.register(object_type, self)
       register_framing
     end
 
