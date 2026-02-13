@@ -1,6 +1,6 @@
 require "../src/crt"
 
-# Multi-line text entry — type some notes and press Tab to finish.
+# Multi-line text entry — Enter inserts newlines, Tab to finish.
 
 notes = nil
 
@@ -17,6 +17,7 @@ begin
     logical_rows: 100,
     min: 0,
   ) do |mentry|
+    mentry.newline_on_enter = true
     mentry.background = CRT.color("#FF/04")  # white on blue
     mentry.draw
     mentry.activate

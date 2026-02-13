@@ -7,6 +7,7 @@ module CRT
     property disp_type : CRT::DisplayType = CRT::DisplayType::MIXED
     getter field_width : Int32 = 0
     getter rows : Int32 = 0
+    property newline_on_enter : Bool = false
 
     @field_win : NCurses::Window? = nil
     @label_win : NCurses::Window? = nil
@@ -140,7 +141,89 @@ module CRT
     end
 
     def cursor_pos : Int32
-      (@current_row + @top_row) * @field_width + @current_col
+      visual_to_pos(@top_row + @current_row, @current_col)
+    end
+
+    # Convert visual (row, col) to string index, accounting for newlines.
+    private def visual_to_pos(target_row : Int32, target_col : Int32) : Int32
+      row = 0
+      col = 0
+      @info.each_char_with_index do |ch, i|
+        return i if row == target_row && col == target_col
+        if ch == '\n'
+          return i if row == target_row # past end of short line
+          row += 1
+          col = 0
+        else
+          col += 1
+          if col >= @field_width
+            col = 0
+            row += 1
+          end
+        end
+      end
+      @info.size
+    end
+
+    # Convert string index to visual (row, col).
+    private def pos_to_visual(target_pos : Int32) : {Int32, Int32}
+      row = 0
+      col = 0
+      @info.each_char_with_index do |ch, i|
+        return {row, col} if i == target_pos
+        if ch == '\n'
+          row += 1
+          col = 0
+        else
+          col += 1
+          if col >= @field_width
+            col = 0
+            row += 1
+          end
+        end
+      end
+      {row, col}
+    end
+
+    # Length of a visual row (chars before newline or field_width wrap).
+    private def visual_line_length(target_row : Int32) : Int32
+      row = 0
+      col = 0
+      @info.each_char do |ch|
+        if ch == '\n'
+          return col if row == target_row
+          row += 1
+          col = 0
+        else
+          col += 1
+          if col >= @field_width
+            return @field_width if row == target_row
+            col = 0
+            row += 1
+          end
+        end
+      end
+      return col if row == target_row
+      0
+    end
+
+    # Total number of visual rows in the current content.
+    private def total_visual_rows : Int32
+      row = 0
+      col = 0
+      @info.each_char do |ch|
+        if ch == '\n'
+          row += 1
+          col = 0
+        else
+          col += 1
+          if col >= @field_width
+            col = 0
+            row += 1
+          end
+        end
+      end
+      row + 1
     end
 
     def set_top_row(row : Int32) : Bool
@@ -167,11 +250,13 @@ module CRT
         moved = set_cur_pos(@current_row, @current_col - 1)
       elsif @current_row == 0
         if @top_row != 0
-          moved = set_cur_pos(@current_row, @field_width - 1)
+          prev_len = visual_line_length(@top_row - 1)
+          moved = set_cur_pos(@current_row, {prev_len, @field_width - 1}.min)
           redraw = set_top_row(@top_row - 1)
         end
       else
-        moved = set_cur_pos(@current_row - 1, @field_width - 1)
+        prev_len = visual_line_length(@top_row + @current_row - 1)
+        moved = set_cur_pos(@current_row - 1, {prev_len, @field_width - 1}.min)
       end
 
       if !moved && !redraw
@@ -196,48 +281,59 @@ module CRT
         moved = set_cur_pos(0, 0)
         redraw = set_top_row(0)
       when LibNCurses::Key::End.value
-        field_characters = @rows * @field_width
-        if @info.size < field_characters
+        end_row, end_col = pos_to_visual(@info.size)
+        if end_row < @rows
           redraw = set_top_row(0)
-          moved = set_cur_pos(@info.size // @field_width, @info.size % @field_width)
+          moved = set_cur_pos(end_row, end_col)
         else
-          redraw = set_top_row(@info.size // @field_width - @rows + 1)
-          moved = set_cur_pos(@rows - 1, @info.size % @field_width)
+          redraw = set_top_row(end_row - @rows + 1)
+          moved = set_cur_pos(@rows - 1, end_col)
         end
       when LibNCurses::Key::Left.value
         _, moved, redraw = handle_key_left(moved, redraw)
       when LibNCurses::Key::Right.value
-        if @current_col < @field_width - 1
-          if cur_pos + 1 <= @info.size
-            moved = set_cur_pos(@current_row, @current_col + 1)
-          end
-        elsif @current_row == @rows - 1
-          if @top_row + @current_row + 1 < @logical_rows
+        cp = cursor_pos
+        if cp >= @info.size
+          CRT.beep
+        elsif @info[cp] == '\n' || @current_col >= @field_width - 1
+          # At newline or end of wrapped line — advance to next row
+          if @current_row < @rows - 1
+            moved = set_cur_pos(@current_row + 1, 0)
+          elsif @top_row + @current_row + 1 < total_visual_rows
             moved = set_cur_pos(@current_row, 0)
             redraw = set_top_row(@top_row + 1)
+          else
+            CRT.beep
           end
         else
-          moved = set_cur_pos(@current_row + 1, 0)
+          moved = set_cur_pos(@current_row, @current_col + 1)
         end
-        CRT.beep if !moved && !redraw
       when LibNCurses::Key::Down.value
-        if @current_row != @rows - 1
-          if cur_pos + @field_width + 1 <= @info.size
-            moved = set_cur_pos(@current_row + 1, @current_col)
-          end
-        elsif @top_row < @logical_rows - @rows
-          if (@top_row + @current_row + 1) * @field_width <= @info.size
+        next_abs_row = @top_row + @current_row + 1
+        if next_abs_row < total_visual_rows
+          target_col = {@current_col, visual_line_length(next_abs_row)}.min
+          if @current_row < @rows - 1
+            moved = set_cur_pos(@current_row + 1, target_col)
+          else
             redraw = set_top_row(@top_row + 1)
+            @current_col = target_col
           end
+        else
+          CRT.beep
         end
-        CRT.beep if !moved && !redraw
       when LibNCurses::Key::Up.value
-        if @current_row != 0
-          moved = set_cur_pos(@current_row - 1, @current_col)
-        elsif @top_row != 0
-          redraw = set_top_row(@top_row - 1)
+        prev_abs_row = @top_row + @current_row - 1
+        if prev_abs_row >= 0
+          target_col = {@current_col, visual_line_length(prev_abs_row)}.min
+          if @current_row > 0
+            moved = set_cur_pos(@current_row - 1, target_col)
+          else
+            redraw = set_top_row(@top_row - 1)
+            @current_col = target_col
+          end
+        else
+          CRT.beep
         end
-        CRT.beep if !moved && !redraw
       when LibNCurses::Key::Backspace.value, CRT::DELETE
         if @disp_type == CRT::DisplayType::VIEWONLY
           CRT.beep
@@ -302,7 +398,22 @@ module CRT
           draw(@box)
         end
       when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
-        if @info.size < @min + 1
+        if @newline_on_enter && input != CRT::KEY_TAB
+          # Insert newline character
+          if @info.size >= @total_width
+            CRT.beep
+          else
+            cp = cursor_pos
+            @info = @info[0...cp] + "\n" + @info[cp..]
+            @current_col = 0
+            @current_row += 1
+            if @current_row >= @rows
+              @current_row = @rows - 1
+              @top_row += 1
+            end
+            draw_field
+          end
+        elsif @info.size < @min + 1
           CRT.beep
         else
           set_exit_type(input)
@@ -357,6 +468,7 @@ module CRT
 
       unless @complete
         set_exit_type(0)
+        LibNCurses.curs_set(2)
       end
 
       @result_data = @info
@@ -366,27 +478,40 @@ module CRT
     def draw_field
       return unless fw = @field_win
 
-      currchar = @field_width * @top_row
+      # Find the string position for the start of @top_row
+      start_pos = visual_to_pos(@top_row, 0)
 
       if w = @win
         draw_title(w)
         wrefresh
       end
 
-      lastpos = @info.size
+      pos = start_pos
 
       @rows.times do |x|
-        @field_width.times do |y|
-          if currchar < lastpos
-            if Display.hidden_display_type?(@disp_type)
+        y = 0
+        while y < @field_width
+          if pos < @info.size
+            ch = @info[pos]
+            if ch == '\n'
+              # Fill rest of row with filler
+              while y < @field_width
+                Draw.mvwaddch(fw, x, y, @filler)
+                y += 1
+              end
+              pos += 1
+              break
+            elsif Display.hidden_display_type?(@disp_type)
               Draw.mvwaddch(fw, x, y, @filler)
+              pos += 1
             else
-              Draw.mvwaddch(fw, x, y, @info[currchar].ord | @field_attr)
-              currchar += 1
+              Draw.mvwaddch(fw, x, y, ch.ord | @field_attr)
+              pos += 1
             end
           else
             Draw.mvwaddch(fw, x, y, @filler)
           end
+          y += 1
         end
       end
 
@@ -429,20 +554,17 @@ module CRT
     end
 
     def value=(new_value : String)
-      field_characters = @rows * @field_width
       @info = new_value
-
-      if new_value.size < field_characters
+      end_row, end_col = pos_to_visual(new_value.size)
+      if end_row < @rows
         @top_row = 0
-        @current_row = new_value.size // @field_width
-        @current_col = new_value.size % @field_width
+        @current_row = end_row
+        @current_col = end_col
       else
-        row_used = new_value.size // @field_width
-        @top_row = row_used - @rows + 1
+        @top_row = end_row - @rows + 1
         @current_row = @rows - 1
-        @current_col = new_value.size % @field_width
+        @current_col = end_col
       end
-
       draw_field
     end
 
@@ -494,11 +616,11 @@ module CRT
     end
 
     def focus
-      LibNCurses.curs_set(2)
       if fw = @field_win
         fw.move(@current_row, @current_col)
         CRT::Screen.wrefresh(fw)
       end
+      LibNCurses.curs_set(2)
     end
 
     def unfocus
