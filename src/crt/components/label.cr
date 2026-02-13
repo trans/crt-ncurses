@@ -78,8 +78,8 @@ module CRT
         @shadow_win = NCurses::Window.new(
           height: box_height,
           width: box_width,
-          y: ypos_arr[0] + 1,
-          x: xpos_arr[0] + 1
+          y: ypos + 1,
+          x: xpos + 1
         )
       end
 
