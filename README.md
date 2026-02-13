@@ -57,27 +57,24 @@ or equivalent for your system).
 require "crt"
 
 # Initialize ncurses
-NCurses.init
-NCurses.cbreak
-NCurses.no_echo
-NCurses.start_color
+NCurses.start
 
 # Create a screen
 screen = CRT::Screen.new
 
 # Display a label
 label = CRT::Label.new(screen,
-  CRT::CENTER, CRT::CENTER,
-  ["</B>Hello, CRT!", "Press any key to exit."],
+  x: CRT::CENTER, y: CRT::CENTER,
+  message: ["[b]Hello, CRT![/]", "Press any key to exit."],
   box: true, shadow: true)
 
-label.draw(true)
+label.draw
 label.wait(0)
 
 # Clean up
 label.destroy
 screen.destroy
-NCurses.end_win
+NCurses.end
 ```
 
 ## Format Strings
