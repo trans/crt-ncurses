@@ -204,6 +204,7 @@ module CRT
 
       unless @complete
         set_exit_type(0)
+        LibNCurses.curs_set(2)
       end
 
       @return_data = @info
@@ -474,8 +475,8 @@ module CRT
     end
 
     def focus
-      LibNCurses.curs_set(2)
       draw(@box)
+      LibNCurses.curs_set(2)
     end
 
     def unfocus

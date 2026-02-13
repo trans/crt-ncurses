@@ -318,6 +318,7 @@ module CRT
 
       unless @complete
         set_exit_type(0)
+        LibNCurses.curs_set(2)
       end
 
       @result_data = ret
@@ -448,11 +449,11 @@ module CRT
     end
 
     def focus
-      LibNCurses.curs_set(2)
       if fw = @field_win
         fw.move(0, @screen_col)
         CRT::Screen.wrefresh(fw)
       end
+      LibNCurses.curs_set(2)
     end
 
     def unfocus

@@ -18,6 +18,10 @@ module CRT
 
     @@refresh_output : Bool = true
 
+    # TODO: Consider opt-in `raw` mode (NCurses.raw instead of cbreak) so that
+    # Ctrl+C arrives as key code 3 rather than generating SIGINT. This would
+    # let widgets handle Ctrl+C directly (e.g. "are you sure?" confirm dialog).
+    # Tradeoff: raw mode disables all signal-generating keys (Ctrl+Z, etc.).
     def initialize(window : NCurses::Window)
       if CRT::ALL_SCREENS.empty?
         NCurses.no_echo
@@ -132,13 +136,12 @@ module CRT
     end
 
     def self.wrefresh(w : NCurses::Window)
-      prev_curs = LibNCurses.curs_set(0)
+      LibNCurses.curs_set(0)
       if refresh_output?
         w.refresh
       else
         LibNCurses.noutrefresh(w)
       end
-      LibNCurses.curs_set(prev_curs) if prev_curs > 0
     end
 
     def self.refresh_window(win : NCurses::Window)
