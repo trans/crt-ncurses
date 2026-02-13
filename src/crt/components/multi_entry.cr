@@ -37,7 +37,7 @@ module CRT
 
       field_width = CRT.set_widget_dimension(parent_width, field_width, 0)
       field_rows = CRT.set_widget_dimension(parent_height, field_rows, 0)
-      box_height = field_rows + 2
+      box_height = field_rows + 2 * @border_size
 
       # Translate label
       @label = [] of Int32
@@ -50,7 +50,7 @@ module CRT
         @label_len = label_len_arr[0]
       end
 
-      box_width = @label_len + field_width + 2
+      box_width = @label_len + field_width + 2 * @border_size
 
       old_width = box_width
       box_width = set_title(title, box_width)
@@ -61,8 +61,8 @@ module CRT
       # Clamp
       box_width = {box_width, parent_width}.min
       box_height = {box_height, parent_height}.min
-      field_width = {box_width - @label_len - 2, field_width}.min
-      field_rows = {box_height - @title_lines - 2, field_rows}.min
+      field_width = {box_width - @label_len - 2 * @border_size, field_width}.min
+      field_rows = {box_height - @title_lines - 2 * @border_size, field_rows}.min
 
       # Align
       xtmp = [x]
@@ -77,13 +77,13 @@ module CRT
 
       # Label window
       if @label.size > 0
-        @label_win = CRT.subwin(w, field_rows, @label_len + 2,
-          ypos + @title_lines + 1, xpos + horizontal_adjust + 1)
+        @label_win = CRT.subwin(w, field_rows, @label_len + 2 * @border_size,
+          ypos + @title_lines + @border_size, xpos + horizontal_adjust + @border_size)
       end
 
       # Field window
       @field_win = CRT.subwin(w, field_rows, field_width,
-        ypos + @title_lines + 1, xpos + @label_len + horizontal_adjust + 1)
+        ypos + @title_lines + @border_size, xpos + @label_len + horizontal_adjust + @border_size)
       if fw = @field_win
         fw.keypad(true)
       end
@@ -508,13 +508,15 @@ module CRT
     end
 
     def focus
+      LibNCurses.curs_set(2)
       if fw = @field_win
-        fw.move(0, @current_col)
+        fw.move(@current_row, @current_col)
         CRT::Screen.wrefresh(fw)
       end
     end
 
     def unfocus
+      LibNCurses.curs_set(0)
       if fw = @field_win
         CRT::Screen.wrefresh(fw)
       end

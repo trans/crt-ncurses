@@ -47,8 +47,8 @@ module CRT
       return unless w = @win
       w.keypad(true)
 
-      @field_win = CRT.subwin(w, box_height - @title_lines - 2, box_width - 2,
-        ypos + @title_lines + 1, xpos + 1)
+      @field_win = CRT.subwin(w, box_height - @title_lines - 2 * @border_size, box_width - 2 * @border_size,
+        ypos + @title_lines + @border_size, xpos + @border_size)
       if fw = @field_win
         fw.keypad(true)
       end
@@ -57,7 +57,7 @@ module CRT
       @parent = parent_window
       @box_height = box_height
       @box_width = box_width
-      @view_size = box_height - @title_lines - 2
+      @view_size = box_height - @title_lines - 2 * @border_size
       @current_top = 0
       @max_top_line = 0
       @left_char = 0
@@ -116,7 +116,7 @@ module CRT
 
       @list_size = list.size
       @max_top_line = {@list_size - @view_size, 0}.max
-      @max_left_char = @widest_line - (@box_width - 2)
+      @max_left_char = @widest_line - (@box_width - 2 * @border_size)
       @current_top = 0
       @left_char = 0
     end
@@ -142,14 +142,14 @@ module CRT
         @current_top = 0
         @list_size += 1 if @list_size < @save_lines
         @max_top_line = {@list_size - @view_size, 0}.max
-        @max_left_char = @widest_line - (@box_width - 2)
+        @max_left_char = @widest_line - (@box_width - 2 * @border_size)
       else
         @list << [] of Int32
         @list_pos << 0
         @list_len << 0
         setup_line(list, @list_size, fmt)
 
-        @max_left_char = @widest_line - (@box_width - 2)
+        @max_left_char = @widest_line - (@box_width - 2 * @border_size)
         @list_size += 1 if @list_size < @save_lines
 
         if @list_size <= @view_size

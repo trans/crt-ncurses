@@ -482,10 +482,12 @@ module CRT
     end
 
     def focus
+      LibNCurses.curs_set(2)
       draw(@box)
     end
 
     def unfocus
+      LibNCurses.curs_set(0)
       draw(@box)
     end
 

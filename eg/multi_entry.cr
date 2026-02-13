@@ -18,6 +18,8 @@ begin
     logical_rows: 100,
     min: 0,
   ) do |mentry|
+    mentry.background = CRT.color("#FF/04")  # white on blue
+    mentry.draw
     mentry.activate
     notes = mentry.info if mentry.exit_type.normal?
   end

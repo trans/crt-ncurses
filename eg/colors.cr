@@ -44,6 +44,13 @@ begin
 
   CRT::Screen.wrefresh(win)
 
+  # Test CRT.color for background
+  label = CRT::Label.new(screen,
+    x: 2, y: lines.size + 2,
+    mesg: ["  CRT.color demo — white on blue  "])
+  label.background = CRT.color(7, 4)
+  label.draw
+
   # Wait for a key
   LibNCurses.curs_set(0)
   win.get_char

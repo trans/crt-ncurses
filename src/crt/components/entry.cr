@@ -454,6 +454,7 @@ module CRT
     end
 
     def focus
+      LibNCurses.curs_set(2)
       if fw = @field_win
         fw.move(0, @screen_col)
         CRT::Screen.wrefresh(fw)
@@ -461,6 +462,7 @@ module CRT
     end
 
     def unfocus
+      LibNCurses.curs_set(0)
       draw(@box)
       if fw = @field_win
         CRT::Screen.wrefresh(fw)

@@ -76,8 +76,8 @@ module CRT
       @parent = parent_window
       @button_highlight = button_highlight
       @box_height = box_height
-      @box_width = box_width - 2
-      @view_size = box_height - 2
+      @box_width = box_width - 2 * @border_size
+      @view_size = box_height - 2 * @border_size
       @input_window = @win
       @shadow = shadow
       @current_button = 0
@@ -113,7 +113,7 @@ module CRT
     def viewer_title=(title : String)
       set_title(title, -(@box_width + 1))
       @title_adj = @title_lines
-      @view_size = @box_height - (@title_lines + 1) - 2
+      @view_size = @box_height - (@title_lines + 1) - 2 * @border_size
     end
 
     def set_info(list : Array(String), fmt : Bool = false) : Int32
