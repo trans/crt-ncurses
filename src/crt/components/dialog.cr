@@ -61,14 +61,12 @@ module CRT
       parent_window = screen.window.not_nil!
 
       # Adjust positions
-      xtmp = [x]
-      ytmp = [y]
-      alignxy(parent_window, xtmp, ytmp, box_width, box_height)
+      xpos, ypos = alignxy(parent_window, x, y, box_width, box_height)
 
       @screen = screen
       @parent = parent_window
       @win = NCurses::Window.new(height: box_height, width: box_width,
-        y: ytmp[0], x: xtmp[0])
+        y: ypos, x: xpos)
       @shadow_win = nil
       @button_count = buttons.size
       @current_button = 0

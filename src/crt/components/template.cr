@@ -73,11 +73,7 @@ module CRT
       field_width = {field_width, box_width - @label_len - 2 * @border_size}.min
 
       # Align
-      xtmp = [x]
-      ytmp = [y]
-      alignxy(parent_window, xtmp, ytmp, box_width, box_height)
-      xpos = xtmp[0]
-      ypos = ytmp[0]
+      xpos, ypos = alignxy(parent_window, x, y, box_width, box_height)
 
       @win = NCurses::Window.new(height: box_height, width: box_width, y: ypos, x: xpos)
       return unless w = @win

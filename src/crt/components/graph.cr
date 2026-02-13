@@ -34,11 +34,7 @@ module CRT
       box_width = {parent_width, box_width}.min
       box_height = {parent_height, box_height}.min
 
-      xtmp = [x]
-      ytmp = [y]
-      alignxy(parent_window, xtmp, ytmp, box_width, box_height)
-      xpos = xtmp[0]
-      ypos = ytmp[0]
+      xpos, ypos = alignxy(parent_window, x, y, box_width, box_height)
 
       @screen = screen
       @parent = parent_window

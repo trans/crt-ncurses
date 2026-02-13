@@ -66,11 +66,7 @@ module CRT
       end
 
       # Align positions
-      xtmp = [x]
-      ytmp = [y]
-      alignxy(parent_window, xtmp, ytmp, @box_width, @box_height)
-      xpos = xtmp[0]
-      ypos = ytmp[0]
+      xpos, ypos = alignxy(parent_window, x, y, @box_width, @box_height)
 
       @win = NCurses::Window.new(height: @box_height, width: @box_width, y: ypos, x: xpos)
       return unless w = @win

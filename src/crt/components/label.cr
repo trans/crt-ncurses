@@ -50,21 +50,19 @@ module CRT
       box_height = {box_height, parent_height}.min
 
       # Rejustify the x and y positions if needed
-      xpos_arr = [x]
-      ypos_arr = [y]
-      alignxy(parent_window, xpos_arr, ypos_arr, box_width, box_height)
+      xpos, ypos = alignxy(parent_window, x, y, box_width, box_height)
 
       @screen = screen
       @parent = parent_window
       @win = NCurses::Window.new(
         height: box_height,
         width: box_width,
-        y: ypos_arr[0],
-        x: xpos_arr[0]
+        y: ypos,
+        x: xpos
       )
       @shadow_win = nil
-      @xpos = xpos_arr[0]
-      @ypos = ypos_arr[0]
+      @xpos = xpos
+      @ypos = ypos
       @rows = mesg.size
       @box_width = box_width
       @box_height = box_height

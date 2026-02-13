@@ -21,11 +21,7 @@ module CRT
       # Adjust the window if we need to
       if scr = @screen
         if scr_win = scr.window
-          xtmp = [xpos]
-          ytmp = [ypos]
-          alignxy(scr_win, xtmp, ytmp, @box_width, @box_height)
-          xpos = xtmp[0]
-          ypos = ytmp[0]
+          xpos, ypos = alignxy(scr_win, xpos, ypos, @box_width, @box_height)
         end
       end
 

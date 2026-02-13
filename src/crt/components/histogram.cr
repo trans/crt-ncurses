@@ -51,11 +51,7 @@ module CRT
       box_height = box_height > parent_height ? old_height : box_height
 
       # Align positions
-      xtmp = [x]
-      ytmp = [y]
-      alignxy(parent_window, xtmp, ytmp, box_width, box_height)
-      xpos = xtmp[0]
-      ypos = ytmp[0]
+      xpos, ypos = alignxy(parent_window, x, y, box_width, box_height)
 
       @screen = screen
       @parent = parent_window

@@ -39,11 +39,7 @@ module CRT
       box_height = CRT.set_widget_dimension(parent_height, height, 0)
       box_width = CRT.set_widget_dimension(parent_width, width, 0)
 
-      xtmp = [x]
-      ytmp = [y]
-      alignxy(parent_window, xtmp, ytmp, box_width, box_height)
-      xpos = xtmp[0]
-      ypos = ytmp[0]
+      xpos, ypos = alignxy(parent_window, x, y, box_width, box_height)
 
       box_width = {box_width, 15}.max
       box_height = {box_height, 6}.max
