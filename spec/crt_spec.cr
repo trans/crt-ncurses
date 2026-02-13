@@ -117,10 +117,10 @@ describe CRT do
       host.resolve_key('G'.ord).should eq(LibNCurses::Key::End.value)
     end
 
-    it "calls on_key handler and returns nil" do
+    it "calls on_key handler and consumes by default" do
       host = MixinHost.new
       called = false
-      host.on_key('q'.ord) { called = true }
+      host.on_key('q'.ord) { called = true; nil }
       host.resolve_key('q'.ord).should be_nil
       called.should be_true
     end
@@ -128,15 +128,27 @@ describe CRT do
     it "accepts Char overload for on_key" do
       host = MixinHost.new
       called = false
-      host.on_key('q') { called = true }
+      host.on_key('q') { called = true; nil }
       host.resolve_key('q'.ord).should be_nil
       called.should be_true
+    end
+
+    it "passes through when on_key handler returns key code" do
+      host = MixinHost.new
+      host.on_key('q'.ord) { 'q'.ord }
+      host.resolve_key('q'.ord).should eq('q'.ord)
+    end
+
+    it "allows dynamic remapping via on_key return value" do
+      host = MixinHost.new
+      host.on_key('j'.ord) { LibNCurses::Key::Down.value }
+      host.resolve_key('j'.ord).should eq(LibNCurses::Key::Down.value)
     end
 
     it "prioritizes on_key handler over remap" do
       host = MixinHost.new
       host.remap_key('g'.ord, LibNCurses::Key::Home.value)
-      host.on_key('g'.ord) { }
+      host.on_key('g'.ord) { nil }
       host.resolve_key('g'.ord).should be_nil
     end
 
