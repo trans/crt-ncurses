@@ -98,7 +98,7 @@ module CRT
       # Shadow window
       if shadow
         @shadow_win = NCurses::Window.new(height: box_height, width: box_width,
-          y: ytmp[0] + 1, x: xtmp[0] + 1)
+          y: ypos + 1, x: xpos + 1)
       end
 
       screen.register(object_type, self)
