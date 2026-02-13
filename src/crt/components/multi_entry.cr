@@ -162,23 +162,23 @@ module CRT
       end
     end
 
-    def handle_key_left(moved : Array(Bool), redraw : Array(Bool)) : Bool
+    def handle_key_left(moved : Bool, redraw : Bool) : {Bool, Bool, Bool}
       if @current_col != 0
-        moved[0] = set_cur_pos(@current_row, @current_col - 1)
+        moved = set_cur_pos(@current_row, @current_col - 1)
       elsif @current_row == 0
         if @top_row != 0
-          moved[0] = set_cur_pos(@current_row, @field_width - 1)
-          redraw[0] = set_top_row(@top_row - 1)
+          moved = set_cur_pos(@current_row, @field_width - 1)
+          redraw = set_top_row(@top_row - 1)
         end
       else
-        moved[0] = set_cur_pos(@current_row - 1, @field_width - 1)
+        moved = set_cur_pos(@current_row - 1, @field_width - 1)
       end
 
-      if !moved[0] && !redraw[0]
+      if !moved && !redraw
         CRT.beep
-        return false
+        return {false, moved, redraw}
       end
-      true
+      {true, moved, redraw}
     end
 
     def inject(input : Int32) : String
@@ -205,11 +205,7 @@ module CRT
           moved = set_cur_pos(@rows - 1, @info.size % @field_width)
         end
       when LibNCurses::Key::Left.value
-        mtmp = [moved]
-        rtmp = [redraw]
-        handle_key_left(mtmp, rtmp)
-        moved = mtmp[0]
-        redraw = rtmp[0]
+        _, moved, redraw = handle_key_left(moved, redraw)
       when LibNCurses::Key::Right.value
         if @current_col < @field_width - 1
           if cur_pos + 1 <= @info.size
@@ -258,11 +254,7 @@ module CRT
           end
         else
           # Backspace - move left then delete
-          mtmp = [moved]
-          rtmp = [redraw]
-          hkl = handle_key_left(mtmp, rtmp)
-          moved = mtmp[0]
-          redraw = rtmp[0]
+          hkl, moved, redraw = handle_key_left(moved, redraw)
           if hkl
             cp = cursor_pos
             if cp < @info.size
