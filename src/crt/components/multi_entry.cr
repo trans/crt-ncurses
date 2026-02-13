@@ -45,9 +45,7 @@ module CRT
       @label_win = nil
 
       if !label.empty?
-        label_len_arr = [0]
-        @label = char2chtype(label, label_len_arr, [] of Int32)
-        @label_len = label_len_arr[0]
+        @label, @label_len, _ = char2chtype(label)
       end
 
       box_width = @label_len + field_width + 2 * @border_size

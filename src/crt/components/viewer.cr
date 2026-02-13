@@ -55,9 +55,9 @@ module CRT
       @button_count = buttons.size
       if buttons.size > 0
         (0...buttons.size).each do |x|
-          button_len_arr = [] of Int32
-          @button << char2chtype(buttons[x], button_len_arr, [] of Int32)
-          @button_len << button_len_arr[0]
+          chtype, len, _ = char2chtype(buttons[x])
+          @button << chtype
+          @button_len << len
           button_width += @button_len[x] + 1
         end
         button_adj = (box_width - button_width) // (buttons.size + 1)
@@ -416,17 +416,15 @@ module CRT
 
     private def setup_line(fmt : Bool, list : String, x : Int32)
       if fmt
-        list_len_arr = [] of Int32
-        list_pos_arr = [] of Int32
-        chtype_arr = char2chtype(list, list_len_arr, list_pos_arr)
+        chtype, len, pos = char2chtype(list)
         if x < @list.size
-          @list[x] = chtype_arr
-          @list_len[x] = list_len_arr[0]
-          @list_pos[x] = justify_string(@box_width, @list_len[x], list_pos_arr[0])
+          @list[x] = chtype
+          @list_len[x] = len
+          @list_pos[x] = justify_string(@box_width, len, pos)
         else
-          @list << chtype_arr
-          @list_len << list_len_arr[0]
-          @list_pos << justify_string(@box_width, list_len_arr[0], list_pos_arr[0])
+          @list << chtype
+          @list_len << len
+          @list_pos << justify_string(@box_width, len, pos)
         end
       else
         t = String.build do |s|

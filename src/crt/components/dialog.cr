@@ -37,20 +37,19 @@ module CRT
 
       # Translate message strings to chtype arrays
       mesg.size.times do |x|
-        info_len = [] of Int32
-        info_pos = [] of Int32
-        @info << char2chtype(mesg[x], info_len, info_pos)
-        @info_len << info_len[0]
-        @info_pos << info_pos[0]
-        max_message_width = {max_message_width, info_len[0]}.max
+        chtype, len, pos = char2chtype(mesg[x])
+        @info << chtype
+        @info_len << len
+        @info_pos << pos
+        max_message_width = {max_message_width, len}.max
       end
 
       # Translate button labels to chtype arrays
       buttons.size.times do |x|
-        btn_len = [] of Int32
-        @button_label << char2chtype(buttons[x], btn_len, [] of Int32)
-        @button_len << btn_len[0]
-        button_width += btn_len[0] + 1
+        chtype, len, _ = char2chtype(buttons[x])
+        @button_label << chtype
+        @button_len << len
+        button_width += len + 1
       end
       button_width -= 1
 

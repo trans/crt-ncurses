@@ -334,12 +334,8 @@ module CRT
     def alloc_list_item(which : Int32, number : Int32, value : String) : Bool
       display_value = number > 0 ? "%4d. %s" % [number, value] : value
 
-      item_len = [] of Int32
-      item_pos = [] of Int32
-      @item[which] = char2chtype(display_value, item_len, item_pos)
-      @item_len[which] = item_len[0]
-      @item_pos[which] = item_pos[0]
-      @item_pos[which] = justify_string(@box_width, @item_len[which], @item_pos[which])
+      @item[which], @item_len[which], pos = char2chtype(display_value)
+      @item_pos[which] = justify_string(@box_width, @item_len[which], pos)
       true
     end
 

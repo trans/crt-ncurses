@@ -80,10 +80,10 @@ module CRT
         max = -1
         (TITLELINES...subsize[x]).each do |y|
           y0 = y - TITLELINES
-          sublist_len_arr = [] of Int32
-          @sublist[x1][y0] = char2chtype(menu_list[x][y], sublist_len_arr, [] of Int32)
-          @sublist_len[x1][y0] = sublist_len_arr[0]
-          max = {max, sublist_len_arr[0]}.max
+          chtype, len, _ = char2chtype(menu_list[x][y])
+          @sublist[x1][y0] = chtype
+          @sublist_len[x1][y0] = len
+          max = {max, len}.max
         end
 
         x2 = if menu_location[x].left?
@@ -93,9 +93,9 @@ module CRT
                rightloc
              end
 
-        title_len_arr = [] of Int32
-        @menu_title[x1] = char2chtype(menu_list[x][0], title_len_arr, [] of Int32)
-        @menu_title_len[x1] = title_len_arr[0]
+        chtype, len, _ = char2chtype(menu_list[x][0])
+        @menu_title[x1] = chtype
+        @menu_title_len[x1] = len
         @subsize[x1] = subsize[x] - TITLELINES
         @title_win[x1] = CRT.subwin(parent_window, TITLELINES,
           @menu_title_len[x1] + 2, ypos + y1, xpos + x2)

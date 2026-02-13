@@ -47,20 +47,14 @@ module CRT
 
       # X axis title
       if !xtitle.empty?
-        xtitle_len_arr = [] of Int32
-        xtitle_pos_arr = [] of Int32
-        @xtitle = char2chtype(xtitle, xtitle_len_arr, xtitle_pos_arr)
-        @xtitle_len = xtitle_len_arr[0]
-        @xtitle_pos = justify_string(@box_height, @xtitle_len, xtitle_pos_arr[0])
+        @xtitle, @xtitle_len, xtitle_pos = char2chtype(xtitle)
+        @xtitle_pos = justify_string(@box_height, @xtitle_len, xtitle_pos)
       end
 
       # Y axis title
       if !ytitle.empty?
-        ytitle_len_arr = [] of Int32
-        ytitle_pos_arr = [] of Int32
-        @ytitle = char2chtype(ytitle, ytitle_len_arr, ytitle_pos_arr)
-        @ytitle_len = ytitle_len_arr[0]
-        @ytitle_pos = justify_string(@box_width, @ytitle_len, ytitle_pos_arr[0])
+        @ytitle, @ytitle_len, ytitle_pos = char2chtype(ytitle)
+        @ytitle_pos = justify_string(@box_width, @ytitle_len, ytitle_pos)
       end
 
       @graph_char = [] of Int32
@@ -98,9 +92,8 @@ module CRT
     end
 
     def characters=(characters : String) : Bool
-      char_count = [] of Int32
-      new_tokens = char2chtype(characters, char_count, [] of Int32)
-      return false if char_count[0] != @count
+      new_tokens, char_count, _ = char2chtype(characters)
+      return false if char_count != @count
       @graph_char = new_tokens
       true
     end

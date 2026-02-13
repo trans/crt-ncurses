@@ -97,10 +97,10 @@ module CRT
 
       # Convert each choice to chtype array
       choices.size.times do |j|
-        choicelen = [] of Int32
-        @choice << char2chtype(choices[j], choicelen, [] of Int32)
-        @choicelen << choicelen[0]
-        @maxchoicelen = {@maxchoicelen, choicelen[0]}.max
+        chtype, len, _ = char2chtype(choices[j])
+        @choice << chtype
+        @choicelen << len
+        @maxchoicelen = {@maxchoicelen, len}.max
       end
 
       # Create list items
@@ -392,12 +392,11 @@ module CRT
       adjust = @maxchoicelen + @border_size
 
       list_size.times do |j|
-        lentmp = [] of Int32
-        postmp = [] of Int32
-        new_list << char2chtype(list[j], lentmp, postmp)
-        new_len << lentmp[0]
-        new_pos << postmp[0]
-        new_pos[j] = justify_string(adjusted_width, new_len[j], new_pos[j]) + adjust
+        chtype, len, pos = char2chtype(list[j])
+        new_list << chtype
+        new_len << len
+        new_pos << pos
+        new_pos[j] = justify_string(adjusted_width, len, pos) + adjust
         widest_item = {widest_item, new_len[j]}.max
       end
 

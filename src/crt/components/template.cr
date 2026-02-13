@@ -41,16 +41,12 @@ module CRT
       @label_win = nil
 
       if !label.empty?
-        label_len_arr = [0]
-        @label = char2chtype(label, label_len_arr, [] of Int32)
-        @label_len = label_len_arr[0]
+        @label, @label_len, _ = char2chtype(label)
       end
 
       # Translate overlay
       if !overlay.empty?
-        overlay_len_arr = [0]
-        @overlay = char2chtype(overlay, overlay_len_arr, [] of Int32)
-        @overlay_len = overlay_len_arr[0]
+        @overlay, @overlay_len, _ = char2chtype(overlay)
         @field_attr = @overlay.size > 0 ? (@overlay[0] & ~0xFF) : 0
       else
         @overlay = [] of Int32

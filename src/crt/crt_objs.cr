@@ -83,9 +83,7 @@ module CRT
     def set_background_color(color : String)
       return if color.empty?
 
-      junk1 = [] of Int32
-      junk2 = [] of Int32
-      holder = char2chtype(color, junk1, junk2)
+      holder, _, _ = char2chtype(color)
       set_bk_attr(holder[0]) unless holder.empty?
     end
 

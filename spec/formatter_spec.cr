@@ -18,20 +18,16 @@ end
 describe CRT::Formatter do
   describe "plain text" do
     it "converts plain text to chtype array" do
-      len = [] of Int32
-      align = [] of Int32
-      result = CRT::Formatter.parse("Hello", len, align)
+      result, len, _ = CRT::Formatter.parse("Hello")
       result.size.should eq(5)
-      len[0].should eq(5)
+      len.should eq(5)
       text_of(result).should eq("Hello")
     end
 
     it "returns empty array for empty string" do
-      len = [] of Int32
-      align = [] of Int32
-      result = CRT::Formatter.parse("", len, align)
+      result, len, _ = CRT::Formatter.parse("")
       result.should be_empty
-      len[0].should eq(0)
+      len.should eq(0)
     end
 
     it "preserves character values" do
@@ -44,61 +40,45 @@ describe CRT::Formatter do
 
   describe "alignment" do
     it "defaults to left alignment" do
-      len = [] of Int32
-      align = [] of Int32
-      CRT::Formatter.parse("text", len, align)
-      align[0].should eq(CRT::LEFT)
+      _, _, align = CRT::Formatter.parse("text")
+      align.should eq(CRT::LEFT)
     end
 
     it "detects [C] center alignment" do
-      len = [] of Int32
-      align = [] of Int32
-      result = CRT::Formatter.parse("[C]centered", len, align)
-      align[0].should eq(CRT::CENTER)
-      len[0].should eq(8)
+      result, len, align = CRT::Formatter.parse("[C]centered")
+      align.should eq(CRT::CENTER)
+      len.should eq(8)
       text_of(result).should eq("centered")
     end
 
     it "detects [center] alignment" do
-      len = [] of Int32
-      align = [] of Int32
-      CRT::Formatter.parse("[center]text", len, align)
-      align[0].should eq(CRT::CENTER)
+      _, _, align = CRT::Formatter.parse("[center]text")
+      align.should eq(CRT::CENTER)
     end
 
     it "detects [R] right alignment" do
-      len = [] of Int32
-      align = [] of Int32
-      CRT::Formatter.parse("[R]right", len, align)
-      align[0].should eq(CRT::RIGHT)
+      _, _, align = CRT::Formatter.parse("[R]right")
+      align.should eq(CRT::RIGHT)
     end
 
     it "detects [right] alignment" do
-      len = [] of Int32
-      align = [] of Int32
-      CRT::Formatter.parse("[right]text", len, align)
-      align[0].should eq(CRT::RIGHT)
+      _, _, align = CRT::Formatter.parse("[right]text")
+      align.should eq(CRT::RIGHT)
     end
 
     it "detects [L] left alignment" do
-      len = [] of Int32
-      align = [] of Int32
-      CRT::Formatter.parse("[L]left", len, align)
-      align[0].should eq(CRT::LEFT)
+      _, _, align = CRT::Formatter.parse("[L]left")
+      align.should eq(CRT::LEFT)
     end
 
     it "detects [left] alignment" do
-      len = [] of Int32
-      align = [] of Int32
-      CRT::Formatter.parse("[left]text", len, align)
-      align[0].should eq(CRT::LEFT)
+      _, _, align = CRT::Formatter.parse("[left]text")
+      align.should eq(CRT::LEFT)
     end
 
     it "only checks alignment at string start" do
-      len = [] of Int32
-      align = [] of Int32
-      result = CRT::Formatter.parse("hello[C]world", len, align)
-      align[0].should eq(CRT::LEFT)
+      _, _, align = CRT::Formatter.parse("hello[C]world")
+      align.should eq(CRT::LEFT)
       # [C] mid-string is treated as a style tag, not alignment
     end
   end
@@ -226,10 +206,8 @@ describe CRT::Formatter do
 
   describe "escape sequences" do
     it "treats \\[ as literal bracket" do
-      len = [] of Int32
-      align = [] of Int32
-      result = CRT::Formatter.parse("a\\[b", len, align)
-      len[0].should eq(3)
+      result, len, _ = CRT::Formatter.parse("a\\[b")
+      len.should eq(3)
       text_of(result).should eq("a[b")
     end
 
@@ -241,18 +219,14 @@ describe CRT::Formatter do
 
   describe "tabs" do
     it "expands tab to 8-column boundary" do
-      len = [] of Int32
-      align = [] of Int32
-      result = CRT::Formatter.parse("\t", len, align)
-      len[0].should eq(8)
+      result, len, _ = CRT::Formatter.parse("\t")
+      len.should eq(8)
       result.all? { |ch| char_of(ch) == ' ' }.should be_true
     end
 
     it "expands tab after text to next boundary" do
-      len = [] of Int32
-      align = [] of Int32
-      result = CRT::Formatter.parse("ab\t", len, align)
-      len[0].should eq(8)  # 'a','b' + 6 spaces to reach column 8
+      _, len, _ = CRT::Formatter.parse("ab\t")
+      len.should eq(8)  # 'a','b' + 6 spaces to reach column 8
     end
   end
 
@@ -316,14 +290,6 @@ describe CRT::Formatter do
       result = CRT.fmt("hello")
       result.size.should eq(5)
       text_of(result).should eq("hello")
-    end
-
-    it "returns chtype array with len and align" do
-      len = [] of Int32
-      align = [] of Int32
-      result = CRT.fmt("[R][b]right", len, align)
-      align[0].should eq(CRT::RIGHT)
-      len[0].should eq(5)
     end
   end
 end

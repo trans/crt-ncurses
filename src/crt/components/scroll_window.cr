@@ -88,11 +88,10 @@ module CRT
 
     def setup_line(list : String, x : Int32, fmt : Bool = false)
       if fmt
-        list_len_arr = [] of Int32
-        list_pos_arr = [] of Int32
-        @list[x] = char2chtype(list, list_len_arr, list_pos_arr)
-        @list_len[x] = list_len_arr[0]
-        @list_pos[x] = justify_string(@box_width, list_len_arr[0], list_pos_arr[0])
+        chtype, len, pos = char2chtype(list)
+        @list[x] = chtype
+        @list_len[x] = len
+        @list_pos[x] = justify_string(@box_width, len, pos)
       else
         plain = list.chars.map { |c| c.ord }
         @list[x] = plain

@@ -21,10 +21,8 @@ module CRT
       if box_width >= 0
         max_width = 0
         temp.each do |line|
-          len = [] of Int32
-          align = [] of Int32
-          char2chtype(line, len, align)
-          max_width = {len[0], max_width}.max
+          _, len, _ = char2chtype(line)
+          max_width = {len, max_width}.max
         end
         box_width = {box_width, max_width + 2 * @border_size}.max
       else
@@ -37,11 +35,10 @@ module CRT
       @title_len = [] of Int32
 
       @title_lines.times do |x|
-        len_x = [] of Int32
-        pos_x = [] of Int32
-        @title << char2chtype(temp[x], len_x, pos_x)
-        @title_len << len_x[0]
-        @title_pos << justify_string(title_width, len_x[0], pos_x[0])
+        chtype, len, pos = char2chtype(temp[x])
+        @title << chtype
+        @title_len << len
+        @title_pos << justify_string(title_width, len, pos)
       end
 
       box_width

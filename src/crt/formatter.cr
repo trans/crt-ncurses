@@ -79,14 +79,8 @@ module CRT
   #
   # Returns an Array(Int32) of chtype values ready for Draw.write_chtype.
   def self.fmt(string : String) : Array(Int32)
-    len = [] of Int32
-    align = [] of Int32
-    Formatter.parse(string, len, align)
-  end
-
-  # Format returning length and alignment info (for widget internals).
-  def self.fmt(string : String, len : Array(Int32), align : Array(Int32)) : Array(Int32)
-    Formatter.parse(string, len, align)
+    result, _, _ = Formatter.parse(string)
+    result
   end
 
   module Formatter
@@ -138,12 +132,12 @@ module CRT
     #   [R] or [right]      — right alignment (at string start only)
     #   [L] or [left]       — left alignment (at string start only)
     #
-    def self.parse(string : String, len : Array(Int32), align : Array(Int32)) : Array(Int32)
-      len << 0
-      align << CRT::LEFT
+    def self.parse(string : String) : {Array(Int32), Int32, Int32}
       result = [] of Int32
 
-      return result if string.empty?
+      return {result, 0, CRT::LEFT} if string.empty?
+
+      alignment = CRT::LEFT
 
       stack = [] of StyleFrame
       current_attrs = 0
@@ -158,8 +152,8 @@ module CRT
         close = string.index(']', 1)
         if close
           tag = string[1...close]
-          if alignment = ALIGNMENTS[tag]?
-            align[align.size - 1] = alignment
+          if align_val = ALIGNMENTS[tag]?
+            alignment = align_val
             start = close + 1
           end
         end
@@ -223,8 +217,7 @@ module CRT
         from += 1
       end
 
-      len[len.size - 1] = used
-      result
+      {result, used, alignment}
     end
 
     # Tokenize a tag's content, expanding registered styles.

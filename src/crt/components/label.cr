@@ -30,12 +30,11 @@ module CRT
 
       # Determine the box width by finding the widest message line
       mesg.size.times do |x|
-        info_len = [] of Int32
-        info_pos = [] of Int32
-        @info << char2chtype(mesg[x], info_len, info_pos)
-        @info_len << info_len[0]
-        @info_pos << info_pos[0]
-        box_width = {box_width, @info_len[x]}.max
+        chtype, len, pos = char2chtype(mesg[x])
+        @info << chtype
+        @info_len << len
+        @info_pos << pos
+        box_width = {box_width, len}.max
       end
       box_width += 2 * @border_size
 
@@ -114,12 +113,10 @@ module CRT
 
       # Copy in the new message
       @rows.times do |x|
-        info_len = [] of Int32
-        info_pos = [] of Int32
-        @info[x] = char2chtype(info[x], info_len, info_pos)
-        @info_len[x] = info_len[0]
-        @info_pos[x] = justify_string(@box_width - 2 * @border_size,
-          @info_len[x], info_pos[0])
+        chtype, len, pos = char2chtype(info[x])
+        @info[x] = chtype
+        @info_len[x] = len
+        @info_pos[x] = justify_string(@box_width - 2 * @border_size, len, pos)
       end
 
       # Redraw

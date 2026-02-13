@@ -48,9 +48,9 @@ module CRT
 
       # Translate buttons to chtype arrays
       buttons.size.times do |x|
-        button_len = [] of Int32
-        @button << char2chtype(buttons[x], button_len, [] of Int32)
-        @button_len << button_len[0]
+        chtype, len, _ = char2chtype(buttons[x])
+        @button << chtype
+        @button_len << len
       end
 
       # Set button positions and column widths

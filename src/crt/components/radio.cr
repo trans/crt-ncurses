@@ -362,12 +362,11 @@ module CRT
 
       adjusted_width = box_width - 2 - @border_size
       list_size.times do |j|
-        lentmp = [] of Int32
-        postmp = [] of Int32
-        new_list << char2chtype(list[j], lentmp, postmp)
-        new_len << lentmp[0]
-        new_pos << postmp[0]
-        new_pos[j] = justify_string(adjusted_width, new_len[j], new_pos[j]) + 3
+        chtype, len, pos = char2chtype(list[j])
+        new_list << chtype
+        new_len << len
+        new_pos << pos
+        new_pos[j] = justify_string(adjusted_width, len, pos) + 3
         widest_item = {widest_item, new_len[j]}.max
       end
 

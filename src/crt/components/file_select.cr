@@ -71,9 +71,7 @@ module CRT
       set_dir_contents
 
       # Create the entry field
-      label_len_arr = [] of Int32
-      char2chtype(label, label_len_arr, [] of Int32)
-      label_len = label_len_arr[0]? || 0
+      _, label_len, _ = char2chtype(label)
 
       temp_width = is_full_width?(width) ? CRT::FULL : box_width - 2 - label_len
       @entry_field = CRT::Entry.new(screen,
@@ -261,8 +259,7 @@ module CRT
     end
 
     def content_to_path(content : String) : String
-      temp_len = [] of Int32
-      temp_chtype = char2chtype(content, temp_len, [] of Int32)
+      temp_chtype, _, _ = char2chtype(content)
       temp_char = chtype2char(temp_chtype)
       make_pathname(@pwd, temp_char.strip)
     end

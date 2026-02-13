@@ -2,8 +2,8 @@ module CRT
   module Converters
     # Translates a CRT format string into an array of chtype (Int32) values.
     # Delegates to the BBCode-style Formatter. See CRT::Formatter for syntax.
-    def char2chtype(string : String, to : Array(Int32), align : Array(Int32)) : Array(Int32)
-      CRT::Formatter.parse(string, to, align)
+    def char2chtype(string : String) : {Array(Int32), Int32, Int32}
+      CRT::Formatter.parse(string)
     end
 
     def char_of(chtype : Int32) : Char

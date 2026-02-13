@@ -46,9 +46,7 @@ module CRT
 
       set_box(box)
 
-      mesg_length_arr = [] of Int32
-      message = char2chtype(mesg, mesg_length_arr, [] of Int32)
-      mesg_length = mesg_length_arr[0]
+      message, mesg_length, _ = char2chtype(mesg)
 
       draw(@box)
       view_limit = @box_width - 2 * @border_size

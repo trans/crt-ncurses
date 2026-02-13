@@ -27,11 +27,7 @@ module CRT
       box_height = 1 + 2 * @border_size
 
       # Translate the string to a chtype array
-      info_len = [] of Int32
-      info_pos = [] of Int32
-      @info = char2chtype(text, info_len, info_pos)
-      @info_len = info_len[0]
-      @info_pos = info_pos[0]
+      @info, @info_len, @info_pos = char2chtype(text)
 
       box_width = {@info_len, box_width}.max + 2 * @border_size
 
@@ -128,12 +124,9 @@ module CRT
     end
 
     def message=(info : String)
-      info_len = [] of Int32
-      info_pos = [] of Int32
-      @info = char2chtype(info, info_len, info_pos)
-      @info_len = info_len[0]
+      @info, @info_len, info_pos = char2chtype(info)
       @info_pos = justify_string(@box_width - 2 * @border_size,
-        @info_len, info_pos[0])
+        @info_len, info_pos)
 
       erase
       draw(@box)

@@ -90,11 +90,7 @@ module CRT
       (1..rows).each do |x|
         rt = x < rowtitles.size ? rowtitles[x] : ""
         have_rowtitles = true if !rt.empty?
-        rt_len = [] of Int32
-        rt_pos = [] of Int32
-        @rowtitle[x] = char2chtype(rt, rt_len, rt_pos)
-        @rowtitle_len[x] = rt_len[0]
-        @rowtitle_pos[x] = rt_pos[0]
+        @rowtitle[x], @rowtitle_len[x], @rowtitle_pos[x] = char2chtype(rt)
         max_row_title_width = {max_row_title_width, @rowtitle_len[x]}.max
       end
 
@@ -138,12 +134,11 @@ module CRT
       (1..cols).each do |x|
         ct = x < coltitles.size ? coltitles[x] : ""
         have_coltitles = true if !ct.empty?
-        ct_len = [] of Int32
-        ct_pos = [] of Int32
-        @coltitle[x] = char2chtype(ct, ct_len, ct_pos)
-        @coltitle_len[x] = ct_len[0]
+        chtype, len, pos = char2chtype(ct)
+        @coltitle[x] = chtype
+        @coltitle_len[x] = len
         cw = x < colwidths.size ? colwidths[x] : 1
-        @coltitle_pos[x] = @border_size + justify_string(cw, @coltitle_len[x], ct_pos[0])
+        @coltitle_pos[x] = @border_size + justify_string(cw, len, pos)
         @colwidths[x] = cw
       end
 

@@ -32,9 +32,7 @@ module CRT
       box_width = CRT.set_widget_dimension(parent_width, width, 0)
 
       if !label.empty?
-        label_len_arr = [] of Int32
-        char2chtype(label, label_len_arr, [] of Int32)
-        label_len = label_len_arr[0]
+        _, label_len, _ = char2chtype(label)
       end
 
       xpos, ypos = alignxy(parent_window, x, y, box_width, box_height)

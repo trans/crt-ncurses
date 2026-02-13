@@ -37,9 +37,7 @@ module CRT
       @label_win = nil
 
       if !label.empty?
-        label_len_arr = [0]
-        @label = char2chtype(label, label_len_arr, [] of Int32)
-        @label_len = label_len_arr[0]
+        @label, @label_len, _ = char2chtype(label)
       end
 
       # Set box width - allow extra char in field for cursor
@@ -275,11 +273,10 @@ module CRT
       field_width = 0
 
       count.times do |x|
-        lentmp = [] of Int32
-        postmp = [] of Int32
-        new_items << char2chtype(items[x], lentmp, postmp)
-        new_len << lentmp[0]
-        new_pos << postmp[0]
+        chtype, len, pos = char2chtype(items[x])
+        new_items << chtype
+        new_len << len
+        new_pos << pos
         field_width = {field_width, new_len[x]}.max
       end
 

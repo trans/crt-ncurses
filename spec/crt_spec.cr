@@ -166,64 +166,50 @@ describe CRT do
 
     describe "char2chtype" do
       it "converts plain text to chtype array" do
-        len = [] of Int32
-        align = [] of Int32
-        result = host.char2chtype("Hello", len, align)
+        result, len, align = host.char2chtype("Hello")
         result.size.should eq(5)
-        len[0].should eq(5)
-        align[0].should eq(CRT::LEFT)
+        len.should eq(5)
+        align.should eq(CRT::LEFT)
         # Each chtype should be the char ord with no attributes
         result[0].should eq('H'.ord)
         result[4].should eq('o'.ord)
       end
 
       it "returns empty array for empty string" do
-        len = [] of Int32
-        align = [] of Int32
-        result = host.char2chtype("", len, align)
+        result, _, _ = host.char2chtype("")
         result.should be_empty
       end
 
       it "detects [C] center alignment" do
-        len = [] of Int32
-        align = [] of Int32
-        host.char2chtype("[C]centered", len, align)
-        align[0].should eq(CRT::CENTER)
-        len[0].should eq(8)
+        _, len, align = host.char2chtype("[C]centered")
+        align.should eq(CRT::CENTER)
+        len.should eq(8)
       end
 
       it "detects [R] right alignment" do
-        len = [] of Int32
-        align = [] of Int32
-        host.char2chtype("[R]right", len, align)
-        align[0].should eq(CRT::RIGHT)
-        len[0].should eq(5)
+        _, len, align = host.char2chtype("[R]right")
+        align.should eq(CRT::RIGHT)
+        len.should eq(5)
       end
 
       it "detects [L] left alignment" do
-        len = [] of Int32
-        align = [] of Int32
-        host.char2chtype("[L]left", len, align)
-        align[0].should eq(CRT::LEFT)
-        len[0].should eq(4)
+        _, len, align = host.char2chtype("[L]left")
+        align.should eq(CRT::LEFT)
+        len.should eq(4)
       end
 
       it "applies bold attribute" do
-        len = [] of Int32
-        align = [] of Int32
-        result = host.char2chtype("[b]bold", len, align)
+        result, len, _ = host.char2chtype("[b]bold")
         bold = LibNCurses::Attribute::Bold.value.to_i32
-        len[0].should eq(4)
+        len.should eq(4)
         result[0].should eq('b'.ord | bold)
         result[3].should eq('d'.ord | bold)
       end
 
       it "pops attribute with [/]" do
-        len = [] of Int32
-        align = [] of Int32
-        result = host.char2chtype("[b]on[/]off", len, align)
+        result, len, _ = host.char2chtype("[b]on[/]off")
         bold = LibNCurses::Attribute::Bold.value.to_i32
-        len[0].should eq(5)
+        len.should eq(5)
         # "on" has bold
         result[0].should eq('o'.ord | bold)
         result[1].should eq('n'.ord | bold)
@@ -233,30 +219,24 @@ describe CRT do
       end
 
       it "handles escaped bracket" do
-        len = [] of Int32
-        align = [] of Int32
-        result = host.char2chtype("a\\[b", len, align)
-        len[0].should eq(3)
+        result, len, _ = host.char2chtype("a\\[b")
+        len.should eq(3)
         result[0].should eq('a'.ord)
         result[1].should eq('['.ord)
         result[2].should eq('b'.ord)
       end
 
       it "expands tabs to 8-column boundaries" do
-        len = [] of Int32
-        align = [] of Int32
-        result = host.char2chtype("\t", len, align)
-        len[0].should eq(8)
+        result, len, _ = host.char2chtype("\t")
+        len.should eq(8)
         result.all? { |ch| ch == ' '.ord }.should be_true
       end
 
       it "stacks multiple attributes" do
-        len = [] of Int32
-        align = [] of Int32
-        result = host.char2chtype("[b][u]x", len, align)
+        result, len, _ = host.char2chtype("[b][u]x")
         bold = LibNCurses::Attribute::Bold.value.to_i32
         underline = LibNCurses::Attribute::Underline.value.to_i32
-        len[0].should eq(1)
+        len.should eq(1)
         result[0].should eq('x'.ord | bold | underline)
       end
     end
