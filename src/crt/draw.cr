@@ -191,7 +191,7 @@ module CRT
       char_byte = (ch & 0xFF).to_u8.unsafe_chr
       attr = LibNCurses::Attribute.new((ch & ~0xFF).to_u32)
       LibNCurses.wattron(window, attr)
-      LibNCurses.mvwaddch(window, y, x, char_byte.ord.to_i8)
+      LibNCurses.mvwaddch(window, y, x, char_byte.ord.to_u8)
       LibNCurses.wattroff(window, attr)
     end
 
