@@ -1,4 +1,4 @@
-name: crt
+name: crt-ncurses
 version: 0.5.3
 
 authors:
