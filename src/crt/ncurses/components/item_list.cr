@@ -1,5 +1,5 @@
-module CRT
-  class ItemList < CRT::CRTObjs
+module CRT::Ncurses
+  class ItemList < CRT::Ncurses::CRTObjs
     getter item : Array(Array(Int32)) = [] of Array(Int32)
     getter item_len : Array(Int32) = [] of Int32
     getter item_pos : Array(Int32) = [] of Int32
@@ -18,9 +18,9 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    items : Array(String), title : String = "", label : String = "",
-                   default_item : Int32 = 0, box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   default_item : Int32 = 0, box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -60,7 +60,7 @@ module CRT
 
       # Create label window
       if @label.size > 0
-        @label_win = CRT.subwin(w, 1, @label_len,
+        @label_win = CRT::Ncurses.subwin(w, 1, @label_len,
           ypos + @border_size + @title_lines,
           xpos + @border_size)
       end
@@ -103,12 +103,12 @@ module CRT
         loop do
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -142,20 +142,20 @@ module CRT
         @current_item = 0
       when '$'.ord
         @current_item = @list_size - 1
-      when CRT::KEY_ESC
+      when CRT::Ncurses::KEY_ESC
         set_exit_type(input)
         @complete = true
-      when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+      when CRT::Ncurses::KEY_TAB, CRT::Ncurses::KEY_RETURN, LibNCurses::Key::Enter.value
         set_exit_type(input)
         ret = @current_item
         @complete = true
-      when CRT::REFRESH
+      when CRT::Ncurses::REFRESH
         if scr = @screen
           scr.erase
           scr.refresh
         end
       else
-        CRT.beep
+        CRT::Ncurses.beep
       end
 
       unless @complete
@@ -174,8 +174,8 @@ module CRT
         draw_title(w)
 
         if lw = @label_win
-          Draw.write_chtype(lw, 0, 0, @label, CRT::HORIZONTAL, 0, @label.size)
-          CRT::Screen.wrefresh(lw)
+          Draw.write_chtype(lw, 0, 0, @label, CRT::Ncurses::HORIZONTAL, 0, @label.size)
+          CRT::Ncurses::Screen.wrefresh(lw)
         end
 
         Draw.draw_obj_box(w, self) if box
@@ -201,14 +201,14 @@ module CRT
         Draw.mvwaddch(fw, 0, x + @item_pos[current], c)
       end
 
-      CRT::Screen.wrefresh(fw)
+      CRT::Ncurses::Screen.wrefresh(fw)
     end
 
     def erase
-      CRT.erase_curses_window(@field_win)
-      CRT.erase_curses_window(@label_win)
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@field_win)
+      CRT::Ncurses.erase_curses_window(@label_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
@@ -216,12 +216,12 @@ module CRT
       clean_title
       @list_size = 0
       @item = [] of Array(Int32)
-      CRT.delete_curses_window(@field_win)
-      CRT.delete_curses_window(@label_win)
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@field_win)
+      CRT::Ncurses.delete_curses_window(@label_win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def current_item=(current_item : Int32)
@@ -309,7 +309,7 @@ module CRT
 
     def create_field_win(ypos : Int32, xpos : Int32) : Bool
       return false unless w = @win
-      @field_win = CRT.subwin(w, 1, @field_width, ypos, xpos)
+      @field_win = CRT::Ncurses.subwin(w, 1, @field_width, ypos, xpos)
       if fw = @field_win
         fw.keypad(true)
         @input_window = fw

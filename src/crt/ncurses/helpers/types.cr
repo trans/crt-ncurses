@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   def self.digit?(character : Char) : Bool
     character.ascii_number?
   end

@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module Focusable
     property has_focus : Bool = true
     property accepts_focus : Bool = false

@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module Justifications
     # Returns the adjustment needed to fill the justification requirement
     # for a string within a box of given width.
@@ -6,11 +6,11 @@ module CRT
       return 0 if mesg_length >= box_width
 
       case justify
-      when CRT::LEFT
+      when CRT::Ncurses::LEFT
         0
-      when CRT::RIGHT
+      when CRT::Ncurses::RIGHT
         box_width - mesg_length
-      when CRT::CENTER
+      when CRT::Ncurses::CENTER
         (box_width - mesg_length) // 2
       else
         justify

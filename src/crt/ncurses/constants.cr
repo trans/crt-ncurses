@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   CRT_PATHMAX = 256
 
   # Direction for drawing operations

@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module WindowHooks
     def draw(box : Bool)
     end

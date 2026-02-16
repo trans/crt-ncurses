@@ -6,10 +6,10 @@ name = nil
 
 NCurses.start
 begin
-  screen = CRT::Screen.new(NCurses.stdscr)
+  screen = CRT::Ncurses::Screen.new(NCurses.stdscr)
 
-  CRT::Entry.open(screen,
-    x: CRT::CENTER, y: CRT::CENTER,
+  CRT::Ncurses::Entry.open(screen,
+    x: CRT::Ncurses::CENTER, y: CRT::Ncurses::CENTER,
     box: true,
     title: "[b]Enter Your Name",
     label: "Name: ",

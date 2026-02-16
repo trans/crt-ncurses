@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   class Framing
     @[Flags]
     enum Edge
@@ -10,13 +10,13 @@ module CRT
 
     record Op, x : Int32, y : Int32, h : Int32 = 0, v : Int32 = 0
 
-    @screen : CRT::Screen?
+    @screen : CRT::Ncurses::Screen?
     @grid : Array(Array(Edge))
     @ops : Array(Op)
     @max_x : Int32
     @max_y : Int32
 
-    def initialize(@screen : CRT::Screen)
+    def initialize(@screen : CRT::Ncurses::Screen)
       window = @screen.not_nil!.window.not_nil!
       @max_x = window.max_x
       @max_y = window.max_y
@@ -61,7 +61,7 @@ module CRT
         end
       end
 
-      CRT::Screen.wrefresh(window)
+      CRT::Ncurses::Screen.wrefresh(window)
     end
 
     def clear

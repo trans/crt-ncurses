@@ -1,5 +1,5 @@
-module CRT
-  abstract class Scroller < CRT::CRTObjs
+module CRT::Ncurses
+  abstract class Scroller < CRT::Ncurses::CRTObjs
     getter current_item : Int32 = 0
     getter current_top : Int32 = 0
     getter current_high : Int32 = 0
@@ -24,17 +24,17 @@ module CRT
               @current_top -= 1
               @current_item -= 1
             else
-              CRT.beep
+              CRT::Ncurses.beep
             end
           else
             @current_item -= 1
             @current_high -= 1
           end
         else
-          CRT.beep
+          CRT::Ncurses.beep
         end
       else
-        CRT.beep
+        CRT::Ncurses.beep
       end
     end
 
@@ -46,41 +46,41 @@ module CRT
               @current_top += 1
               @current_item += 1
             else
-              CRT.beep
+              CRT::Ncurses.beep
             end
           else
             @current_item += 1
             @current_high += 1
           end
         else
-          CRT.beep
+          CRT::Ncurses.beep
         end
       else
-        CRT.beep
+        CRT::Ncurses.beep
       end
     end
 
     def key_left
       if @list_size > 0
         if @left_char == 0
-          CRT.beep
+          CRT::Ncurses.beep
         else
           @left_char -= 1
         end
       else
-        CRT.beep
+        CRT::Ncurses.beep
       end
     end
 
     def key_right
       if @list_size > 0
         if @left_char >= @max_left_char
-          CRT.beep
+          CRT::Ncurses.beep
         else
           @left_char += 1
         end
       else
-        CRT.beep
+        CRT::Ncurses.beep
       end
     end
 
@@ -94,10 +94,10 @@ module CRT
             key_home
           end
         else
-          CRT.beep
+          CRT::Ncurses.beep
         end
       else
-        CRT.beep
+        CRT::Ncurses.beep
       end
     end
 
@@ -113,10 +113,10 @@ module CRT
             @current_high = @view_size - 1
           end
         else
-          CRT.beep
+          CRT::Ncurses.beep
         end
       else
-        CRT.beep
+        CRT::Ncurses.beep
       end
     end
 

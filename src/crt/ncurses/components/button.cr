@@ -1,11 +1,11 @@
-module CRT
-  class Button < CRT::CRTObjs
+module CRT::Ncurses
+  class Button < CRT::Ncurses::CRTObjs
     include Formattable
 
     getter xpos : Int32 = 0
     getter ypos : Int32 = 0
     getter parent : NCurses::Window? = nil
-    property callback : Proc(CRT::Button, Nil)? = nil
+    property callback : Proc(CRT::Ncurses::Button, Nil)? = nil
 
     @info : Array(Int32) = [] of Int32
     @info_len : Int32 = 0
@@ -14,9 +14,9 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
-                   text : String, callback : Proc(CRT::Button, Nil)? = nil,
-                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
+                   text : String, callback : Proc(CRT::Ncurses::Button, Nil)? = nil,
+                   box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -76,12 +76,12 @@ module CRT
         loop do
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -96,23 +96,23 @@ module CRT
       set_exit_type(0)
 
       case input
-      when CRT::KEY_ESC
+      when CRT::Ncurses::KEY_ESC
         set_exit_type(input)
         @complete = true
-      when ' '.ord, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+      when ' '.ord, CRT::Ncurses::KEY_RETURN, LibNCurses::Key::Enter.value
         if cb = @callback
           cb.call(self)
         end
         set_exit_type(LibNCurses::Key::Enter.value)
         ret = 0
         @complete = true
-      when CRT::REFRESH
+      when CRT::Ncurses::REFRESH
         if scr = @screen
           scr.erase
           scr.refresh
         end
       else
-        CRT.beep
+        CRT::Ncurses.beep
       end
 
       unless @complete
@@ -161,16 +161,16 @@ module CRT
     end
 
     def erase
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

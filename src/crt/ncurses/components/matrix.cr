@@ -1,5 +1,5 @@
-module CRT
-  class Matrix < CRT::CRTObjs
+module CRT::Ncurses
+  class Matrix < CRT::Ncurses::CRTObjs
     MAX_MATRIX_ROWS = 1000
     MAX_MATRIX_COLS = 1000
 
@@ -9,7 +9,7 @@ module CRT
     getter crow : Int32 = 1
     getter ccol : Int32 = 1
     getter colwidths : Array(Int32)
-    getter colvalues : Array(CRT::DisplayType)
+    getter colvalues : Array(CRT::Ncurses::DisplayType)
     getter filler : Int32 = '.'.ord
 
     @cell : Array(Array(NCurses::Window?))
@@ -39,12 +39,12 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    rows : Int32, cols : Int32, vrows : Int32, vcols : Int32,
                    rowtitles : Array(String), coltitles : Array(String),
-                   colwidths : Array(Int32), colvalues : Array(CRT::DisplayType),
+                   colwidths : Array(Int32), colvalues : Array(CRT::Ncurses::DisplayType),
                    title : String = "", rspace : Int32 = 1, cspace : Int32 = 1,
-                   filler : Char = '.', dominant : Dominant = Dominant::None, box : Bool | CRT::Framing | Nil = nil,
+                   filler : Char = '.', dominant : Dominant = Dominant::None, box : Bool | CRT::Ncurses::Framing | Nil = nil,
                    box_cell : Bool = true, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
@@ -69,7 +69,7 @@ module CRT
       @info = Array(Array(String)).new(rows + 1) { Array(String).new(cols + 1, "") }
       @cell = Array(Array(NCurses::Window?)).new(rows + 1) { Array(NCurses::Window?).new(cols + 1, nil) }
       @colwidths = Array(Int32).new(cols + 1, 0)
-      @colvalues = Array(CRT::DisplayType).new(cols + 1, CRT::DisplayType::MIXED)
+      @colvalues = Array(CRT::Ncurses::DisplayType).new(cols + 1, CRT::Ncurses::DisplayType::MIXED)
       @coltitle = Array(Array(Int32)).new(cols + 1) { [] of Int32 }
       @coltitle_len = Array(Int32).new(cols + 1, 0)
       @coltitle_pos = Array(Int32).new(cols + 1, 0)
@@ -125,7 +125,7 @@ module CRT
 
       # Make the 0,0 cell (row title header)
       if @maxrt > 0
-        @cell[0][0] = CRT.subwin(w, 3, @maxrt, begy, begx)
+        @cell[0][0] = CRT::Ncurses.subwin(w, 3, @maxrt, begy, begx)
       end
 
       begx += @maxrt + 1
@@ -146,7 +146,7 @@ module CRT
         (1..vcols).each do |x|
           cw = @colwidths[x]
           cell_width = cw + 3
-          @cell[0][x] = CRT.subwin(w, borderw, cell_width, begy, begx)
+          @cell[0][x] = CRT::Ncurses.subwin(w, borderw, cell_width, begy, begx)
           return if @cell[0][x].nil?
           begx += cell_width + col_space - 1
         end
@@ -156,7 +156,7 @@ module CRT
       # Make main cell body
       (1..vrows).each do |x|
         if have_rowtitles
-          @cell[x][0] = CRT.subwin(w, 3, @maxrt, begy, xpos + borderw)
+          @cell[x][0] = CRT::Ncurses.subwin(w, 3, @maxrt, begy, xpos + borderw)
           return if @cell[x][0].nil?
         end
 
@@ -164,7 +164,7 @@ module CRT
 
         (1..vcols).each do |y|
           cell_width = @colwidths[y] + 3
-          @cell[x][y] = CRT.subwin(w, 3, cell_width, begy, begx)
+          @cell[x][y] = CRT::Ncurses.subwin(w, 3, cell_width, begy, begx)
           return if @cell[x][y].nil?
           if cw = @cell[x][y]
             cw.keypad(true)
@@ -192,7 +192,7 @@ module CRT
 
       # Copy colwidths and colvalues
       (1..cols).each do |y|
-        @colvalues[y] = y < colvalues.size ? colvalues[y] : CRT::DisplayType::MIXED
+        @colvalues[y] = y < colvalues.size ? colvalues[y] : CRT::Ncurses::DisplayType::MIXED
         @colwidths[y] = y < colwidths.size ? colwidths[y] : 1
       end
 
@@ -201,8 +201,8 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
-      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::Ncurses::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::Ncurses::BACKCHAR, LibNCurses::Key::PageUp.value)
 
       screen.register(object_type, self)
       register_framing
@@ -219,12 +219,12 @@ module CRT
           end
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -259,17 +259,17 @@ module CRT
         case resolved
         when LibNCurses::Key::Backspace.value, LibNCurses::Key::Delete.value
           if @colvalues[@col].viewonly? || @info[@row][@col].size <= 0
-            CRT.beep
+            CRT::Ncurses.beep
           else
             charcount = @info[@row][@col].size - 1
             if cell = cur_matrix_cell
               LibNCurses.mvwdelch(cell, 1, charcount + 1)
               LibNCurses.mvwinsch(cell, 1, charcount + 1, @filler.to_u8.unsafe_chr.ord.to_i8)
-              CRT::Screen.wrefresh(cell)
+              CRT::Ncurses::Screen.wrefresh(cell)
             end
             @info[@row][@col] = @info[@row][@col][0...charcount]
           end
-        when LibNCurses::Key::Right.value, CRT::KEY_TAB
+        when LibNCurses::Key::Right.value, CRT::Ncurses::KEY_TAB
           if @ccol != @vcols
             @col += 1
             @ccol += 1
@@ -284,7 +284,7 @@ module CRT
             moved_cell = true
           else
             if @row == @rows
-              CRT.beep
+              CRT::Ncurses.beep
             else
               @col = 1; @lcol = 1; @ccol = 1
               if @crow != @vrows
@@ -310,7 +310,7 @@ module CRT
             moved_cell = true
           else
             if @row == 1
-              CRT.beep
+              CRT::Ncurses.beep
             else
               @col = @cols; @lcol = @cols - @vcols + 1; @ccol = @vcols
               if @crow != 1
@@ -335,7 +335,7 @@ module CRT
             refresh_cells = true
             moved_cell = true
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         when LibNCurses::Key::Down.value
           if @crow != @vrows
@@ -349,7 +349,7 @@ module CRT
             refresh_cells = true
             moved_cell = true
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         when LibNCurses::Key::PageDown.value
           if @rows > @vrows && @trow + (@vrows - 1) * 2 <= @rows
@@ -359,7 +359,7 @@ module CRT
             refresh_cells = true
             moved_cell = true
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         when LibNCurses::Key::PageUp.value
           if @rows > @vrows && @trow - (@vrows - 1) >= 1
@@ -369,26 +369,26 @@ module CRT
             refresh_cells = true
             moved_cell = true
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
-        when CRT::PASTE
-          buf = CRT::CRTObjs.paste_buffer
+        when CRT::Ncurses::PASTE
+          buf = CRT::Ncurses::CRTObjs.paste_buffer
           if buf.empty? || buf.size > @colwidths[@ccol]
-            CRT.beep
+            CRT::Ncurses.beep
           else
             @info[@row][@col] = buf
             draw_cur_cell
           end
-        when CRT::COPY
-          CRT::CRTObjs.paste_buffer = @info[@row][@col]
-        when CRT::CUT
-          CRT::CRTObjs.paste_buffer = @info[@row][@col]
+        when CRT::Ncurses::COPY
+          CRT::Ncurses::CRTObjs.paste_buffer = @info[@row][@col]
+        when CRT::Ncurses::CUT
+          CRT::Ncurses::CRTObjs.paste_buffer = @info[@row][@col]
           clean_cell(@row, @col)
           draw_cur_cell
-        when CRT::ERASE
+        when CRT::Ncurses::ERASE
           clean_cell(@row, @col)
           draw_cur_cell
-        when LibNCurses::Key::Enter.value, CRT::KEY_RETURN
+        when LibNCurses::Key::Enter.value, CRT::Ncurses::KEY_RETURN
           if !@box_cell && (old_cell = @cell[@oldcrow][@oldccol])
             Draw.attrbox(old_cell, ' '.ord, ' '.ord, ' '.ord, ' '.ord,
               ' '.ord, ' '.ord, 0)
@@ -398,7 +398,7 @@ module CRT
           set_exit_type(resolved)
           ret = 1
           @complete = true
-        when CRT::KEY_ESC
+        when CRT::Ncurses::KEY_ESC
           if !@box_cell && (old_cell = @cell[@oldcrow][@oldccol])
             Draw.attrbox(old_cell, ' '.ord, ' '.ord, ' '.ord, ' '.ord,
               ' '.ord, ' '.ord, 0)
@@ -407,30 +407,30 @@ module CRT
           end
           set_exit_type(resolved)
           @complete = true
-        when CRT::REFRESH
+        when CRT::Ncurses::REFRESH
           if scr = @screen
             scr.erase
             scr.refresh
           end
         else
           # Character input callback
-          plainchar = CRT::Display.filter_by_display_type(@colvalues[@col], input)
+          plainchar = CRT::Ncurses::Display.filter_by_display_type(@colvalues[@col], input)
           charcount = @info[@row][@col].size
 
           if plainchar == -1
-            CRT.beep
+            CRT::Ncurses.beep
           elsif charcount >= @colwidths[@col]
-            CRT.beep
+            CRT::Ncurses.beep
           else
             if cell = cur_matrix_cell
-              ch = if CRT::Display.hidden_display_type?(@colvalues[@col])
+              ch = if CRT::Ncurses::Display.hidden_display_type?(@colvalues[@col])
                      @filler
                    else
                      plainchar
                    end
               LibNCurses.wmove(cell, 1, charcount + 1)
               LibNCurses.waddch(cell, ch.to_u8.unsafe_chr.ord.to_i8)
-              CRT::Screen.wrefresh(cell)
+              CRT::Ncurses::Screen.wrefresh(cell)
             end
             @info[@row][@col] += plainchar.unsafe_chr
           end
@@ -442,7 +442,7 @@ module CRT
           if !@box_cell && (old_cell = @cell[@oldcrow][@oldccol])
             Draw.attrbox(old_cell, ' '.ord, ' '.ord, ' '.ord, ' '.ord,
               ' '.ord, ' '.ord, 0)
-            CRT::Screen.wrefresh(old_cell)
+            CRT::Ncurses::Screen.wrefresh(old_cell)
           else
             draw_old_cell
           end
@@ -461,7 +461,7 @@ module CRT
             else
               LibNCurses.wmove(cell, 1, @info[@row][@col].size + 1)
             end
-            CRT::Screen.wrefresh(cell)
+            CRT::Ncurses::Screen.wrefresh(cell)
           end
         end
       end
@@ -572,29 +572,29 @@ module CRT
     end
 
     def erase
-      CRT.erase_curses_window(@cell[0][0]) if @maxrt > 0
-      (1..@vrows).each { |x| CRT.erase_curses_window(@cell[x][0]) }
-      (1..@vcols).each { |x| CRT.erase_curses_window(@cell[0][x]) }
+      CRT::Ncurses.erase_curses_window(@cell[0][0]) if @maxrt > 0
+      (1..@vrows).each { |x| CRT::Ncurses.erase_curses_window(@cell[x][0]) }
+      (1..@vcols).each { |x| CRT::Ncurses.erase_curses_window(@cell[0][x]) }
       (1..@vrows).each do |x|
-        (1..@vcols).each { |y| CRT.erase_curses_window(@cell[x][y]) }
+        (1..@vcols).each { |y| CRT::Ncurses.erase_curses_window(@cell[x][y]) }
       end
-      CRT.erase_curses_window(@shadow_win)
-      CRT.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
     end
 
     def destroy
       unregister_framing
       clean_title
-      CRT.delete_curses_window(@cell[0][0]) if @maxrt > 0
-      (1..@vrows).each { |x| CRT.delete_curses_window(@cell[x][0]) }
-      (1..@vcols).each { |x| CRT.delete_curses_window(@cell[0][x]) }
+      CRT::Ncurses.delete_curses_window(@cell[0][0]) if @maxrt > 0
+      (1..@vrows).each { |x| CRT::Ncurses.delete_curses_window(@cell[x][0]) }
+      (1..@vcols).each { |x| CRT::Ncurses.delete_curses_window(@cell[0][x]) }
       (1..@vrows).each do |x|
-        (1..@vcols).each { |y| CRT.delete_curses_window(@cell[x][y]) }
+        (1..@vcols).each { |y| CRT::Ncurses.delete_curses_window(@cell[x][y]) }
       end
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)
@@ -631,7 +631,7 @@ module CRT
       end
 
       (1..@colwidths[@ccol]).each do |x|
-        ch = if x <= infolen && !CRT::Display.hidden_display_type?(@colvalues[@col])
+        ch = if x <= infolen && !CRT::Ncurses::Display.hidden_display_type?(@colvalues[@col])
                @info[@row][@col][x - 1].ord
              else
                @filler & 0xFF
@@ -639,7 +639,7 @@ module CRT
         Draw.mvwaddch(cell, 1, x, ch | hl)
       end
       LibNCurses.wmove(cell, 1, infolen + 1)
-      CRT::Screen.wrefresh(cell)
+      CRT::Ncurses::Screen.wrefresh(cell)
     end
 
     private def focus_current
@@ -648,7 +648,7 @@ module CRT
         Draw::ACS_LLCORNER, Draw::ACS_LRCORNER,
         Draw::ACS_HLINE, Draw::ACS_VLINE,
         LibNCurses::Attribute::Bold.value.to_i32)
-      CRT::Screen.wrefresh(cell)
+      CRT::Ncurses::Screen.wrefresh(cell)
       highlight_cell
     end
 
@@ -665,7 +665,7 @@ module CRT
       end
 
       (1..@colwidths[col]).each do |x|
-        ch = if x <= infolen && !CRT::Display.hidden_display_type?(@colvalues[@col])
+        ch = if x <= infolen && !CRT::Ncurses::Display.hidden_display_type?(@colvalues[@col])
                @info[vrow][vcol][x - 1].ord | hl
              else
                @filler
@@ -674,7 +674,7 @@ module CRT
       end
 
       LibNCurses.wmove(cell, 1, infolen + 1)
-      CRT::Screen.wrefresh(cell)
+      CRT::Ncurses::Screen.wrefresh(cell)
 
       return unless box_it
       draw_cell_box(row, col, @vrows, @vcols, attr)
@@ -756,9 +756,9 @@ module CRT
           cell.erase
           Draw.write_chtype(cell,
             @coltitle_pos[@lcol + x - 1], 0,
-            @coltitle[@lcol + x - 1], CRT::HORIZONTAL, 0,
+            @coltitle[@lcol + x - 1], CRT::Ncurses::HORIZONTAL, 0,
             @coltitle_len[@lcol + x - 1])
-          CRT::Screen.wrefresh(cell)
+          CRT::Ncurses::Screen.wrefresh(cell)
         end
       end
     end
@@ -769,9 +769,9 @@ module CRT
           cell.erase
           Draw.write_chtype(cell,
             @rowtitle_pos[@trow + x - 1], 1,
-            @rowtitle[@trow + x - 1], CRT::HORIZONTAL, 0,
+            @rowtitle[@trow + x - 1], CRT::Ncurses::HORIZONTAL, 0,
             @rowtitle_len[@trow + x - 1])
-          CRT::Screen.wrefresh(cell)
+          CRT::Ncurses::Screen.wrefresh(cell)
         end
       end
     end

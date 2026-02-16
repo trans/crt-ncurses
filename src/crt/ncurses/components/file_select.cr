@@ -1,9 +1,9 @@
-module CRT
-  class FileSelect < CRT::CRTObjs
+module CRT::Ncurses
+  class FileSelect < CRT::Ncurses::CRTObjs
     include ListSupport
 
-    getter scroll_field : CRT::Scroll
-    getter entry_field : CRT::Entry
+    getter scroll_field : CRT::Ncurses::Scroll
+    getter entry_field : CRT::Ncurses::Entry
     getter dir_contents : Array(String) = [] of String
     getter file_counter : Int32 = 0
     getter pwd : String = ""
@@ -21,14 +21,14 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32,
                    title : String = "", label : String = "",
                    field_attribute : Int32 = 0, filler_char : Char = '.',
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
                    dir_attribute : String = "", file_attribute : String = "",
                    link_attribute : String = "", sock_attribute : String = "",
-                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -36,8 +36,8 @@ module CRT
 
       set_box(box)
 
-      box_height = CRT.set_widget_dimension(parent_height, height, 0)
-      box_width = CRT.set_widget_dimension(parent_width, width, 0)
+      box_height = CRT::Ncurses.set_widget_dimension(parent_height, height, 0)
+      box_width = CRT::Ncurses.set_widget_dimension(parent_width, width, 0)
 
       xpos, ypos = alignxy(parent_window, x, y, box_width, box_height)
 
@@ -73,8 +73,8 @@ module CRT
       # Create the entry field
       _, label_len, _ = char2chtype(label)
 
-      temp_width = is_full_width?(width) ? CRT::FULL : box_width - 2 - label_len
-      @entry_field = CRT::Entry.new(screen,
+      temp_width = is_full_width?(width) ? CRT::Ncurses::FULL : box_width - 2 - label_len
+      @entry_field = CRT::Ncurses::Entry.new(screen,
         x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(w),
         title: title, label: label, field_width: temp_width,
         field_attr: field_attribute, filler: filler_char, box: box, shadow: false)
@@ -88,8 +88,8 @@ module CRT
 
       # Create the scrolling list
       temp_height = entry_win.max_y - @border_size
-      temp_width_scroll = is_full_width?(width) ? CRT::FULL : box_width - 1
-      @scroll_field = CRT::Scroll.new(screen,
+      temp_width_scroll = is_full_width?(width) ? CRT::Ncurses::FULL : box_width - 1
+      @scroll_field = CRT::Ncurses::Scroll.new(screen,
         x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(entry_win) + temp_height,
         height: box_height - temp_height, width: temp_width_scroll,
         list: @dir_contents, highlight: @highlight, box: box, shadow: false)
@@ -102,8 +102,8 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
-      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::Ncurses::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::Ncurses::FORCHAR, LibNCurses::Key::PageDown.value)
 
       screen.register(object_type, self)
       register_framing
@@ -117,12 +117,12 @@ module CRT
           @input_window = @entry_field.input_window
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -151,13 +151,13 @@ module CRT
               @entry_field.draw(@entry_field.box)
             end
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
-        when CRT::KEY_TAB
+        when CRT::Ncurses::KEY_TAB
           # Tab completion
           filename = @entry_field.info
           if filename.empty?
-            CRT.beep
+            CRT::Ncurses.beep
           else
             # Check if it's a directory
             if Dir.exists?(filename)
@@ -172,7 +172,7 @@ module CRT
                 @scroll_field.set_position(index)
                 draw_my_scroller
               else
-                CRT.beep
+                CRT::Ncurses.beep
               end
             end
           end
@@ -181,7 +181,7 @@ module CRT
           filename = @entry_field.inject(resolved)
           @exit_type = @entry_field.exit_type
 
-          if @exit_type == CRT::ExitType::EARLY_EXIT
+          if @exit_type == CRT::Ncurses::ExitType::EARLY_EXIT
             return 0
           end
 
@@ -221,14 +221,14 @@ module CRT
         set_dir_contents
         @scroll_field.set_items(@dir_contents)
       else
-        CRT.beep
+        CRT::Ncurses.beep
       end
     end
 
     def erase
       @scroll_field.erase
       @entry_field.erase
-      CRT.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@win)
     end
 
     def destroy
@@ -236,9 +236,9 @@ module CRT
       clear_key_bindings
       @scroll_field.destroy
       @entry_field.destroy
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)
@@ -329,7 +329,7 @@ module CRT
     end
 
     private def is_full_width?(width : Int32) : Bool
-      width == CRT::FULL
+      width == CRT::Ncurses::FULL
     end
   end
 end

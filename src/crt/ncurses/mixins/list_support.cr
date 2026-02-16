@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module ListSupport
     # Looks for a subset of a word in the given list
     def search_list(list : Array(String), list_size : Int32, pattern : String) : Int32

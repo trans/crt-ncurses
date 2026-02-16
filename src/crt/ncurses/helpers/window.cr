@@ -1,10 +1,10 @@
-module CRT
+module CRT::Ncurses
   # Safely erase a given window
   def self.erase_curses_window(window : NCurses::Window?)
     return if window.nil?
     win = window.not_nil!
     win.erase
-    CRT::Screen.wrefresh(win)
+    CRT::Ncurses::Screen.wrefresh(win)
   end
 
   # Safely delete a given window

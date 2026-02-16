@@ -1,2 +1,2 @@
 require "spec"
-require "../src/crt"
+require "../src/crt/ncurses"

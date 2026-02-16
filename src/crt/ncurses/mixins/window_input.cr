@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   # TODO: Consider adding before/after input hooks (e.g., `before_input { }`,
   # `after_input { }`) for running callbacks around each keypress cycle.
   # Could complement `on_key` for cross-cutting concerns like logging or
@@ -22,22 +22,22 @@ module CRT
       when '\r'.ord, '\n'.ord
         ch = LibNCurses::Key::Enter.value
       when '\t'.ord
-        ch = CRT::KEY_TAB
-      when CRT::DELETE
+        ch = CRT::Ncurses::KEY_TAB
+      when CRT::Ncurses::DELETE
         ch = LibNCurses::Key::Delete.value
       when '\b'.ord
         ch = LibNCurses::Key::Backspace.value
-      when CRT::BEGOFLINE
+      when CRT::Ncurses::BEGOFLINE
         ch = LibNCurses::Key::Home.value
-      when CRT::ENDOFLINE
+      when CRT::Ncurses::ENDOFLINE
         ch = LibNCurses::Key::End.value
-      when CRT::FORCHAR
+      when CRT::Ncurses::FORCHAR
         ch = LibNCurses::Key::Right.value
-      when CRT::BACKCHAR
+      when CRT::Ncurses::BACKCHAR
         ch = LibNCurses::Key::Left.value
-      when CRT::NEXT
-        ch = CRT::KEY_TAB
-      when CRT::PREV
+      when CRT::Ncurses::NEXT
+        ch = CRT::Ncurses::KEY_TAB
+      when CRT::Ncurses::PREV
         ch = LibNCurses::Key::ShiftTab.value
       end
 

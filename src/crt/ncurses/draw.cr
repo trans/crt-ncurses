@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module Draw
     ACS_ULCORNER = 'l'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
     ACS_URCORNER = 'k'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
@@ -12,7 +12,7 @@ module CRT
     ACS_BTEE     = 'v'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
     ACS_TTEE     = 'w'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
 
-    # Color pairs are now allocated on demand via CRT.color_pair(fg, bg).
+    # Color pairs are now allocated on demand via CRT::Ncurses.color_pair(fg, bg).
     # See src/crt/formatter.cr for the allocation logic.
 
     # Print a box around a window with attributes
@@ -34,7 +34,7 @@ module CRT
       mvwaddch(window, bry, 0, ACS_LLCORNER | attr)
       mvwaddch(window, bry, brx, ACS_LRCORNER | attr)
 
-      CRT::Screen.wrefresh(window)
+      CRT::Ncurses::Screen.wrefresh(window)
     end
 
     # Draw a box with custom characters
@@ -73,7 +73,7 @@ module CRT
         count += 1
       end
 
-      CRT::Screen.wrefresh(win) if count != 0
+      CRT::Ncurses::Screen.wrefresh(win) if count != 0
     end
 
     # Draw a box using the object's defined line-drawing characters
@@ -100,7 +100,7 @@ module CRT
       mvwaddch(win, y_hi, 0, ACS_LLCORNER | dim)
       mvwaddch(win, y_hi, x_hi, ACS_LRCORNER | dim)
 
-      CRT::Screen.wrefresh(win)
+      CRT::Ncurses::Screen.wrefresh(win)
     end
 
     # Write a string of blanks

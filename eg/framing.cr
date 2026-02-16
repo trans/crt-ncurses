@@ -6,9 +6,9 @@ require "../src/crt"
 NCurses.start
 
 begin
-  screen = CRT::Screen.new(NCurses.stdscr)
+  screen = CRT::Ncurses::Screen.new(NCurses.stdscr)
 
-  framing = CRT::Framing.new(screen)
+  framing = CRT::Ncurses::Framing.new(screen)
 
   # Manual framing: two adjacent boxes sharing a vertical edge at x=30
   framing.add(x: 5, y: 2, h: 26, v: 12)   # left box:  cols 5-30, rows 2-13
@@ -20,7 +20,7 @@ begin
   framing.draw
 
   # Place labels inside the framed regions (no box of their own)
-  CRT::Label.open(screen,
+  CRT::Ncurses::Label.open(screen,
     x: 7, y: 3,
     mesg: [
       "[b]Top Left",
@@ -29,7 +29,7 @@ begin
       "edges with others.",
     ]
   ) do |_l1|
-    CRT::Label.open(screen,
+    CRT::Ncurses::Label.open(screen,
       x: 32, y: 3,
       mesg: [
         "[b]Top Right",
@@ -38,7 +38,7 @@ begin
         "resolved smartly.",
       ]
     ) do |_l2|
-      CRT::Label.open(screen,
+      CRT::Ncurses::Label.open(screen,
         x: 7, y: 9,
         mesg: [
           "[b]Bottom Left",
@@ -50,7 +50,7 @@ begin
         # Widget-integrated framing: pass framing instance as box parameter.
         # The label registers itself with the framing, getting border spacing
         # without drawing its own box — the framing draws it with smart intersections.
-        CRT::Label.open(screen,
+        CRT::Ncurses::Label.open(screen,
           x: 32, y: 9,
           box: framing,
           mesg: [

@@ -1,10 +1,10 @@
-module CRT
-  class Histogram < CRT::CRTObjs
+module CRT::Ncurses
+  class Histogram < CRT::Ncurses::CRTObjs
     getter orient : Direction = Direction::Horizontal
     property filler : Int32 = '#'.ord | LibNCurses::Attribute::Reverse.value.to_i32
     property stats_attr : Int32 = 0
     property stats_pos : Position = Position::Top
-    property view_type : CRT::HistViewType = CRT::HistViewType::REAL
+    property view_type : CRT::Ncurses::HistViewType = CRT::Ncurses::HistViewType::REAL
     getter value : Int32 = 0
     getter low : Int32 = 0
     getter high : Int32 = 0
@@ -26,9 +26,9 @@ module CRT
     @curx : Int32 = 0
     @cury : Int32 = 0
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, orient : Direction = Direction::Horizontal,
-                   title : String = "", box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   title : String = "", box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -36,10 +36,10 @@ module CRT
 
       set_box(box)
 
-      box_height = CRT.set_widget_dimension(parent_height, height, 2)
+      box_height = CRT::Ncurses.set_widget_dimension(parent_height, height, 2)
       old_height = box_height
 
-      box_width = CRT.set_widget_dimension(parent_width, width, 0)
+      box_width = CRT::Ncurses.set_widget_dimension(parent_width, width, 0)
       old_width = box_width
 
       box_width = set_title(title, -(box_width + 1))
@@ -70,7 +70,7 @@ module CRT
       @filler = '#'.ord | LibNCurses::Attribute::Reverse.value.to_i32
       @stats_attr = 0
       @stats_pos = Position::Top
-      @view_type = CRT::HistViewType::REAL
+      @view_type = CRT::Ncurses::HistViewType::REAL
 
       if shadow
         @shadow_win = NCurses::Window.new(height: box_height, width: box_width,
@@ -86,7 +86,7 @@ module CRT
       0
     end
 
-    def set(view_type : CRT::HistViewType, stats_pos : Position, stats_attr : Int32,
+    def set(view_type : CRT::Ncurses::HistViewType, stats_pos : Position, stats_attr : Int32,
             low : Int32, high : Int32, value : Int32, filler : Int32, box : Bool)
       self.display_type = view_type
       self.stats_pos = stats_pos
@@ -110,7 +110,7 @@ module CRT
       end
 
       # Set label strings based on view_type and orientation
-      return if @view_type == CRT::HistViewType::NONE
+      return if @view_type == CRT::Ncurses::HistViewType::NONE
 
       if @orient.vertical?
         set_vertical_labels
@@ -131,11 +131,11 @@ module CRT
       @high
     end
 
-    def display_type=(view_type : CRT::HistViewType)
+    def display_type=(view_type : CRT::Ncurses::HistViewType)
       @view_type = view_type
     end
 
-    def display_type : CRT::HistViewType
+    def display_type : CRT::Ncurses::HistViewType
       @view_type
     end
 
@@ -169,7 +169,7 @@ module CRT
       draw_title(w)
 
       # Draw stat labels
-      if @view_type != CRT::HistViewType::NONE
+      if @view_type != CRT::Ncurses::HistViewType::NONE
         if @low_string.size > 0
           Draw.write_char_attrib(w, @lowx, @lowy, @low_string,
             @stats_attr, @orient,
@@ -210,17 +210,17 @@ module CRT
     end
 
     def erase
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
       clean_title
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)
@@ -243,9 +243,9 @@ module CRT
 
     private def format_value_string : String
       case @view_type
-      when CRT::HistViewType::PERCENT
+      when CRT::Ncurses::HistViewType::PERCENT
         "%3.1f%%" % [100.0 * @percent]
-      when CRT::HistViewType::FRACTION
+      when CRT::Ncurses::HistViewType::FRACTION
         "%d/%d" % [@value, @high]
       else
         @value.to_s

@@ -1,12 +1,12 @@
-module CRT
+module CRT::Ncurses
   module Movement
     def move(xplace : Int32, yplace : Int32, relative : Bool, refresh_flag : Bool)
       move_specific(xplace, yplace, relative, refresh_flag,
-        [win].compact, [] of CRT::CRTObjs)
+        [win].compact, [] of CRT::Ncurses::CRTObjs)
     end
 
     def move_specific(xplace : Int32, yplace : Int32, relative : Bool, refresh_flag : Bool,
-                      windows : Array(NCurses::Window), subwidgets : Array(CRT::CRTObjs))
+                      windows : Array(NCurses::Window), subwidgets : Array(CRT::Ncurses::CRTObjs))
       return unless w = @win
       current_x = 0 # will use window position
       current_y = 0
@@ -27,13 +27,13 @@ module CRT
 
       # Move the window to the new location.
       windows.each do |window|
-        CRT.move_curses_window(window, xpos, ypos)
+        CRT::Ncurses.move_curses_window(window, xpos, ypos)
       end
 
       # Touch/refresh the screen
       if scr = @screen
         if scr_win = scr.window
-          CRT::Screen.refresh_window(scr_win)
+          CRT::Ncurses::Screen.refresh_window(scr_win)
         end
       end
 

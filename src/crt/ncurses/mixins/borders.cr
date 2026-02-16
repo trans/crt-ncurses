@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module Borders
     property box : Bool = false
     property ul_char : Int32 = 'l'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
@@ -10,7 +10,7 @@ module CRT
     property bx_attr : Int32 = 0
 
     getter border_size : Int32 = 0
-    getter framing : CRT::Framing? = nil
+    getter framing : CRT::Ncurses::Framing? = nil
 
     def init_borders
       @ul_char = 'l'.ord | LibNCurses::Attribute::AltCharSet.value.to_i32
@@ -22,9 +22,9 @@ module CRT
       @bx_attr = 0
     end
 
-    def set_box(box : Bool | CRT::Framing | Nil)
+    def set_box(box : Bool | CRT::Ncurses::Framing | Nil)
       case box
-      when CRT::Framing
+      when CRT::Ncurses::Framing
         @framing = box
         @box = false
         @border_size = 1

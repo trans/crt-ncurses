@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module Bindings
     getter key_remaps : Hash(Int32, Int32) = {} of Int32 => Int32
     getter key_handlers : Hash(Int32, Proc(Int32?)) = {} of Int32 => Proc(Int32?)

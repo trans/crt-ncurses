@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module CommonControls
     property quit_on_enter : Bool = true
 

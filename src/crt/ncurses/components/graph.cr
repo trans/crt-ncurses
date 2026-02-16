@@ -1,5 +1,5 @@
-module CRT
-  class Graph < CRT::CRTObjs
+module CRT::Ncurses
+  class Graph < CRT::Ncurses::CRTObjs
     getter values : Array(Int32) = [] of Int32
     getter count : Int32 = 0
     property display_type : Symbol = :LINE
@@ -17,7 +17,7 @@ module CRT
     @xscale : Int32 = 1
     @yscale : Int32 = 1
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, title : String = "",
                    xtitle : String = "", ytitle : String = "")
       super()
@@ -27,8 +27,8 @@ module CRT
 
       set_box(false)
 
-      box_height = CRT.set_widget_dimension(parent_height, height, 3)
-      box_width = CRT.set_widget_dimension(parent_width, width, 0)
+      box_height = CRT::Ncurses.set_widget_dimension(parent_height, height, 3)
+      box_width = CRT::Ncurses.set_widget_dimension(parent_width, width, 0)
       box_width = set_title(title, box_width)
       box_height += @title_lines
       box_width = {parent_width, box_width}.min
@@ -124,7 +124,7 @@ module CRT
 
       # X axis title
       if @xtitle.size > 0
-        Draw.write_chtype(w, 0, @xtitle_pos, @xtitle, CRT::VERTICAL,
+        Draw.write_chtype(w, 0, @xtitle_pos, @xtitle, CRT::Ncurses::VERTICAL,
           0, @xtitle_len)
       end
 
@@ -132,23 +132,23 @@ module CRT
       attrib = ' '.ord | LibNCurses::Attribute::Reverse.value.to_i32
       temp = @maxx.to_s
       Draw.write_char_attrib(w, 1, @title_lines + 1, temp, attrib,
-        CRT::VERTICAL, 0, temp.size)
+        CRT::Ncurses::VERTICAL, 0, temp.size)
       temp = @minx.to_s
       Draw.write_char_attrib(w, 1, @box_height - 2 - temp.size, temp, attrib,
-        CRT::VERTICAL, 0, temp.size)
+        CRT::Ncurses::VERTICAL, 0, temp.size)
 
       # Y axis title
       if @ytitle.size > 0
         Draw.write_chtype(w, @ytitle_pos, @box_height - 1, @ytitle,
-          CRT::HORIZONTAL, 0, @ytitle_len)
+          CRT::Ncurses::HORIZONTAL, 0, @ytitle_len)
       end
 
       # Y axis labels
       temp = @count.to_s
       Draw.write_char_attrib(w, @box_width - temp.size - adj, @box_height - 2,
-        temp, attrib, CRT::HORIZONTAL, 0, temp.size)
+        temp, attrib, CRT::Ncurses::HORIZONTAL, 0, temp.size)
       Draw.write_char_attrib(w, 3, @box_height - 2, "0", attrib,
-        CRT::HORIZONTAL, 0, 1)
+        CRT::Ncurses::HORIZONTAL, 0, 1)
 
       if @count == 0
         wrefresh
@@ -187,14 +187,14 @@ module CRT
     end
 
     def erase
-      CRT.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@win)
     end
 
     def destroy
       clean_title
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses::Screen.unregister(object_type, self)
+      CRT::Ncurses.delete_curses_window(@win)
     end
 
     def background=(attrib : Int32)

@@ -6,10 +6,10 @@ notes = nil
 
 NCurses.start
 begin
-  screen = CRT::Screen.new(NCurses.stdscr)
+  screen = CRT::Ncurses::Screen.new(NCurses.stdscr)
 
-  CRT::MultiEntry.open(screen,
-    x: CRT::CENTER, y: CRT::CENTER,
+  CRT::Ncurses::MultiEntry.open(screen,
+    x: CRT::Ncurses::CENTER, y: CRT::Ncurses::CENTER,
     title: "[b]Enter Notes",
     label: "Notes: ",
     field_width: 40,
@@ -18,7 +18,7 @@ begin
     min: 0,
   ) do |mentry|
     mentry.newline_on_enter = true
-    mentry.background = CRT.color("#FF/04")  # white on blue
+    mentry.background = CRT::Ncurses.color("#FF/04")  # white on blue
     mentry.draw
     mentry.activate
     notes = mentry.info if mentry.exit_type.normal?

@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   # On-demand color pair allocation for 256-color support.
   # Pairs are allocated as needed rather than pre-allocated.
   @@color_pairs = {} of {Int32, Int32} => Int32
@@ -36,9 +36,9 @@ module CRT
 
   # Build a chtype suitable for background= (space char + color pair + attributes).
   #
-  #   CRT.color(7, 4)          # white on blue
-  #   CRT.color("#07/04")      # same, hex notation
-  #   CRT.color("bold #07/04") # bold white on blue
+  #   CRT::Ncurses.color(7, 4)          # white on blue
+  #   CRT::Ncurses.color("#07/04")      # same, hex notation
+  #   CRT::Ncurses.color("bold #07/04") # bold white on blue
   #
   def self.color(fg : Int32, bg : Int32, fill : Char = ' ') : Int32
     fill.ord | color_pair(fg, bg)
@@ -61,8 +61,8 @@ module CRT
   end
 
   # Style registry — named styles that expand in format strings.
-  # Register: CRT.style("error", "bold #FF ##00")
-  # Use:      CRT.fmt("[error]Oops![/]")
+  # Register: CRT::Ncurses.style("error", "bold #FF ##00")
+  # Use:      CRT::Ncurses.fmt("[error]Oops![/]")
   @@styles = {} of String => String
 
   def self.style(name : String, definition : String)
@@ -75,7 +75,7 @@ module CRT
 
   # Format a BBCode-style string into a chtype array.
   #
-  #   CRT.fmt("[bold #0F]Hello[/] world")
+  #   CRT::Ncurses.fmt("[bold #0F]Hello[/] world")
   #
   # Returns an Array(Int32) of chtype values ready for Draw.write_chtype.
   def self.fmt(string : String) : Array(Int32)
@@ -101,12 +101,12 @@ module CRT
 
     # Alignment tag names
     ALIGNMENTS = {
-      "C"      => CRT::CENTER,
-      "center" => CRT::CENTER,
-      "R"      => CRT::RIGHT,
-      "right"  => CRT::RIGHT,
-      "L"      => CRT::LEFT,
-      "left"   => CRT::LEFT,
+      "C"      => CRT::Ncurses::CENTER,
+      "center" => CRT::Ncurses::CENTER,
+      "R"      => CRT::Ncurses::RIGHT,
+      "right"  => CRT::Ncurses::RIGHT,
+      "L"      => CRT::Ncurses::LEFT,
+      "left"   => CRT::Ncurses::LEFT,
     }
 
     # A frame on the style stack, recording what was pushed so it can be popped.
@@ -135,9 +135,9 @@ module CRT
     def self.parse(string : String) : {Array(Int32), Int32, Int32}
       result = [] of Int32
 
-      return {result, 0, CRT::LEFT} if string.empty?
+      return {result, 0, CRT::Ncurses::LEFT} if string.empty?
 
-      alignment = CRT::LEFT
+      alignment = CRT::Ncurses::LEFT
 
       stack = [] of StyleFrame
       current_attrs = 0
@@ -226,7 +226,7 @@ module CRT
 
       # If single token that's not a built-in, check the style registry
       if tokens.size == 1 && !ATTRIBUTES.has_key?(tokens[0]) && !tokens[0].starts_with?('#')
-        if style_def = CRT.styles[tokens[0]]?
+        if style_def = CRT::Ncurses.styles[tokens[0]]?
           return style_def.split
         end
       end
@@ -294,7 +294,7 @@ module CRT
     private def self.compute_chtype(char_ord : Int32, attrs : Int32, fg : Int32, bg : Int32) : Int32
       chtype = char_ord | attrs
       if fg != -1 || bg != -1
-        chtype |= CRT.color_pair(fg, bg)
+        chtype |= CRT::Ncurses.color_pair(fg, bg)
       end
       chtype
     end

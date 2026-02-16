@@ -1,5 +1,5 @@
-module CRT
-  class ScrollWindow < CRT::CRTObjs
+module CRT::Ncurses
+  class ScrollWindow < CRT::Ncurses::CRTObjs
     @field_win : NCurses::Window? = nil
     @list : Array(Array(Int32)) = [] of Array(Int32)
     @list_pos : Array(Int32) = [] of Int32
@@ -17,9 +17,9 @@ module CRT
     @title_adj : Int32 = 0
     @complete : Bool = false
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, save_lines : Int32,
-                   title : String = "", box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   title : String = "", box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -27,8 +27,8 @@ module CRT
 
       set_box(box)
 
-      box_height = CRT.set_widget_dimension(parent_height, height, 0)
-      box_width = CRT.set_widget_dimension(parent_width, width, 0)
+      box_height = CRT::Ncurses.set_widget_dimension(parent_height, height, 0)
+      box_width = CRT::Ncurses.set_widget_dimension(parent_width, width, 0)
       box_width = set_title(title, box_width)
 
       box_height += @title_lines + 1
@@ -43,7 +43,7 @@ module CRT
       return unless w = @win
       w.keypad(true)
 
-      @field_win = CRT.subwin(w, box_height - @title_lines - 2 * @border_size, box_width - 2 * @border_size,
+      @field_win = CRT::Ncurses.subwin(w, box_height - @title_lines - 2 * @border_size, box_width - 2 * @border_size,
         ypos + @title_lines + @border_size, xpos + @border_size)
       if fw = @field_win
         fw.keypad(true)
@@ -72,10 +72,10 @@ module CRT
           y: ypos + 1, x: xpos + 1)
       end
 
-      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::Ncurses::BACKCHAR, LibNCurses::Key::PageUp.value)
       remap_key('b'.ord, LibNCurses::Key::PageUp.value)
       remap_key('B'.ord, LibNCurses::Key::PageUp.value)
-      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::Ncurses::FORCHAR, LibNCurses::Key::PageDown.value)
       remap_key(' '.ord, LibNCurses::Key::PageDown.value)
       remap_key('f'.ord, LibNCurses::Key::PageDown.value)
       remap_key('F'.ord, LibNCurses::Key::PageDown.value)
@@ -128,7 +128,7 @@ module CRT
         @list_size -= 1
       end
 
-      if insert_pos == CRT::TOP
+      if insert_pos == CRT::Ncurses::TOP
         @list = [[] of Int32] + @list
         @list_pos = [0] + @list_pos
         @list_len = [0] + @list_len
@@ -160,9 +160,9 @@ module CRT
     end
 
     def jump_to_line(line : Int32)
-      if line == CRT::BOTTOM || line >= @list_size
+      if line == CRT::Ncurses::BOTTOM || line >= @list_size
         @current_top = @list_size - @view_size
-      elsif line == CRT::TOP || line <= 0
+      elsif line == CRT::Ncurses::TOP || line <= 0
         @current_top = 0
       else
         if @view_size + line < @list_size
@@ -210,12 +210,12 @@ module CRT
         loop do
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -239,25 +239,25 @@ module CRT
           if @current_top > 0
             @current_top -= 1
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         when LibNCurses::Key::Down.value
           if @current_top >= 0 && @current_top < @max_top_line
             @current_top += 1
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         when LibNCurses::Key::Right.value
           if @left_char < @max_left_char
             @left_char += 1
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         when LibNCurses::Key::Left.value
           if @left_char > 0
             @left_char -= 1
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         when LibNCurses::Key::PageUp.value
           if @current_top != 0
@@ -267,7 +267,7 @@ module CRT
               @current_top = 0
             end
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         when LibNCurses::Key::PageDown.value
           if @current_top != @max_top_line
@@ -277,7 +277,7 @@ module CRT
               @current_top = @max_top_line
             end
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         when LibNCurses::Key::Home.value
           @left_char = 0
@@ -287,14 +287,14 @@ module CRT
           @current_top = 0
         when 'G'.ord, '>'.ord
           @current_top = @max_top_line
-        when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+        when CRT::Ncurses::KEY_TAB, CRT::Ncurses::KEY_RETURN, LibNCurses::Key::Enter.value
           set_exit_type(resolved)
           ret = 1
           @complete = true
-        when CRT::KEY_ESC
+        when CRT::Ncurses::KEY_ESC
           set_exit_type(resolved)
           @complete = true
-        when CRT::REFRESH
+        when CRT::Ncurses::REFRESH
           if scr = @screen
             scr.erase
             scr.refresh
@@ -336,21 +336,21 @@ module CRT
 
         if screen_pos >= 0
           Draw.write_chtype(fw, screen_pos, x,
-            @list[idx], CRT::HORIZONTAL, 0,
+            @list[idx], CRT::Ncurses::HORIZONTAL, 0,
             @list_len[idx])
         else
           Draw.write_chtype(fw, 0, x, @list[idx],
-            CRT::HORIZONTAL, @left_char - @list_pos[idx],
+            CRT::Ncurses::HORIZONTAL, @left_char - @list_pos[idx],
             @list_len[idx])
         end
       end
 
-      CRT::Screen.wrefresh(fw)
+      CRT::Ncurses::Screen.wrefresh(fw)
     end
 
     def erase
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
@@ -359,11 +359,11 @@ module CRT
       @list_pos = [] of Int32
       @list_len = [] of Int32
       clean_title
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@field_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@field_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

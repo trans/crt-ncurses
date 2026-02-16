@@ -1,5 +1,5 @@
-module CRT
-  class Label < CRT::CRTObjs
+module CRT::Ncurses
+  class Label < CRT::Ncurses::CRTObjs
     getter xpos : Int32 = 0
     getter ypos : Int32 = 0
     getter rows : Int32 = 0
@@ -9,8 +9,8 @@ module CRT
     @info_len : Array(Int32) = [] of Int32
     @info_pos : Array(Int32) = [] of Int32
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
-                   mesg : Array(String), box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
+                   mesg : Array(String), box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
 
       parent_window = screen.window.not_nil!
@@ -154,7 +154,7 @@ module CRT
         @rows.times do |x|
           Draw.write_chtype(w,
             @info_pos[x] + @border_size, x + @border_size,
-            @info[x], CRT::HORIZONTAL, 0, @info_len[x])
+            @info[x], CRT::Ncurses::HORIZONTAL, 0, @info_len[x])
         end
 
         # Refresh
@@ -164,17 +164,17 @@ module CRT
 
     # Erase the label widget
     def erase
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     # Destroy the label widget
     def destroy
       unregister_framing
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     # Pause until a user hits a key

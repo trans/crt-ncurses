@@ -1,5 +1,5 @@
-module CRT
-  class Entry < CRT::CRTObjs
+module CRT::Ncurses
+  class Entry < CRT::Ncurses::CRTObjs
     property info : String = ""
     property left_char : Int32 = 0
     property screen_col : Int32 = 0
@@ -9,7 +9,7 @@ module CRT
     getter field_attr : Int32 = 0
     property filler : Char = ' '
     property hidden : Char = ' '
-    property disp_type : CRT::DisplayType = CRT::DisplayType::MIXED
+    property disp_type : CRT::Ncurses::DisplayType = CRT::Ncurses::DisplayType::MIXED
     getter parent : NCurses::Window? = nil
 
     @field_win : NCurses::Window? = nil
@@ -19,14 +19,14 @@ module CRT
     @shadow : Bool = false
     @complete : Bool = false
     @result_data : String | Int32 = 0
-    @callbackfn : Proc(CRT::Entry, Int32, Nil)? = nil
+    @callbackfn : Proc(CRT::Ncurses::Entry, Int32, Nil)? = nil
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    field_width : Int32, title : String = "", label : String = "",
                    field_attr : Int32 = 0, filler : Char = ' ',
-                   disp_type : CRT::DisplayType = CRT::DisplayType::MIXED,
+                   disp_type : CRT::Ncurses::DisplayType = CRT::Ncurses::DisplayType::MIXED,
                    min : Int32 = 0, max : Int32 = 512,
-                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -36,7 +36,7 @@ module CRT
       set_box(box)
       box_height = @border_size * 2 + 1
 
-      field_width = CRT.set_widget_dimension(parent_width, field_width, 0)
+      field_width = CRT::Ncurses.set_widget_dimension(parent_width, field_width, 0)
       box_width = field_width + 2 * @border_size
 
       # Translate the label
@@ -69,7 +69,7 @@ module CRT
       w.keypad(true)
 
       # Create the field window (subwindow)
-      @field_win = CRT.subwin(w,
+      @field_win = CRT::Ncurses.subwin(w,
         1, field_width,
         ypos + @title_lines + @border_size,
         xpos + @label_len + horizontal_adjust + @border_size
@@ -80,7 +80,7 @@ module CRT
 
       # Create label window if needed
       if !label.empty?
-        @label_win = CRT.subwin(w,
+        @label_win = CRT::Ncurses.subwin(w,
           1, @label_len,
           ypos + @title_lines + @border_size,
           xpos + horizontal_adjust + @border_size
@@ -106,11 +106,11 @@ module CRT
       @box_height = box_height
       @disp_type = disp_type
 
-      @callbackfn = ->(entry : CRT::Entry, character : Int32) do
-        plainchar = CRT::Display.filter_by_display_type(entry.disp_type, character)
+      @callbackfn = ->(entry : CRT::Ncurses::Entry, character : Int32) do
+        plainchar = CRT::Ncurses::Display.filter_by_display_type(entry.disp_type, character)
 
         if plainchar == -1 || entry.info.size >= entry.max
-          CRT.beep
+          CRT::Ncurses.beep
         else
           if entry.screen_col != entry.field_width - 1
             cursor_pos = entry.screen_col + entry.left_char
@@ -149,16 +149,16 @@ module CRT
             LibNCurses.curs_set(2)
             input = getch([] of Bool)
             ret = inject(input)
-            return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+            return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
           end
         else
           actions.each do |action|
             ret = inject(action)
-            return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+            return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
           end
         end
 
-        if @exit_type == CRT::ExitType::NORMAL
+        if @exit_type == CRT::Ncurses::ExitType::NORMAL
           @info
         else
           0
@@ -195,14 +195,14 @@ module CRT
 
       case input
       when LibNCurses::Key::Up.value, LibNCurses::Key::Down.value
-        CRT.beep
+        CRT::Ncurses.beep
       when LibNCurses::Key::Home.value
         @left_char = 0
         @screen_col = 0
         draw_field
-      when CRT::TRANSPOSE
+      when CRT::Ncurses::TRANSPOSE
         if curr_pos >= @info.size - 1
-          CRT.beep
+          CRT::Ncurses.beep
         else
           # Swap characters
           chars = @info.chars
@@ -215,7 +215,7 @@ module CRT
         draw_field
       when LibNCurses::Key::Left.value
         if curr_pos <= 0
-          CRT.beep
+          CRT::Ncurses.beep
         elsif @screen_col == 0
           @left_char -= 1
           draw_field
@@ -227,7 +227,7 @@ module CRT
         end
       when LibNCurses::Key::Right.value
         if curr_pos >= @info.size
-          CRT.beep
+          CRT::Ncurses.beep
         elsif @screen_col == @field_width - 1
           @left_char += 1
           draw_field
@@ -239,7 +239,7 @@ module CRT
         end
       when LibNCurses::Key::Backspace.value, LibNCurses::Key::Delete.value
         if @disp_type.viewonly?
-          CRT.beep
+          CRT::Ncurses.beep
         else
           success = false
           delete_pos = curr_pos
@@ -265,47 +265,47 @@ module CRT
             end
             draw_field
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         end
-      when CRT::KEY_ESC
+      when CRT::Ncurses::KEY_ESC
         set_exit_type(input)
         @complete = true
-      when CRT::ERASE
+      when CRT::Ncurses::ERASE
         if @info.size != 0
           clean
           draw_field
         end
-      when CRT::CUT
+      when CRT::Ncurses::CUT
         if @info.size != 0
-          CRT::CRTObjs.paste_buffer = @info.dup
+          CRT::Ncurses::CRTObjs.paste_buffer = @info.dup
           clean
           draw_field
         else
-          CRT.beep
+          CRT::Ncurses.beep
         end
-      when CRT::COPY
+      when CRT::Ncurses::COPY
         if @info.size != 0
-          CRT::CRTObjs.paste_buffer = @info.dup
+          CRT::Ncurses::CRTObjs.paste_buffer = @info.dup
         else
-          CRT.beep
+          CRT::Ncurses.beep
         end
-      when CRT::PASTE
-        if !CRT::CRTObjs.paste_buffer.empty?
-          self.value = CRT::CRTObjs.paste_buffer
+      when CRT::Ncurses::PASTE
+        if !CRT::Ncurses::CRTObjs.paste_buffer.empty?
+          self.value = CRT::Ncurses::CRTObjs.paste_buffer
           draw_field
         else
-          CRT.beep
+          CRT::Ncurses.beep
         end
-      when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+      when CRT::Ncurses::KEY_TAB, CRT::Ncurses::KEY_RETURN, LibNCurses::Key::Enter.value
         if @info.size >= @min
           set_exit_type(input)
           ret = @info
           @complete = true
         else
-          CRT.beep
+          CRT::Ncurses.beep
         end
-      when CRT::REFRESH
+      when CRT::Ncurses::REFRESH
         if scr = @screen
           scr.erase
           scr.refresh
@@ -347,8 +347,8 @@ module CRT
 
       # Draw the label
       if lw = @label_win
-        Draw.write_chtype(lw, 0, 0, @label, CRT::HORIZONTAL, 0, @label_len)
-        CRT::Screen.wrefresh(lw)
+        Draw.write_chtype(lw, 0, 0, @label, CRT::Ncurses::HORIZONTAL, 0, @label_len)
+        CRT::Ncurses::Screen.wrefresh(lw)
       end
 
       draw_field
@@ -363,7 +363,7 @@ module CRT
 
       # Draw the info if present
       if @info.size > 0
-        if CRT::Display.hidden_display_type?(@disp_type)
+        if CRT::Ncurses::Display.hidden_display_type?(@disp_type)
           (@left_char...@info.size).each do |x|
             LibNCurses.mvwaddch(fw, 0, x - @left_char, @hidden.ord.to_i8)
           end
@@ -380,25 +380,25 @@ module CRT
         LibNCurses.wmove(fw, 0, @screen_col)
       end
 
-      CRT::Screen.wrefresh(fw)
+      CRT::Ncurses::Screen.wrefresh(fw)
     end
 
     def erase
-      CRT.erase_curses_window(@field_win)
-      CRT.erase_curses_window(@label_win)
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@field_win)
+      CRT::Ncurses.erase_curses_window(@label_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
       clean_title
-      CRT.delete_curses_window(@field_win)
-      CRT.delete_curses_window(@label_win)
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@field_win)
+      CRT::Ncurses.delete_curses_window(@label_win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def value=(new_value : String?)
@@ -444,14 +444,14 @@ module CRT
       end
     end
 
-    def callback=(callback : Proc(CRT::Entry, Int32, Nil))
+    def callback=(callback : Proc(CRT::Ncurses::Entry, Int32, Nil))
       @callbackfn = callback
     end
 
     def focus
       if fw = @field_win
         fw.move(0, @screen_col)
-        CRT::Screen.wrefresh(fw)
+        CRT::Ncurses::Screen.wrefresh(fw)
       end
       LibNCurses.curs_set(2)
     end
@@ -460,7 +460,7 @@ module CRT
       LibNCurses.curs_set(0)
       draw(@box)
       if fw = @field_win
-        CRT::Screen.wrefresh(fw)
+        CRT::Ncurses::Screen.wrefresh(fw)
       end
     end
 

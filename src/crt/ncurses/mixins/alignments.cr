@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module Alignments
     # Realigns x and y positions based on alignment constants
     # (CENTER, LEFT, RIGHT, TOP, BOTTOM) relative to the given window.
@@ -10,9 +10,9 @@ module CRT
       last = first + gap
 
       x = case xpos
-          when CRT::LEFT   then first
-          when CRT::RIGHT  then first + gap
-          when CRT::CENTER then first + (gap // 2)
+          when CRT::Ncurses::LEFT   then first
+          when CRT::Ncurses::RIGHT  then first + gap
+          when CRT::Ncurses::CENTER then first + (gap // 2)
           else                  xpos.clamp(first, last)
           end
 
@@ -22,9 +22,9 @@ module CRT
       last = first + gap
 
       y = case ypos
-          when CRT::TOP    then first
-          when CRT::BOTTOM then first + gap
-          when CRT::CENTER then first + (gap // 2)
+          when CRT::Ncurses::TOP    then first
+          when CRT::Ncurses::BOTTOM then first + gap
+          when CRT::Ncurses::CENTER then first + (gap // 2)
           else                  ypos.clamp(first, last)
           end
 

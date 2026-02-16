@@ -1,5 +1,5 @@
-module CRT
-  class Scale(T) < CRT::CRTObjs
+module CRT::Ncurses
+  class Scale(T) < CRT::Ncurses::CRTObjs
     getter current : T
 
     def current=(value : T)
@@ -24,13 +24,13 @@ module CRT
     @complete : Bool = false
     @result_data : T
 
-    def initialize(screen : CRT::Screen, *,
+    def initialize(screen : CRT::Ncurses::Screen, *,
                    low : T, high : T, step : T, page : T,
                    x : Int32, y : Int32,
                    title : String = "", label : String = "",
                    start : T = low, field_attr : Int32 = 0,
                    field_width : Int32 = 0, digits : Int32 = 0,
-                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -47,7 +47,7 @@ module CRT
       @page = page
       @result_data = low
 
-      field_width = CRT.set_widget_dimension(parent_width, field_width, 0)
+      field_width = CRT::Ncurses.set_widget_dimension(parent_width, field_width, 0)
       box_width = field_width + 2 * @border_size
 
       # Translate label
@@ -81,13 +81,13 @@ module CRT
 
       # Create label window
       if @label.size > 0
-        @label_win = CRT.subwin(w, 1, @label_len,
+        @label_win = CRT::Ncurses.subwin(w, 1, @label_len,
           ypos + @title_lines + @border_size,
           xpos + horizontal_adjust + @border_size)
       end
 
       # Create field window
-      @field_win = CRT.subwin(w, 1, field_width,
+      @field_win = CRT::Ncurses.subwin(w, 1, field_width,
         ypos + @title_lines + @border_size,
         xpos + @label_len + horizontal_adjust + @border_size)
       if fw = @field_win
@@ -113,8 +113,8 @@ module CRT
       # Key bindings
       remap_key('u'.ord, LibNCurses::Key::Up.value)
       remap_key('U'.ord, LibNCurses::Key::PageUp.value)
-      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
-      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::Ncurses::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::Ncurses::FORCHAR, LibNCurses::Key::PageDown.value)
       remap_key('g'.ord, LibNCurses::Key::Home.value)
       remap_key('^'.ord, LibNCurses::Key::Home.value)
       remap_key('G'.ord, LibNCurses::Key::End.value)
@@ -131,12 +131,12 @@ module CRT
         loop do
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -147,10 +147,10 @@ module CRT
     def limit_current_value
       if @current < @low
         @current = @low
-        CRT.beep
+        CRT::Ncurses.beep
       elsif @current > @high
         @current = @high
-        CRT.beep
+        CRT::Ncurses.beep
       end
     end
 
@@ -178,14 +178,14 @@ module CRT
           @current = @low
         when LibNCurses::Key::End.value
           @current = @high
-        when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+        when CRT::Ncurses::KEY_TAB, CRT::Ncurses::KEY_RETURN, LibNCurses::Key::Enter.value
           set_exit_type(resolved)
           ret = @current
           @complete = true
-        when CRT::KEY_ESC
+        when CRT::Ncurses::KEY_ESC
           set_exit_type(resolved)
           @complete = true
-        when CRT::REFRESH
+        when CRT::Ncurses::REFRESH
           if scr = @screen
             scr.erase
             scr.refresh
@@ -201,7 +201,7 @@ module CRT
           when '0'.ord
             @current = @low
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
         end
       end
@@ -225,8 +225,8 @@ module CRT
         draw_title(w)
 
         if lw = @label_win
-          Draw.write_chtype(lw, 0, 0, @label, CRT::HORIZONTAL, 0, @label_len)
-          CRT::Screen.wrefresh(lw)
+          Draw.write_chtype(lw, 0, 0, @label, CRT::Ncurses::HORIZONTAL, 0, @label_len)
+          CRT::Ncurses::Screen.wrefresh(lw)
         end
 
         wrefresh
@@ -242,27 +242,27 @@ module CRT
       temp = format_value(@current)
       Draw.write_char_attrib(fw,
         @field_width - temp.size - 1, 0, temp, @field_attr,
-        CRT::HORIZONTAL, 0, temp.size)
+        CRT::Ncurses::HORIZONTAL, 0, temp.size)
 
-      CRT::Screen.wrefresh(fw)
+      CRT::Ncurses::Screen.wrefresh(fw)
     end
 
     def erase
-      CRT.erase_curses_window(@label_win)
-      CRT.erase_curses_window(@field_win)
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@label_win)
+      CRT::Ncurses.erase_curses_window(@field_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
       clean_title
-      CRT.delete_curses_window(@field_win)
-      CRT.delete_curses_window(@label_win)
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@field_win)
+      CRT::Ncurses.delete_curses_window(@label_win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def set_range(low : T, high : T)

@@ -1,12 +1,12 @@
-module CRT
-  class Marquee < CRT::CRTObjs
+module CRT::Ncurses
+  class Marquee < CRT::Ncurses::CRTObjs
     property active : Bool = true
     @width : Int32 = 0
     @shadow : Bool = false
     @parent : NCurses::Window? = nil
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
-                   width : Int32 = 0, box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
+                   width : Int32 = 0, box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -19,7 +19,7 @@ module CRT
 
       set_box(box)
 
-      box_width = CRT.set_widget_dimension(parent_width, width, 0)
+      box_width = CRT::Ncurses.set_widget_dimension(parent_width, width, 0)
       box_height = @border_size * 2 + 1
 
       xpos, ypos = alignxy(parent_window, x, y, box_width, box_height)
@@ -144,16 +144,16 @@ module CRT
     end
 
     def erase
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)

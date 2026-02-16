@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module HasTitle
     property title_attrib : Int32 = 0
     property title_lines : Int32 = 0
@@ -47,12 +47,12 @@ module CRT
     # Draw the widget's title
     def draw_title(win : NCurses::Window)
       @title_lines.times do |x|
-        CRT::Draw.write_chtype_attrib(win,
+        CRT::Ncurses::Draw.write_chtype_attrib(win,
           @title_pos[x] + @border_size,
           x + @border_size,
           @title[x],
           @title_attrib,
-          CRT::HORIZONTAL,
+          CRT::Ncurses::HORIZONTAL,
           0,
           @title_len[x])
       end

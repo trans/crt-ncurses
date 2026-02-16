@@ -1,5 +1,5 @@
-module CRT
-  class Menu < CRT::CRTObjs
+module CRT::Ncurses
+  class Menu < CRT::Ncurses::CRTObjs
     TITLELINES     = 1
     MAX_MENU_ITEMS = 30
     MAX_SUB_ITEMS  = 98
@@ -22,7 +22,7 @@ module CRT
     @parent : NCurses::Window? = nil
     @complete : Bool = false
 
-    def initialize(screen : CRT::Screen, *, menu_list : Array(Array(String)),
+    def initialize(screen : CRT::Ncurses::Screen, *, menu_list : Array(Array(String)),
                    menu_location : Array(Position), menu_pos : Position = Position::Top,
                    title_attr : Int32 = 0, subtitle_attr : Int32 = 0)
       super()
@@ -97,9 +97,9 @@ module CRT
         @menu_title[x1] = chtype
         @menu_title_len[x1] = len
         @subsize[x1] = subsize[x] - TITLELINES
-        @title_win[x1] = CRT.subwin(parent_window, TITLELINES,
+        @title_win[x1] = CRT::Ncurses.subwin(parent_window, TITLELINES,
           @menu_title_len[x1] + 2, ypos + y1, xpos + x2)
-        @pull_win[x1] = CRT.subwin(parent_window, high, max + 2,
+        @pull_win[x1] = CRT::Ncurses.subwin(parent_window, high, max + 2,
           ypos + y2, xpos + x2)
 
         return if @title_win[x1].nil? || @pull_win[x1].nil?
@@ -135,12 +135,12 @@ module CRT
         loop do
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -161,25 +161,25 @@ module CRT
         case resolved
         when LibNCurses::Key::Left.value
           across_submenus(-1)
-        when LibNCurses::Key::Right.value, CRT::KEY_TAB
+        when LibNCurses::Key::Right.value, CRT::Ncurses::KEY_TAB
           across_submenus(1)
         when LibNCurses::Key::Up.value
           within_submenu(-1)
         when LibNCurses::Key::Down.value, ' '.ord
           within_submenu(1)
-        when LibNCurses::Key::Enter.value, CRT::KEY_RETURN
+        when LibNCurses::Key::Enter.value, CRT::Ncurses::KEY_RETURN
           clean_up_menu
           set_exit_type(resolved)
           @last_selection = @current_title * 100 + @current_subtitle
           ret = @last_selection
           @complete = true
-        when CRT::KEY_ESC
+        when CRT::Ncurses::KEY_ESC
           clean_up_menu
           set_exit_type(resolved)
           @last_selection = -1
           ret = @last_selection
           @complete = true
-        when CRT::REFRESH
+        when CRT::Ncurses::REFRESH
           erase
           if scr = @screen
             scr.refresh
@@ -229,19 +229,19 @@ module CRT
       end
 
       select_item(@current_subtitle, x0)
-      CRT::Screen.wrefresh(pw)
+      CRT::Ncurses::Screen.wrefresh(pw)
 
       # Highlight the title
       if tw = @title_win[@current_title]
         Draw.write_chtype_attrib(tw, 0, 0,
-          @menu_title[@current_title], @title_attr, CRT::HORIZONTAL,
+          @menu_title[@current_title], @title_attr, CRT::Ncurses::HORIZONTAL,
           0, @menu_title_len[@current_title])
-        CRT::Screen.wrefresh(tw)
+        CRT::Ncurses::Screen.wrefresh(tw)
       end
     end
 
     def erase_subwin
-      CRT.erase_curses_window(@pull_win[@current_title])
+      CRT::Ncurses.erase_curses_window(@pull_win[@current_title])
       draw_menu_title(@current_title)
     end
 
@@ -249,23 +249,23 @@ module CRT
       (0...@menu_items).each do |x|
         if tw = @title_win[x]
           tw.erase
-          CRT::Screen.wrefresh(tw)
+          CRT::Ncurses::Screen.wrefresh(tw)
         end
         if pw = @pull_win[x]
           pw.erase
-          CRT::Screen.wrefresh(pw)
+          CRT::Ncurses::Screen.wrefresh(pw)
         end
       end
     end
 
     def destroy
       (0...@menu_items).each do |x|
-        CRT.delete_curses_window(@title_win[x])
-        CRT.delete_curses_window(@pull_win[x])
+        CRT::Ncurses.delete_curses_window(@title_win[x])
+        CRT::Ncurses.delete_curses_window(@pull_win[x])
       end
 
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def set_current_item(menu_item : Int32, submenu_item : Int32)
@@ -318,8 +318,8 @@ module CRT
     private def draw_menu_title(item : Int32)
       return unless tw = @title_win[item]
       Draw.write_chtype(tw, 0, 0, @menu_title[item],
-        CRT::HORIZONTAL, 0, @menu_title_len[item])
-      CRT::Screen.wrefresh(tw)
+        CRT::Ncurses::HORIZONTAL, 0, @menu_title_len[item])
+      CRT::Ncurses::Screen.wrefresh(tw)
     end
 
     private def draw_item(item : Int32, offset : Int32)
@@ -327,7 +327,7 @@ module CRT
       Draw.write_chtype(pw, 1,
         item + TITLELINES - offset,
         @sublist[@current_title][item],
-        CRT::HORIZONTAL, 0, @sublist_len[@current_title][item])
+        CRT::Ncurses::HORIZONTAL, 0, @sublist_len[@current_title][item])
     end
 
     private def select_item(item : Int32, offset : Int32)
@@ -335,7 +335,7 @@ module CRT
       Draw.write_chtype_attrib(pw, 1,
         item + TITLELINES - offset,
         @sublist[@current_title][item], @subtitle_attr,
-        CRT::HORIZONTAL, 0, @sublist_len[@current_title][item])
+        CRT::Ncurses::HORIZONTAL, 0, @sublist_len[@current_title][item])
     end
 
     private def within_submenu(step : Int32)
@@ -352,7 +352,7 @@ module CRT
           draw_item(@current_subtitle, 0)
           @current_subtitle = next_item
           select_item(@current_subtitle, 0)
-          CRT::Screen.wrefresh(pw)
+          CRT::Ncurses::Screen.wrefresh(pw)
         end
       end
 
@@ -378,7 +378,7 @@ module CRT
     private def clean_up_menu
       erase_subwin
       if pw = @pull_win[@current_title]
-        CRT::Screen.wrefresh(pw)
+        CRT::Ncurses::Screen.wrefresh(pw)
       end
       if scr = @screen
         scr.refresh

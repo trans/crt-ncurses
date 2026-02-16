@@ -1,5 +1,5 @@
-module CRT
-  class Dialog < CRT::CRTObjs
+module CRT::Ncurses
+  class Dialog < CRT::Ncurses::CRTObjs
     getter current_button : Int32 = 0
 
     MIN_DIALOG_WIDTH = 10
@@ -20,10 +20,10 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    mesg : Array(String), buttons : Array(String),
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
-                   separator : Bool = true, box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   separator : Bool = true, box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       box_width = MIN_DIALOG_WIDTH
       max_message_width = -1
@@ -112,7 +112,7 @@ module CRT
       if w = @win
         Draw.write_chtype_attrib(w, @button_pos[@current_button],
           @box_height - 1 - @border_size, @button_label[@current_button],
-          @highlight, CRT::HORIZONTAL, 0, @button_len[@current_button])
+          @highlight, CRT::Ncurses::HORIZONTAL, 0, @button_len[@current_button])
         wrefresh
       end
 
@@ -120,12 +120,12 @@ module CRT
         loop do
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -142,19 +142,19 @@ module CRT
       case input
       when LibNCurses::Key::Left.value, LibNCurses::Key::ShiftTab.value, LibNCurses::Key::Backspace.value
         @current_button = @current_button == 0 ? @button_count - 1 : @current_button - 1
-      when LibNCurses::Key::Right.value, CRT::KEY_TAB, ' '.ord
+      when LibNCurses::Key::Right.value, CRT::Ncurses::KEY_TAB, ' '.ord
         @current_button = @current_button == @button_count - 1 ? 0 : @current_button + 1
       when LibNCurses::Key::Up.value, LibNCurses::Key::Down.value
-        CRT.beep
-      when CRT::REFRESH
+        CRT::Ncurses.beep
+      when CRT::Ncurses::REFRESH
         if scr = @screen
           scr.erase
           scr.refresh
         end
-      when CRT::KEY_ESC
+      when CRT::Ncurses::KEY_ESC
         set_exit_type(input)
         @complete = true
-      when LibNCurses::Key::Enter.value, CRT::KEY_RETURN
+      when LibNCurses::Key::Enter.value, CRT::Ncurses::KEY_RETURN
         set_exit_type(input)
         ret = @current_button
         @complete = true
@@ -180,7 +180,7 @@ module CRT
         @message_rows.times do |x|
           Draw.write_chtype(w,
             @info_pos[x] + @border_size, x + @border_size, @info[x],
-            CRT::HORIZONTAL, 0, @info_len[x])
+            CRT::Ncurses::HORIZONTAL, 0, @info_len[x])
         end
 
         draw_buttons
@@ -194,7 +194,7 @@ module CRT
       @button_count.times do |x|
         Draw.write_chtype(w, @button_pos[x],
           @box_height - 1 - @border_size,
-          @button_label[x], CRT::HORIZONTAL, 0,
+          @button_label[x], CRT::Ncurses::HORIZONTAL, 0,
           @button_len[x])
       end
 
@@ -213,20 +213,20 @@ module CRT
       # Highlight the current button
       Draw.write_chtype_attrib(w, @button_pos[@current_button],
         @box_height - 1 - @border_size, @button_label[@current_button],
-        @highlight, CRT::HORIZONTAL, 0, @button_len[@current_button])
+        @highlight, CRT::Ncurses::HORIZONTAL, 0, @button_len[@current_button])
     end
 
     def erase
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
-      CRT.delete_curses_window(@win)
-      CRT.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def highlight=(highlight : Int32)

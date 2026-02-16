@@ -1,5 +1,5 @@
-module CRT
-  class Buttonbox < CRT::CRTObjs
+module CRT::Ncurses
+  class Buttonbox < CRT::Ncurses::CRTObjs
     getter current_button : Int32 = 0
     getter button_count : Int32 = 0
     getter rows : Int32 = 0
@@ -18,11 +18,11 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    buttons : Array(String), rows : Int32 = 1, cols : Int32 = 0,
                    height : Int32 = 0, width : Int32 = 0, title : String = "",
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
-                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -42,8 +42,8 @@ module CRT
       @row_adjust = 0
       @col_adjust = 0
 
-      box_height = CRT.set_widget_dimension(parent_height, height, rows + 1)
-      box_width = CRT.set_widget_dimension(parent_width, width, 0)
+      box_height = CRT::Ncurses.set_widget_dimension(parent_height, height, rows + 1)
+      box_width = CRT::Ncurses.set_widget_dimension(parent_width, width, 0)
       box_width = set_title(title, box_width)
 
       # Translate buttons to chtype arrays
@@ -117,12 +117,12 @@ module CRT
         loop do
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -145,7 +145,7 @@ module CRT
         else
           @current_button -= @rows
         end
-      when LibNCurses::Key::Right.value, CRT::KEY_TAB, ' '.ord
+      when LibNCurses::Key::Right.value, CRT::Ncurses::KEY_TAB, ' '.ord
         if @current_button + @rows > last_button
           @current_button = first_button
         else
@@ -163,15 +163,15 @@ module CRT
         else
           @current_button += 1
         end
-      when CRT::REFRESH
+      when CRT::Ncurses::REFRESH
         if scr = @screen
           scr.erase
           scr.refresh
         end
-      when CRT::KEY_ESC
+      when CRT::Ncurses::KEY_ESC
         set_exit_type(input)
         @complete = true
-      when CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+      when CRT::Ncurses::KEY_RETURN, LibNCurses::Key::Enter.value
         set_exit_type(input)
         ret = @current_button
         @complete = true
@@ -220,7 +220,7 @@ module CRT
                      @button_attrib
                    end
             Draw.write_chtype_attrib(w, col, row,
-              @button[current_button], attr, CRT::HORIZONTAL, 0,
+              @button[current_button], attr, CRT::Ncurses::HORIZONTAL, 0,
               @button_len[current_button])
             row += 1 + @row_adjust
             current_button += 1
@@ -236,17 +236,17 @@ module CRT
     end
 
     def erase
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
       clean_title
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def current_button=(button : Int32)

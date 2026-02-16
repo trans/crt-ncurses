@@ -1,5 +1,5 @@
-module CRT
-  class Selection < CRT::Scroller
+module CRT::Ncurses
+  class Selection < CRT::Ncurses::Scroller
     getter item : Array(Array(Int32)) = [] of Array(Int32)
     getter item_len : Array(Int32) = [] of Int32
     getter item_pos : Array(Int32) = [] of Int32
@@ -21,12 +21,12 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, list : Array(String),
                    choices : Array(String), splace : Position = Position::Right,
                    title : String = "",
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
-                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -40,8 +40,8 @@ module CRT
 
       set_box(box)
 
-      box_height = CRT.set_widget_dimension(parent_height, height, 0)
-      box_width = CRT.set_widget_dimension(parent_width, width, 0)
+      box_height = CRT::Ncurses.set_widget_dimension(parent_height, height, 0)
+      box_width = CRT::Ncurses.set_widget_dimension(parent_width, width, 0)
       box_width = set_title(title, box_width)
 
       # Set the box height
@@ -73,10 +73,10 @@ module CRT
 
       # Create scrollbar window
       if splace.right?
-        @scrollbar_win = CRT.subwin(w, max_view_size, 1,
+        @scrollbar_win = CRT::Ncurses.subwin(w, max_view_size, 1,
           screen_ypos(ypos), xpos + @box_width - @border_size - 1)
       elsif splace.left?
-        @scrollbar_win = CRT.subwin(w, max_view_size, 1,
+        @scrollbar_win = CRT::Ncurses.subwin(w, max_view_size, 1,
           screen_ypos(ypos), screen_xpos(xpos))
       else
         @scrollbar_win = nil
@@ -117,8 +117,8 @@ module CRT
       end
 
       # Key bindings
-      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
-      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::Ncurses::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::Ncurses::FORCHAR, LibNCurses::Key::PageDown.value)
       remap_key('g'.ord, LibNCurses::Key::Home.value)
       remap_key('1'.ord, LibNCurses::Key::Home.value)
       remap_key('G'.ord, LibNCurses::Key::End.value)
@@ -136,7 +136,7 @@ module CRT
 
       if iw = @input_window
         iw.move(ypos, xpos)
-        CRT::Screen.wrefresh(iw)
+        CRT::Ncurses::Screen.wrefresh(iw)
       end
     end
 
@@ -148,12 +148,12 @@ module CRT
           fix_cursor_position
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -201,16 +201,16 @@ module CRT
               @selections[@current_item] += 1
             end
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
-        when CRT::KEY_ESC
+        when CRT::Ncurses::KEY_ESC
           set_exit_type(resolved)
           @complete = true
-        when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+        when CRT::Ncurses::KEY_TAB, CRT::Ncurses::KEY_RETURN, LibNCurses::Key::Enter.value
           set_exit_type(resolved)
           ret = 1
           @complete = true
-        when CRT::REFRESH
+        when CRT::Ncurses::REFRESH
           if scr = @screen
             scr.erase
             scr.refresh
@@ -253,7 +253,7 @@ module CRT
           screen_pos = screenpos(k, scrollbar_adj)
 
           # Draw blank line
-          Draw.write_blanks(w, xpos, ypos, CRT::HORIZONTAL, 0,
+          Draw.write_blanks(w, xpos, ypos, CRT::Ncurses::HORIZONTAL, 0,
             w.max_x)
 
           # Draw the selection item
@@ -261,13 +261,13 @@ module CRT
             screen_pos >= 0 ? screen_pos : 1,
             ypos, @item[k],
             k == sel_item ? @highlight : 0,
-            CRT::HORIZONTAL,
+            CRT::Ncurses::HORIZONTAL,
             screen_pos >= 0 ? 0 : 1 - screen_pos,
             @item_len[k])
 
           # Draw the choice value
           Draw.write_chtype(w, xpos + scrollbar_adj, ypos,
-            @choice[@selections[k]], CRT::HORIZONTAL, 0,
+            @choice[@selections[k]], CRT::Ncurses::HORIZONTAL, 0,
             @choicelen[@selections[k]])
         end
       end
@@ -296,19 +296,19 @@ module CRT
     end
 
     def erase
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
       clean_title
       @item = [] of Array(Int32)
-      CRT.delete_curses_window(@scrollbar_win)
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@scrollbar_win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def highlight=(highlight : Int32)

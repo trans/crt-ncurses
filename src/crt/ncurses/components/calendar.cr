@@ -1,5 +1,5 @@
-module CRT
-  class Calendar < CRT::CRTObjs
+module CRT::Ncurses
+  class Calendar < CRT::Ncurses::CRTObjs
     getter day : Int32 = 1
     getter month : Int32 = 1
     getter year : Int32 = 2000
@@ -57,13 +57,13 @@ module CRT
       Time.local(year, month, 1).day_of_week.value % 7
     end
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    day : Int32 = Time.local.day, month : Int32 = Time.local.month,
                    year : Int32 = Time.local.year, title : String = "",
                    day_attrib : Int32 = 0, month_attrib : Int32 = 0,
                    year_attrib : Int32 = 0,
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
-                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -105,10 +105,10 @@ module CRT
       @week_base = 0
       @shadow = shadow
 
-      @label_win = CRT.subwin(w, 1, @field_width,
+      @label_win = CRT::Ncurses.subwin(w, 1, @field_width,
         ypos + @title_lines + 1, xpos + 1 + @border_size)
 
-      @field_win = CRT.subwin(w, 7, 20,
+      @field_win = CRT::Ncurses.subwin(w, 7, 20,
         ypos + @title_lines + 3, xpos + @x_offset)
 
       @marker = Array(Int32).new(CALENDAR_LIMIT, 0)
@@ -132,9 +132,9 @@ module CRT
       remap_key('T'.ord, LibNCurses::Key::Home.value)
       remap_key('t'.ord, LibNCurses::Key::Home.value)
       remap_key('n'.ord, LibNCurses::Key::PageDown.value)
-      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::Ncurses::FORCHAR, LibNCurses::Key::PageDown.value)
       remap_key('p'.ord, LibNCurses::Key::PageUp.value)
-      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::Ncurses::BACKCHAR, LibNCurses::Key::PageUp.value)
 
       screen.register(object_type, self)
       register_framing
@@ -148,12 +148,12 @@ module CRT
         loop do
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
       ret
@@ -193,14 +193,14 @@ module CRT
           increment_calendar_year(1)
         when LibNCurses::Key::Home.value
           set_date(-1, -1, -1)
-        when CRT::KEY_ESC
+        when CRT::Ncurses::KEY_ESC
           set_exit_type(resolved)
           @complete = true
-        when CRT::KEY_TAB, CRT::KEY_RETURN, LibNCurses::Key::Enter.value
+        when CRT::Ncurses::KEY_TAB, CRT::Ncurses::KEY_RETURN, LibNCurses::Key::Enter.value
           set_exit_type(resolved)
           ret = @day
           @complete = true
-        when CRT::REFRESH
+        when CRT::Ncurses::REFRESH
           if scr = @screen
             scr.erase
             scr.refresh
@@ -230,7 +230,7 @@ module CRT
           dst = col_len * col
           part = @day_name[src..]? || ""
           Draw.write_char(w, @x_offset + dst, @title_lines + 2,
-            part, CRT::HORIZONTAL, 0, col_len)
+            part, CRT::Ncurses::HORIZONTAL, 0, col_len)
         end
 
         wrefresh
@@ -263,26 +263,26 @@ module CRT
               marker |= m
             end
             Draw.write_char_attrib(fw, xpos, ypos, temp, marker,
-              CRT::HORIZONTAL, 0, 2)
+              CRT::Ncurses::HORIZONTAL, 0, 2)
           end
           day += 1
         end
       end
-      CRT::Screen.wrefresh(fw)
+      CRT::Ncurses::Screen.wrefresh(fw)
 
       # Draw month/day and year in label window
       if lw = @label_win
         month_name = @month_name[@month]
         temp = "#{month_name} #{@day},"
-        Draw.write_char(lw, 0, 0, temp, CRT::HORIZONTAL, 0, temp.size)
+        Draw.write_char(lw, 0, 0, temp, CRT::Ncurses::HORIZONTAL, 0, temp.size)
         LibNCurses.wclrtoeol(lw)
 
         year_str = @year.to_s
         Draw.write_char(lw, @field_width - year_str.size, 0, year_str,
-          CRT::HORIZONTAL, 0, year_str.size)
+          CRT::Ncurses::HORIZONTAL, 0, year_str.size)
 
         lw.move(0, 0)
-        CRT::Screen.wrefresh(lw)
+        CRT::Ncurses::Screen.wrefresh(lw)
       end
     end
 
@@ -315,21 +315,21 @@ module CRT
     end
 
     def erase
-      CRT.erase_curses_window(@label_win)
-      CRT.erase_curses_window(@field_win)
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@label_win)
+      CRT::Ncurses.erase_curses_window(@field_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
       clean_title
-      CRT.delete_curses_window(@label_win)
-      CRT.delete_curses_window(@field_win)
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@label_win)
+      CRT::Ncurses.delete_curses_window(@field_win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def background=(attrib : Int32)
@@ -382,7 +382,7 @@ module CRT
     private def decrement_calendar_day(adjust : Int32)
       if @day - adjust < 1
         if @month == 1 && @year == 1900
-          CRT.beep
+          CRT::Ncurses.beep
           return
         end
         prev_month = @month == 1 ? 12 : @month - 1
@@ -413,7 +413,7 @@ module CRT
     private def decrement_calendar_month(adjust : Int32)
       if @month <= adjust
         if @year == 1900
-          CRT.beep
+          CRT::Ncurses.beep
           return
         end
         @month = 13 - adjust
@@ -441,7 +441,7 @@ module CRT
 
     private def decrement_calendar_year(adjust : Int32)
       if @year - adjust < 1900
-        CRT.beep
+        CRT::Ncurses.beep
         return
       end
       @year -= adjust

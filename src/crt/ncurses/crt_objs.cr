@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   abstract class CRTObjs
     include Alignments
     include Justifications
@@ -52,7 +52,7 @@ module CRT
     end
 
     def initialize
-      CRT::ALL_OBJECTS << self
+      CRT::Ncurses::ALL_OBJECTS << self
 
       init_title
       init_borders
@@ -76,7 +76,7 @@ module CRT
     end
 
     def valid_object? : Bool
-      CRT::ALL_OBJECTS.includes?(self) && valid_obj_type?(object_type)
+      CRT::Ncurses::ALL_OBJECTS.includes?(self) && valid_obj_type?(object_type)
     end
 
     # Set the background color of the widget

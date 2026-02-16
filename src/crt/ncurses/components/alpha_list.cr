@@ -1,9 +1,9 @@
-module CRT
-  class AlphaList < CRT::CRTObjs
+module CRT::Ncurses
+  class AlphaList < CRT::Ncurses::CRTObjs
     include ListSupport
 
-    getter scroll_field : CRT::Scroll
-    getter entry_field : CRT::Entry
+    getter scroll_field : CRT::Ncurses::Scroll
+    getter entry_field : CRT::Ncurses::Entry
     getter list : Array(String) = [] of String
 
     @highlight : Int32 = 0
@@ -13,11 +13,11 @@ module CRT
     @complete : Bool = false
     @save_focus : Bool = false
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, list : Array(String),
                    title : String = "", label : String = "",
                    filler_char : Char = '.', highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
-                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -28,8 +28,8 @@ module CRT
 
       set_box(box)
 
-      box_height = CRT.set_widget_dimension(parent_height, height, 0)
-      box_width = CRT.set_widget_dimension(parent_width, width, 0)
+      box_height = CRT::Ncurses.set_widget_dimension(parent_height, height, 0)
+      box_width = CRT::Ncurses.set_widget_dimension(parent_width, width, 0)
 
       if !label.empty?
         _, label_len, _ = char2chtype(label)
@@ -55,8 +55,8 @@ module CRT
       end
 
       # Create the entry field
-      temp_width = is_full_width?(width) ? CRT::FULL : box_width - 2 - label_len
-      @entry_field = CRT::Entry.new(screen,
+      temp_width = is_full_width?(width) ? CRT::Ncurses::FULL : box_width - 2 - label_len
+      @entry_field = CRT::Ncurses::Entry.new(screen,
         x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(w),
         title: title, label: label, field_width: temp_width,
         filler: filler_char, box: box, shadow: false)
@@ -69,8 +69,8 @@ module CRT
 
       # Create the scrolling list below the entry
       temp_height = entry_win.max_y - @border_size
-      temp_width_scroll = is_full_width?(width) ? CRT::FULL : box_width - 1
-      @scroll_field = CRT::Scroll.new(screen,
+      temp_width_scroll = is_full_width?(width) ? CRT::Ncurses::FULL : box_width - 1
+      @scroll_field = CRT::Ncurses::Scroll.new(screen,
         x: LibNCurses.getbegx(w), y: LibNCurses.getbegy(entry_win) + temp_height,
         height: box_height - temp_height, width: temp_width_scroll,
         list: @list, box: box, shadow: false)
@@ -81,8 +81,8 @@ module CRT
       @input_window = @entry_field.win
       @accepts_focus = true
 
-      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
-      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::Ncurses::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::Ncurses::FORCHAR, LibNCurses::Key::PageDown.value)
 
       screen.register(object_type, self)
       register_framing
@@ -96,12 +96,12 @@ module CRT
           @input_window = @entry_field.input_window
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -130,16 +130,16 @@ module CRT
               @entry_field.draw(@entry_field.box)
             end
           else
-            CRT.beep
+            CRT::Ncurses.beep
           end
-        when CRT::KEY_TAB
+        when CRT::Ncurses::KEY_TAB
           # Attempt word completion
           if @entry_field.info.empty?
-            CRT.beep
+            CRT::Ncurses.beep
           else
             index = search_list(@list, @list.size, @entry_field.info)
             if index < 0
-              CRT.beep
+              CRT::Ncurses.beep
             else
               @entry_field.value = @list[index]
               @entry_field.draw(@entry_field.box)
@@ -152,7 +152,7 @@ module CRT
           ret = @entry_field.inject(resolved)
           @exit_type = @entry_field.exit_type
 
-          if @exit_type == CRT::ExitType::EARLY_EXIT
+          if @exit_type == CRT::Ncurses::ExitType::EARLY_EXIT
             # Filter the scroll list based on current entry
             if !@entry_field.info.empty?
               index = search_list(@list, @list.size, @entry_field.info)
@@ -187,8 +187,8 @@ module CRT
     def erase
       @scroll_field.erase
       @entry_field.erase
-      CRT.erase_curses_window(@shadow_win)
-      CRT.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
     end
 
     def destroy
@@ -196,9 +196,9 @@ module CRT
       clear_key_bindings
       @entry_field.destroy
       @scroll_field.destroy
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@win)
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@win)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def contents=(list : Array(String))
@@ -263,7 +263,7 @@ module CRT
     end
 
     private def is_full_width?(width : Int32) : Bool
-      width == CRT::FULL
+      width == CRT::Ncurses::FULL
     end
   end
 end

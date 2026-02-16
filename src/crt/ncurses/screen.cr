@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   # TODO: Investigate terminal color query (OSC 11) response leaking into the
   # shell after NCurses.end. Some terminals send async replies to color queries
   # that arrive after endwin(). NCurses.flush_input or draining stdin post-exit
@@ -8,7 +8,7 @@ module CRT
     property object_focus : Int32 = 0
     property object_count : Int32 = 0
     property object_limit : Int32 = 2
-    property object : Array(CRT::CRTObjs?) = Array(CRT::CRTObjs?).new(2, nil)
+    property object : Array(CRT::Ncurses::CRTObjs?) = Array(CRT::Ncurses::CRTObjs?).new(2, nil)
     property window : NCurses::Window? = nil
     property exit_status : Int32 = 0
 
@@ -26,22 +26,22 @@ module CRT
     end
 
     def initialize(window : NCurses::Window)
-      if CRT::ALL_SCREENS.empty?
+      if CRT::Ncurses::ALL_SCREENS.empty?
         NCurses.no_echo
         NCurses.cbreak
         LibNCurses.curs_set(0)
       end
 
-      CRT::ALL_SCREENS << self
+      CRT::Ncurses::ALL_SCREENS << self
       @object_count = 0
       @object_limit = 2
-      @object = Array(CRT::CRTObjs?).new(@object_limit, nil)
+      @object = Array(CRT::Ncurses::CRTObjs?).new(@object_limit, nil)
       @window = window
       @object_focus = 0
     end
 
     # Register a CRT object with a screen
-    def register(obj_type : Symbol, obj : CRT::CRTObjs)
+    def register(obj_type : Symbol, obj : CRT::Ncurses::CRTObjs)
       if @object_count + 1 >= @object_limit
         @object_limit += 2
         @object_limit *= 2
@@ -57,7 +57,7 @@ module CRT
     end
 
     # Remove an object from the CRT screen
-    def self.unregister(obj_type : Symbol, obj : CRT::CRTObjs)
+    def self.unregister(obj_type : Symbol, obj : CRT::Ncurses::CRTObjs)
       return unless obj.valid_obj_type?(obj_type) && obj.screen_index >= 0
       screen = obj.screen
       return if screen.nil?
@@ -73,7 +73,7 @@ module CRT
       end
 
       if screen.object_count <= 1
-        screen.object = [] of CRT::CRTObjs?
+        screen.object = [] of CRT::Ncurses::CRTObjs?
         screen.object_count = 0
         screen.object_limit = 0
       else
@@ -89,7 +89,7 @@ module CRT
       end
     end
 
-    def set_screen_index(number : Int32, obj : CRT::CRTObjs)
+    def set_screen_index(number : Int32, obj : CRT::Ncurses::CRTObjs)
       obj.screen_index = number
       obj.screen = self
       @object[number] = obj
@@ -114,7 +114,7 @@ module CRT
       end
     end
 
-    def self.raise_object(obj_type : Symbol, obj : CRT::CRTObjs)
+    def self.raise_object(obj_type : Symbol, obj : CRT::Ncurses::CRTObjs)
       if obj.valid_obj_type?(obj_type)
         if screen = obj.screen
           screen.swap_indices(obj.screen_index, screen.object_count - 1)
@@ -122,7 +122,7 @@ module CRT
       end
     end
 
-    def self.lower_object(obj_type : Symbol, obj : CRT::CRTObjs)
+    def self.lower_object(obj_type : Symbol, obj : CRT::Ncurses::CRTObjs)
       if obj.valid_obj_type?(obj_type)
         if screen = obj.screen
           screen.swap_indices(obj.screen_index, 0)
@@ -222,7 +222,7 @@ module CRT
 
     # Destroy this screen
     def destroy
-      CRT::ALL_SCREENS.delete(self)
+      CRT::Ncurses::ALL_SCREENS.delete(self)
     end
 
     # End CRT / ncurses mode

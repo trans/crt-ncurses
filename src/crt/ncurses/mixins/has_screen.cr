@@ -1,7 +1,7 @@
-module CRT
+module CRT::Ncurses
   module HasScreen
     property screen_index : Int32 = -1
-    property screen : CRT::Screen? = nil
+    property screen : CRT::Ncurses::Screen? = nil
     property is_visible : Bool = true
 
     def init_screen
@@ -18,7 +18,7 @@ module CRT
 
     def wrefresh(win : NCurses::Window? = nil)
       w = win || @win
-      CRT::Screen.wrefresh(w.not_nil!) if w
+      CRT::Ncurses::Screen.wrefresh(w.not_nil!) if w
     end
   end
 end

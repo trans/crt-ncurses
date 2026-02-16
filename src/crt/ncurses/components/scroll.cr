@@ -1,5 +1,5 @@
-module CRT
-  class Scroll < CRT::Scroller
+module CRT::Ncurses
+  class Scroll < CRT::Ncurses::Scroller
     include CommonControls
 
     getter item : Array(Array(Int32)) = [] of Array(Int32)
@@ -19,12 +19,12 @@ module CRT
     @complete : Bool = false
     @result_data : Int32 = -1
 
-    def initialize(screen : CRT::Screen, *, x : Int32, y : Int32,
+    def initialize(screen : CRT::Ncurses::Screen, *, x : Int32, y : Int32,
                    height : Int32, width : Int32, list : Array(String),
                    splace : Position = Position::Right, title : String = "",
                    numbers : Bool = false,
                    highlight : Int32 = LibNCurses::Attribute::Reverse.value.to_i32,
-                   box : Bool | CRT::Framing | Nil = nil, shadow : Bool = false)
+                   box : Bool | CRT::Ncurses::Framing | Nil = nil, shadow : Bool = false)
       super()
       parent_window = screen.window.not_nil!
       parent_width = parent_window.max_x
@@ -35,8 +35,8 @@ module CRT
 
       set_box(box)
 
-      box_height = CRT.set_widget_dimension(parent_height, height, 0)
-      box_width = CRT.set_widget_dimension(parent_width, width, 0)
+      box_height = CRT::Ncurses.set_widget_dimension(parent_height, height, 0)
+      box_width = CRT::Ncurses.set_widget_dimension(parent_width, width, 0)
       box_width = set_title(title, box_width)
 
       # Set the box height
@@ -68,10 +68,10 @@ module CRT
 
       # Create the scrollbar window
       if splace.right?
-        @scrollbar_win = CRT.subwin(w, max_view_size, 1,
+        @scrollbar_win = CRT::Ncurses.subwin(w, max_view_size, 1,
           screen_ypos(ypos), xpos + box_width - @border_size - 1)
       elsif splace.left?
-        @scrollbar_win = CRT.subwin(w, max_view_size, 1,
+        @scrollbar_win = CRT::Ncurses.subwin(w, max_view_size, 1,
           screen_ypos(ypos), screen_xpos(xpos))
       else
         @scrollbar_win = nil
@@ -79,7 +79,7 @@ module CRT
 
       # Create the list window
       scrollbar_offset = splace.left? ? 1 : 0
-      @list_win = CRT.subwin(w, max_view_size,
+      @list_win = CRT::Ncurses.subwin(w, max_view_size,
         box_width - (2 * @border_size) - scroll_adjust,
         screen_ypos(ypos),
         screen_xpos(xpos) + scrollbar_offset)
@@ -111,8 +111,8 @@ module CRT
       end
 
       # Set up key bindings
-      remap_key(CRT::BACKCHAR, LibNCurses::Key::PageUp.value)
-      remap_key(CRT::FORCHAR, LibNCurses::Key::PageDown.value)
+      remap_key(CRT::Ncurses::BACKCHAR, LibNCurses::Key::PageUp.value)
+      remap_key(CRT::Ncurses::FORCHAR, LibNCurses::Key::PageDown.value)
       remap_key('g'.ord, LibNCurses::Key::Home.value)
       remap_key('1'.ord, LibNCurses::Key::Home.value)
       remap_key('G'.ord, LibNCurses::Key::End.value)
@@ -134,7 +134,7 @@ module CRT
 
       if iw = @input_window
         iw.move(ypos, xpos)
-        CRT::Screen.wrefresh(iw)
+        CRT::Ncurses::Screen.wrefresh(iw)
       end
     end
 
@@ -146,12 +146,12 @@ module CRT
           fix_cursor_position
           input = getch([] of Bool)
           ret = inject(input)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       else
         actions.each do |action|
           ret = inject(action)
-          return ret if @exit_type != CRT::ExitType::EARLY_EXIT
+          return ret if @exit_type != CRT::Ncurses::ExitType::EARLY_EXIT
         end
       end
 
@@ -191,15 +191,15 @@ module CRT
           @left_char = @max_left_char
         when '|'.ord
           @left_char = 0
-        when CRT::KEY_ESC
+        when CRT::Ncurses::KEY_ESC
           set_exit_type(resolved)
           @complete = true
-        when CRT::REFRESH
+        when CRT::Ncurses::REFRESH
           if scr = @screen
             scr.erase
             scr.refresh
           end
-        when CRT::KEY_TAB, LibNCurses::Key::Enter.value, CRT::KEY_RETURN
+        when CRT::Ncurses::KEY_TAB, LibNCurses::Key::Enter.value, CRT::Ncurses::KEY_RETURN
           if quit_on_enter?
             set_exit_type(resolved)
             ret = @current_item
@@ -247,7 +247,7 @@ module CRT
 
       Draw.write_chtype_attrib(lw,
         screen_pos >= 0 ? screen_pos : 0,
-        @current_high, @item[@current_item], hl, CRT::HORIZONTAL,
+        @current_high, @item[@current_item], hl, CRT::Ncurses::HORIZONTAL,
         screen_pos >= 0 ? 0 : 1 - screen_pos,
         @item_len[@current_item])
     end
@@ -259,14 +259,14 @@ module CRT
         (0...@view_size).each do |j|
           k = j + @current_top
 
-          Draw.write_blanks(lw, 0, j, CRT::HORIZONTAL, 0,
+          Draw.write_blanks(lw, 0, j, CRT::Ncurses::HORIZONTAL, 0,
             @box_width - (2 * @border_size))
 
           if k < @list_size
             screen_pos = @item_pos[k] - @left_char
             Draw.write_chtype(lw,
               screen_pos >= 0 ? screen_pos : 1,
-              j, @item[k], CRT::HORIZONTAL,
+              j, @item[k], CRT::Ncurses::HORIZONTAL,
               screen_pos >= 0 ? 0 : 1 - screen_pos,
               @item_len[k])
           end
@@ -316,19 +316,19 @@ module CRT
     end
 
     def erase
-      CRT.erase_curses_window(@win)
-      CRT.erase_curses_window(@shadow_win)
+      CRT::Ncurses.erase_curses_window(@win)
+      CRT::Ncurses.erase_curses_window(@shadow_win)
     end
 
     def destroy
       unregister_framing
       clean_title
-      CRT.delete_curses_window(@scrollbar_win)
-      CRT.delete_curses_window(@shadow_win)
-      CRT.delete_curses_window(@list_win)
-      CRT.delete_curses_window(@win)
+      CRT::Ncurses.delete_curses_window(@scrollbar_win)
+      CRT::Ncurses.delete_curses_window(@shadow_win)
+      CRT::Ncurses.delete_curses_window(@list_win)
+      CRT::Ncurses.delete_curses_window(@win)
       clear_key_bindings
-      CRT::Screen.unregister(object_type, self)
+      CRT::Ncurses::Screen.unregister(object_type, self)
     end
 
     def alloc_list_item(which : Int32, number : Int32, value : String) : Bool
@@ -411,14 +411,14 @@ module CRT
     def focus
       draw_current
       if lw = @list_win
-        CRT::Screen.wrefresh(lw)
+        CRT::Ncurses::Screen.wrefresh(lw)
       end
     end
 
     def unfocus
       draw_current
       if lw = @list_win
-        CRT::Screen.wrefresh(lw)
+        CRT::Ncurses::Screen.wrefresh(lw)
       end
     end
 

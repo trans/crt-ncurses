@@ -1,4 +1,4 @@
-module CRT
+module CRT::Ncurses
   module Formattable
     property skip_formatting : Bool = false
 
