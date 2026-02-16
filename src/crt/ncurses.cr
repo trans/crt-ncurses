@@ -50,7 +50,7 @@ require "./ncurses/components/file_select"
 require "./ncurses/components/matrix"
 
 module CRT::Ncurses
-  VERSION = "0.6.0"
+  VERSION = "0.6.1"
 
   ALL_SCREENS = [] of CRT::Ncurses::Screen
   ALL_OBJECTS = [] of CRT::Ncurses::CRTObjs

@@ -1,5 +1,5 @@
 name: crt-ncurses
-version: 0.6.0
+version: 0.6.1
 
 authors:
   - Thomas Sawyer <transfire@gmail.com>

@@ -14,7 +14,7 @@ end
 
 describe CRT do
   it "has a version" do
-    CRT::Ncurses::VERSION.should eq("0.6.0")
+    CRT::Ncurses::VERSION.should eq("0.6.1")
   end
 
   describe "constants" do
